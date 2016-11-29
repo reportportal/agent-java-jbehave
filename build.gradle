@@ -5,15 +5,15 @@ plugins {
 apply plugin: 'java'
 apply from: 'release.gradle'
 apply from: 'quality.gradle'
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 repositories {
     jcenter()
     maven { url "http://dl.bintray.com/epam/reportportal" }
 }
 dependencies {
-    compile 'com.epam.reportportal:client-java-core:2.5.1'
+    compile 'com.epam.reportportal:client-java-core:2.6.0'
     compile 'org.testng:testng:6.8.7'
-    compile 'org.jbehave:jbehave-core:4.0-beta-4'
+    compile 'org.jbehave:jbehave-core:4.0.5'
     compile 'net.thucydides:thucydides-jbehave:0.9.278'
 }
