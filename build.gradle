@@ -12,7 +12,7 @@ repositories {
     maven { url "http://dl.bintray.com/epam/reportportal" }
 }
 dependencies {
-    compile 'com.epam.reportportal:client-java-core:2.6.0'
+    compile 'com.epam.reportportal:client-java-core:2.7.0'
     compile 'org.testng:testng:6.8.7'
     compile 'org.jbehave:jbehave-core:4.0.5'
     compile 'net.thucydides:thucydides-jbehave:0.9.278'
