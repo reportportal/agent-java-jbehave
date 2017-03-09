@@ -1,4 +1,5 @@
-# agent-java-jbehave
+﻿# agent-java-jbehave
+[![Build Status](https://travis-ci.org/reportportal/agent-java-jbehave.svg?branch=master)](https://travis-ci.org/reportportal/agent-java-jbehave)
  [ ![Download](https://api.bintray.com/packages/epam/reportportal/agent-java-jbehave/images/download.svg) ](https://bintray.com/epam/reportportal/agent-java-jbehave/_latestVersion)
  
 [![Join Slack chat!](https://reportportal-slack-auto.herokuapp.com/badge.svg)](https://reportportal-slack-auto.herokuapp.com)
