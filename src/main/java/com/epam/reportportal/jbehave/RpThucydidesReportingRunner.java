@@ -20,50 +20,48 @@
  */
 package com.epam.reportportal.jbehave;
 
+import net.serenitybdd.jbehave.runners.SerenityReportingRunner;
 import org.jbehave.core.ConfigurableEmbedder;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.junit.Test;
 import org.junit.runner.notification.RunNotifier;
 
-import net.thucydides.jbehave.runners.ThucydidesReportingRunner;
-
 /**
  * Thucydides->JBehave integration
  *
  * @author Andrei Varabyeu
  */
-public class RpThucydidesReportingRunner extends ThucydidesReportingRunner {
+public class RpThucydidesReportingRunner extends SerenityReportingRunner {
 
-	public RpThucydidesReportingRunner(Class<? extends ConfigurableEmbedder> testClass) throws Throwable {
-		super(testClass);
-	}
+    public RpThucydidesReportingRunner(Class<? extends ConfigurableEmbedder> testClass) throws Throwable {
+        super(testClass);
+    }
 
-	public RpThucydidesReportingRunner(Class<? extends ConfigurableEmbedder> testClass, ConfigurableEmbedder embedder) throws Throwable {
-		super(testClass, embedder);
-	}
+    public RpThucydidesReportingRunner(Class<? extends ConfigurableEmbedder> testClass, ConfigurableEmbedder embedder)
+            throws Throwable {
+        super(testClass, embedder);
+    }
 
-	@Override
-	protected Configuration getConfiguration() {
-		Configuration configuration = super.getConfiguration();
-		configuration.useStoryReporterBuilder(new StoryReporterBuilder().withFormats(ReportPortalFormat.INSTANCE));
-		return configuration;
-	}
+    @Override
+    protected Configuration getConfiguration() {
+        Configuration configuration = super.getConfiguration();
+        configuration.useStoryReporterBuilder(new StoryReporterBuilder().withFormats(ReportPortalFormat.INSTANCE));
+        return configuration;
+    }
 
-	@Test
-	@Override
-	public void run(RunNotifier notifier) {
+    @Test
+    @Override
+    public void run(RunNotifier notifier) {
+        try {
+            super.run(notifier);
+        } finally {
+            /*
+		     * Finishes execution in ReportPortal
+		     */
+            JBehaveUtils.finishLaunch();
+        }
 
-		/*
-		 * Starts execution in ReportPortal
-		 */
-		JBehaveUtils.startLaunch();
-		super.run(notifier);
-
-		/*
-		 * Finishes execution in ReportPortal
-		 */
-		JBehaveUtils.finishLaunch();
-	}
+    }
 
 }

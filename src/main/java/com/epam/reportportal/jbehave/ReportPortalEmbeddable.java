@@ -23,37 +23,32 @@ package com.epam.reportportal.jbehave;
 import org.jbehave.core.Embeddable;
 import org.jbehave.core.embedder.Embedder;
 
-import com.epam.reportportal.listeners.Statuses;
-
 /**
  * {@link Embeddable} decorator to be able to start and finish execution in
  * ReportPortal
- * 
+ *
  * @author Andrei Varabyeu
- * 
  */
 public class ReportPortalEmbeddable implements Embeddable {
 
-	private Embeddable embeddable;
+    private Embeddable embeddable;
 
-	public ReportPortalEmbeddable(Embeddable embeddable) {
-		this.embeddable = embeddable;
-	}
+    public ReportPortalEmbeddable(Embeddable embeddable) {
+        this.embeddable = embeddable;
+    }
 
-	@Override
-	public void useEmbedder(Embedder embedder) {
-		embeddable.useEmbedder(embedder);
-	}
+    @Override
+    public void useEmbedder(Embedder embedder) {
+        embeddable.useEmbedder(embedder);
+    }
 
-	@Override
-	public void run() throws Throwable {
-		JBehaveUtils.startLaunch();
-		try {
-			embeddable.run();
-		} finally {
-			JBehaveUtils.makeSureAllItemsFinished(Statuses.FAILED);
-			JBehaveUtils.finishLaunch();
-		}
-	}
+    @Override
+    public void run() throws Throwable {
+        try {
+            embeddable.run();
+        } finally {
+            JBehaveUtils.finishLaunch();
+        }
+    }
 
 }

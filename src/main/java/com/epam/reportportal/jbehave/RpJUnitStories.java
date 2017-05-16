@@ -38,14 +38,9 @@ public abstract class RpJUnitStories extends JUnitStories {
 	@Test
 	@Override
 	public void run() throws Throwable {
-		/*
-		 * Starts execution in ReportPortal
-		 */
-		JBehaveUtils.startLaunch();
 		try {
 			super.run();
 		} finally {
-			JBehaveUtils.makeSureAllItemsFinished(Statuses.FAILED);
 			/*
 			 * Finishes execution in ReportPortal
 			 */
