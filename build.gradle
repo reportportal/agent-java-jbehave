@@ -15,6 +15,4 @@ dependencies {
     compile 'com.epam.reportportal:client-java:3.0.1'
     compile 'com.epam.reportportal:commons-model:3.0.0'
     compile 'org.jbehave:jbehave-core:4.1'
-
-    compile 'net.serenity-bdd:serenity-jbehave:1.24.0'
 }

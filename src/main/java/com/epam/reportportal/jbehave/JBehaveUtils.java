@@ -29,23 +29,24 @@ import com.epam.ta.reportportal.ws.model.FinishExecutionRQ;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
-import com.google.common.collect.Iterables;
 import io.reactivex.Maybe;
 import org.apache.commons.lang.StringUtils;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Story;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rp.com.google.common.annotations.VisibleForTesting;
+import rp.com.google.common.base.Function;
+import rp.com.google.common.base.Joiner;
+import rp.com.google.common.base.Strings;
+import rp.com.google.common.base.Supplier;
+import rp.com.google.common.base.Suppliers;
+import rp.com.google.common.collect.Iterables;
 
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -78,6 +79,10 @@ class JBehaveUtils {
     static final Pattern STEP_NAME_PATTERN = Pattern.compile("<(.*?)>");
 
     private static Supplier<ReportPortal> RP = Suppliers.memoize(new Supplier<ReportPortal>() {
+
+        /* should no be lazy */
+        private final Date startTime = Calendar.getInstance().getTime();
+
         @Override
         public ReportPortal get() {
             final Injector injector = Injector.createDefault();
@@ -86,13 +91,12 @@ class JBehaveUtils {
 
             StartLaunchRQ rq = new StartLaunchRQ();
             rq.setName(parameters.getLaunchName());
-            rq.setStartTime(Calendar.getInstance().getTime());
+            rq.setStartTime(startTime);
             rq.setMode(parameters.getLaunchRunningMode());
             rq.setTags(parameters.getTags());
             rq.setDescription(parameters.getDescription());
 
-            ReportPortal rp = ReportPortal.startLaunch(client, 10, false, rq);
-            return rp;
+            return ReportPortal.startLaunch(client, parameters.getBatchLogsSize(), parameters.isConvertImage(), rq);
         }
     });
 
@@ -152,6 +156,7 @@ class JBehaveUtils {
         }
         currentStory.setCurrentStoryId(storyId);
         currentStory.setStoryMeta(story.getMeta());
+        System.out.println("starting story: " + story.getName() + " " + givenStory);
 
     }
 
@@ -165,6 +170,8 @@ class JBehaveUtils {
         if (null == currentStory.getCurrentStoryId()) {
             return;
         }
+
+        System.out.println("Finishing story.." + currentStory.getCurrentStoryId());
 
         FinishTestItemRQ rq = new FinishTestItemRQ();
         rq.setEndTime(Calendar.getInstance().getTime());
@@ -203,6 +210,7 @@ class JBehaveUtils {
 
         rq.setStartTime(Calendar.getInstance().getTime());
         rq.setType("STEP");
+        System.out.println("starting step: " + step);
 
         Maybe<String> stepId = RP.get().startTestItem(currentStory.getCurrentScenario(), rq);
         currentStory.setCurrentStep(stepId);
@@ -221,7 +229,7 @@ class JBehaveUtils {
         if (null == currentStory.getCurrentStep()) {
             return;
         }
-
+        System.out.println("finishing step: " + currentStory.getCurrentStep());
         FinishTestItemRQ rq = new FinishTestItemRQ();
         rq.setEndTime(Calendar.getInstance().getTime());
         rq.setStatus(status);
@@ -237,6 +245,8 @@ class JBehaveUtils {
      * @param scenario
      */
     public static void startScenario(String scenario) {
+
+        System.out.println("starting scenario " + scenario);
 
         JBehaveContext.Story currentStory = JBehaveContext.getCurrentStory();
         StartTestItemRQ rq = new StartTestItemRQ();
@@ -260,6 +270,7 @@ class JBehaveUtils {
             return;
         }
 
+        System.out.println("finishing scenario " + currentStory.getCurrentScenario());
         FinishTestItemRQ rq = new FinishTestItemRQ();
         rq.setEndTime(Calendar.getInstance().getTime());
         rq.setStatus(status);

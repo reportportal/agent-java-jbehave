@@ -23,9 +23,6 @@ package com.epam.reportportal.jbehave;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.junit.JUnitStories;
 import org.jbehave.core.reporters.StoryReporterBuilder;
-import org.junit.Test;
-
-import com.epam.reportportal.listeners.Statuses;
 
 /**
  * Wraps {@link JUnitStories} to be able to start and finish execution in
@@ -35,25 +32,13 @@ import com.epam.reportportal.listeners.Statuses;
  */
 public abstract class RpJUnitStories extends JUnitStories {
 
-	@Test
-	@Override
-	public void run() throws Throwable {
-		try {
-			super.run();
-		} finally {
-			/*
-			 * Finishes execution in ReportPortal
-			 */
-			JBehaveUtils.finishLaunch();
-		}
-
-	}
-
-	/**
-	 * Adds ReportPortalFormat to be able to report results to ReportPortal
-	 */
-	@Override
-	public Configuration configuration() {
-		return super.configuration().useStoryReporterBuilder(new StoryReporterBuilder().withFormats(ReportPortalFormat.INSTANCE));
-	}
+    /**
+     * Adds ReportPortalFormat to be able to report results to ReportPortal
+     */
+    @Override
+    public Configuration configuration() {
+        return super.configuration()
+                .useStoryReporterBuilder(new StoryReporterBuilder().withFormats(ReportPortalFormat.INSTANCE))
+                .useViewGenerator(new ReportPortalViewGenerator());
+    }
 }
