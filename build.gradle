@@ -12,7 +12,24 @@ repositories {
     maven { url "http://dl.bintray.com/epam/reportportal" }
 }
 dependencies {
-    compile 'com.epam.reportportal:client-java:3.0.1'
-    compile 'com.epam.reportportal:commons-model:3.0.0'
+    compile('com.epam.reportportal:client-java:3.0.1') {
+        ext.compileScope = true
+    }
+    compile('com.epam.reportportal:commons-model:3.0.0') {
+        ext.compileScope = true
+    }
+
     compile 'org.jbehave:jbehave-core:4.1'
+}
+
+publishing.publications.all {
+    pom.withXml {
+        asNode().dependencies.'*'.findAll() {
+            it.scope.text() == 'runtime' && (project.configurations.compile.allDependencies.find { dep ->
+                dep.name == it.artifactId.text() && dep.hasProperty('compileScope') && dep.compileScope
+            })
+        }.each {
+            it.scope*.value = 'compile'
+        }
+    }
 }
