@@ -27,8 +27,7 @@ import java.util.regex.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.google.common.collect.ImmutableMap;
+import rp.com.google.common.collect.ImmutableMap;
 
 /**
  * Some unit tests for JBehaveUtils
