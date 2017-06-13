@@ -58,7 +58,7 @@ public class ReportPortalViewGenerator implements ViewGenerator {
 
     @Override
     public ReportsCount getReportsCount() {
-        return null;
+        return new ReportsCount(0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     @Override
