@@ -130,7 +130,7 @@ class JBehaveUtils {
         if (Strings.isNullOrEmpty(story.getDescription().asString())) {
             rq.setDescription(story.getDescription().asString() + "\n" + joinMeta(metaMap));
         }
-        rq.setName(normalizeLength(story.getName()));
+        rq.setName(normalizeName(story.getName()));
         rq.setStartTime(Calendar.getInstance().getTime());
         rq.setType("STORY");
 
@@ -156,7 +156,7 @@ class JBehaveUtils {
         }
         currentStory.setCurrentStoryId(storyId);
         currentStory.setStoryMeta(story.getMeta());
-        System.out.println("starting story: " + story.getName() + " " + givenStory);
+        LOGGER.debug("Starting Story in ReportPortal: {} {}", story.getName(), givenStory);
 
     }
 
@@ -171,7 +171,7 @@ class JBehaveUtils {
             return;
         }
 
-        System.out.println("Finishing story.." + currentStory.getCurrentStoryId());
+        LOGGER.debug("Finishing story in ReportPortal: {}", currentStory.getCurrentStoryId());
 
         FinishTestItemRQ rq = new FinishTestItemRQ();
         rq.setEndTime(Calendar.getInstance().getTime());
@@ -200,17 +200,17 @@ class JBehaveUtils {
             StringBuilder name = new StringBuilder();
             name.append("[").append(currentStory.getExamples().getCurrentExample()).append("] ")
                     .append(expandParameters(step, currentStory.getExamples().getCurrentExampleParams()));
-            rq.setName(normalizeLength(name.toString()));
+            rq.setName(normalizeName(name.toString()));
             rq.setDescription(joinMeta(currentStory.getExamples().getCurrentExampleParams()));
 
         } else {
-            rq.setName(normalizeLength(step));
+            rq.setName(normalizeName(step));
             rq.setDescription(joinMetas(currentStory.getStoryMeta(), currentStory.getScenarioMeta()));
         }
 
         rq.setStartTime(Calendar.getInstance().getTime());
         rq.setType("STEP");
-        System.out.println("starting step: " + step);
+        LOGGER.debug("Starting Step in ReportPortal: {}", step);
 
         Maybe<String> stepId = RP.get().startTestItem(currentStory.getCurrentScenario(), rq);
         currentStory.setCurrentStep(stepId);
@@ -229,7 +229,7 @@ class JBehaveUtils {
         if (null == currentStory.getCurrentStep()) {
             return;
         }
-        System.out.println("finishing step: " + currentStory.getCurrentStep());
+        LOGGER.debug("Finishing Step in ReportPortal: {}", currentStory.getCurrentStep());
         FinishTestItemRQ rq = new FinishTestItemRQ();
         rq.setEndTime(Calendar.getInstance().getTime());
         rq.setStatus(status);
@@ -246,11 +246,11 @@ class JBehaveUtils {
      */
     public static void startScenario(String scenario) {
 
-        System.out.println("starting scenario " + scenario);
+        LOGGER.debug("Starting Scenario in ReportPortal: {}", scenario);
 
         JBehaveContext.Story currentStory = JBehaveContext.getCurrentStory();
         StartTestItemRQ rq = new StartTestItemRQ();
-        rq.setName(normalizeLength(
+        rq.setName(normalizeName(
                 expandParameters(scenario, metasToMap(currentStory.getStoryMeta(), currentStory.getScenarioMeta()))));
         rq.setStartTime(Calendar.getInstance().getTime());
         rq.setType("SCENARIO");
@@ -270,7 +270,7 @@ class JBehaveUtils {
             return;
         }
 
-        System.out.println("finishing scenario " + currentStory.getCurrentScenario());
+        LOGGER.debug("finishing scenario in ReportPortal: {}");
         FinishTestItemRQ rq = new FinishTestItemRQ();
         rq.setEndTime(Calendar.getInstance().getTime());
         rq.setStatus(status);
@@ -419,11 +419,17 @@ class JBehaveUtils {
         return buffer.toString();
     }
 
-    private static String normalizeLength(String string) {
-        if (null != string && string.length() > MAX_NAME_LENGTH) {
-            return string.substring(0, MAX_NAME_LENGTH - 1);
+    private static String normalizeName(String string) {
+        String name;
+        if (Strings.isNullOrEmpty(string)) {
+            name = "UNKNOWN";
+        } else if (string.length() > MAX_NAME_LENGTH) {
+            name = string.substring(0, MAX_NAME_LENGTH - 1);
+        } else {
+            name = string;
         }
-        return string;
+        return name;
+
     }
 
 }
