@@ -96,7 +96,7 @@ class JBehaveUtils {
             rq.setTags(parameters.getTags());
             rq.setDescription(parameters.getDescription());
 
-            return ReportPortal.startLaunch(client, parameters.getBatchLogsSize(), parameters.isConvertImage(), rq);
+            return ReportPortal.startLaunch(client, parameters, rq);
         }
     });
 

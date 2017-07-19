@@ -12,7 +12,7 @@ repositories {
     maven { url "http://dl.bintray.com/epam/reportportal" }
 }
 dependencies {
-    compile('com.epam.reportportal:client-java:3.0.3') {
+    compile('com.epam.reportportal:client-java:3.0.4') {
         ext.compileScope = true
     }
     compile('com.epam.reportportal:commons-model:3.0.0') {
