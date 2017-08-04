@@ -22,10 +22,16 @@ package com.epam.reportportal.jbehave;
 
 import com.epam.reportportal.listeners.Statuses;
 import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.GivenStories;
+import org.jbehave.core.model.Lifecycle;
 import org.jbehave.core.model.Meta;
+import org.jbehave.core.model.Narrative;
+import org.jbehave.core.model.OutcomesTable;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
+import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.reporters.NullStoryReporter;
+import org.jbehave.core.reporters.StoryReporter;
 
 import java.util.List;
 import java.util.Map;
@@ -38,11 +44,21 @@ import java.util.Map;
  * @author Andrei Varabyeu
  * 
  */
-public class ReportPortalStoryReporter extends NullStoryReporter {
+public class ReportPortalStoryReporter implements StoryReporter {
 
 	@Override
 	public void scenarioMeta(Meta meta) {
 		JBehaveContext.getCurrentStory().setScenarioMeta(meta);
+	}
+
+	@Override
+	public void storyNotAllowed(Story story, String filter) {
+
+	}
+
+	@Override
+	public void storyCancelled(Story story, StoryDuration storyDuration) {
+
 	}
 
 	@Override
@@ -56,6 +72,16 @@ public class ReportPortalStoryReporter extends NullStoryReporter {
 	}
 
 	@Override
+	public void narrative(Narrative narrative) {
+
+	}
+
+	@Override
+	public void lifecyle(Lifecycle lifecycle) {
+
+	}
+
+	@Override
 	public void beforeScenario(String scenarioTitle) {
 		JBehaveUtils.startScenario(scenarioTitle);
 	}
@@ -63,6 +89,16 @@ public class ReportPortalStoryReporter extends NullStoryReporter {
 	@Override
 	public void afterScenario() {
 		JBehaveUtils.finishScenario();
+	}
+
+	@Override
+	public void givenStories(GivenStories givenStories) {
+
+	}
+
+	@Override
+	public void givenStories(List<String> storyPaths) {
+
 	}
 
 	@Override
@@ -100,6 +136,11 @@ public class ReportPortalStoryReporter extends NullStoryReporter {
 	}
 
 	@Override
+	public void comment(String step) {
+
+	}
+
+	@Override
 	public void notPerformed(String step) {
         if (JBehaveContext.getCurrentStory().getCurrentStep() == null) {
             JBehaveUtils.startStep(step);
@@ -110,6 +151,31 @@ public class ReportPortalStoryReporter extends NullStoryReporter {
 	@Override
 	public void failed(String step, Throwable cause) {
 		JBehaveUtils.finishStep(Statuses.FAILED);
+	}
+
+	@Override
+	public void failedOutcomes(String step, OutcomesTable table) {
+
+	}
+
+	@Override
+	public void restarted(String step, Throwable cause) {
+
+	}
+
+	@Override
+	public void restartedStory(Story story, Throwable cause) {
+
+	}
+
+	@Override
+	public void dryRun() {
+
+	}
+
+	@Override
+	public void pendingMethods(List<String> methods) {
+
 	}
 
 	@Override
