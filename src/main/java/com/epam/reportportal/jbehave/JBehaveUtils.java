@@ -20,17 +20,16 @@
  */
 package com.epam.reportportal.jbehave;
 
-import com.epam.reportportal.guice.Injector;
 import com.epam.reportportal.listeners.ListenerParameters;
 import com.epam.reportportal.listeners.Statuses;
+import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.ReportPortal;
-import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.ta.reportportal.ws.model.FinishExecutionRQ;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import io.reactivex.Maybe;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Story;
 import org.slf4j.Logger;
@@ -78,16 +77,15 @@ class JBehaveUtils {
     @VisibleForTesting
     static final Pattern STEP_NAME_PATTERN = Pattern.compile("<(.*?)>");
 
-    private static Supplier<ReportPortal> RP = Suppliers.memoize(new Supplier<ReportPortal>() {
+    private static Supplier<Launch> RP = Suppliers.memoize(new Supplier<Launch>() {
 
         /* should no be lazy */
         private final Date startTime = Calendar.getInstance().getTime();
 
         @Override
-        public ReportPortal get() {
-            final Injector injector = Injector.createDefault();
-            ListenerParameters parameters = injector.getBean(ListenerParameters.class);
-            ReportPortalClient client = injector.getBean(ReportPortalClient.class);
+        public Launch get() {
+            ReportPortal rp = ReportPortal.builder().build();
+            ListenerParameters parameters = rp.getParameters();
 
             StartLaunchRQ rq = new StartLaunchRQ();
             rq.setName(parameters.getLaunchName());
@@ -96,7 +94,8 @@ class JBehaveUtils {
             rq.setTags(parameters.getTags());
             rq.setDescription(parameters.getDescription());
 
-            return ReportPortal.startLaunch(client, parameters, rq);
+
+            return rp.newLaunch(rq);
         }
     });
 
@@ -109,7 +108,7 @@ class JBehaveUtils {
         FinishExecutionRQ finishLaunchRq = new FinishExecutionRQ();
         finishLaunchRq.setEndTime(Calendar.getInstance().getTime());
 
-        RP.get().finishLaunch(finishLaunchRq);
+        RP.get().finish(finishLaunchRq);
     }
 
     /**
@@ -378,7 +377,7 @@ class JBehaveUtils {
         if (value.toLowerCase().startsWith("http")) {
             String text;
             if (value.toLowerCase().contains("jira")) {
-                text = key + KEY_VALUE_SEPARATOR + StringUtils.substringAfterLast(value, "/");
+                text = key + KEY_VALUE_SEPARATOR +  StringUtils.substringAfterLast(value, "/");
             } else {
                 text = key;
             }

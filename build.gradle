@@ -10,14 +10,17 @@ targetCompatibility = 1.7
 repositories {
     jcenter()
     maven { url "http://dl.bintray.com/epam/reportportal" }
+    maven { url "https://jitpack.io" }
+
 }
 dependencies {
-    compile('com.epam.reportportal:client-java:3.0.6') {
+    compile ('com.github.reportportal:client-java:e2f08dd') {
         ext.compileScope = true
     }
-    compile('com.epam.reportportal:commons-model:3.0.0') {
+    compile('com.github.reportportal:commons-model:63cea60') {
         ext.compileScope = true
     }
+
 
     compile 'org.jbehave:jbehave-core:4.1'
 }
