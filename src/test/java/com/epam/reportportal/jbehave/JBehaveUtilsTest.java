@@ -20,7 +20,7 @@
  */
 package com.epam.reportportal.jbehave;
 
-import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
+import com.epam.ta.reportportal.ws.model.ParameterResource;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -50,22 +50,22 @@ public class JBehaveUtilsTest {
 
 	@Test
 	public void testStepParametersReplacement() {
-		StartTestItemRQ rq = new StartTestItemRQ();
+		List<ParameterResource> params = new ArrayList<>();
 		String result = JBehaveUtils.expandParameters(STEP_NAME,
-				ImmutableMap.<String, String> builder().put("parameter1", "repl1").put("parameter2", "repl2").build(), rq);
+				ImmutableMap.<String, String> builder().put("parameter1", "repl1").put("parameter2", "repl2").build(), params);
 		Assert.assertThat("Incorrect parameters replacement", result, Matchers.is("Given that I am on the repl1 page with repl2 value"));
-		Assert.assertEquals("Incorrect parameters key expand", "parameter1", rq.getParameters().get(0).getKey());
-		Assert.assertEquals("Incorrect parameters value expand", "repl1", rq.getParameters().get(0).getValue());
-		Assert.assertEquals("Incorrect parameters key expand", "parameter2", rq.getParameters().get(1).getKey());
-		Assert.assertEquals("Incorrect parameters value expand", "repl2", rq.getParameters().get(1).getValue());
+		Assert.assertEquals("Incorrect parameters key expand", "parameter1", params.get(0).getKey());
+		Assert.assertEquals("Incorrect parameters value expand", "repl1", params.get(0).getValue());
+		Assert.assertEquals("Incorrect parameters key expand", "parameter2", params.get(1).getKey());
+		Assert.assertEquals("Incorrect parameters value expand", "repl2", params.get(1).getValue());
 	}
 
 	@Test
 	public void testStepParametersReplacementNegative() {
-		StartTestItemRQ rq = new StartTestItemRQ();
+		List<ParameterResource> params = new ArrayList<>();
 		String result = JBehaveUtils.expandParameters("Given that I am on",
-				ImmutableMap.<String, String> builder().put("parameter1", "repl1").put("parameter2", "repl2").build(), rq);
+				ImmutableMap.<String, String> builder().put("parameter1", "repl1").put("parameter2", "repl2").build(), params);
 		Assert.assertThat("Incorrect parameters replacement", result, Matchers.is("Given that I am on"));
-		Assert.assertThat("Incorrect parameters expand", rq.getParameters(), Matchers.nullValue());
+		Assert.assertThat("Incorrect parameters expand", params, Matchers.<ParameterResource>empty());
 	}
 }
