@@ -182,12 +182,14 @@ class JBehaveUtils {
 		StartTestItemRQ rq = new StartTestItemRQ();
 
 		if (currentStory.hasExamples() && currentStory.getExamples().hasStep(step)) {
-			List<ParameterResource> parameters = new ArrayList<>();
-			String name = expandParameters("[" + currentStory.getExamples().getCurrentExample() + "] " + step,
-					currentStory.getExamples().getCurrentExampleParams(), parameters
-			);
+			List<ParameterResource> parameters = new ArrayList<ParameterResource>();
+			StringBuilder name = new StringBuilder();
+			name.append("[")
+					.append(currentStory.getExamples().getCurrentExample())
+					.append("] ")
+					.append(expandParameters(step, currentStory.getExamples().getCurrentExampleParams(), parameters));
 			rq.setParameters(parameters);
-			rq.setName(normalizeName(name));
+			rq.setName(normalizeName(name.toString()));
 		} else {
 			rq.setName(normalizeName(step));
 			rq.setDescription(joinMetas(currentStory.getStoryMeta(), currentStory.getScenarioMeta()));
@@ -318,7 +320,7 @@ class JBehaveUtils {
 		if (null == meta) {
 			return Collections.emptyMap();
 		}
-		Map<String, String> metaMap = new HashMap<>(meta.getPropertyNames().size());
+		Map<String, String> metaMap = new HashMap<String, String>(meta.getPropertyNames().size());
 		for (String name : meta.getPropertyNames()) {
 			metaMap.put(name, meta.getProperty(name));
 		}
@@ -329,7 +331,7 @@ class JBehaveUtils {
 	// TODO rename as join metas
 	private static Map<String, String> metasToMap(Meta... metas) {
 		if (null != metas && metas.length > 0) {
-			Map<String, String> metaMap = new HashMap<>();
+			Map<String, String> metaMap = new HashMap<String, String>();
 			for (Meta meta : metas) {
 				metaMap.putAll(metaToMap(meta));
 			}
