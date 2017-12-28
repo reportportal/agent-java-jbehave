@@ -186,8 +186,8 @@ class JBehaveUtils {
 
         if (currentStory.hasExamples() && currentStory.getExamples().hasStep(step)) {
         	List<ParameterResource> parameters = new ArrayList<>();
-        	parameters.add(buildParameter("example", String.valueOf(currentStory.getExamples().getCurrentExample())));
-			String name = expandParameters(step, currentStory.getExamples().getCurrentExampleParams(), parameters);
+			String name = expandParameters("[" + currentStory.getExamples().getCurrentExample() + "] " + step,
+					currentStory.getExamples().getCurrentExampleParams(), parameters);
 			rq.setParameters(parameters);
 			rq.setName(normalizeName(name));
         } else {
