@@ -26,32 +26,22 @@ import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.ta.reportportal.ws.model.FinishExecutionRQ;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
+import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import io.reactivex.Maybe;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Story;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rp.com.google.common.annotations.VisibleForTesting;
-import rp.com.google.common.base.Function;
-import rp.com.google.common.base.Joiner;
-import rp.com.google.common.base.Strings;
-import rp.com.google.common.base.Supplier;
-import rp.com.google.common.base.Suppliers;
+import rp.com.google.common.base.*;
 import rp.com.google.common.collect.Iterables;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -198,7 +188,7 @@ class JBehaveUtils {
         if (currentStory.hasExamples() && currentStory.getExamples().hasStep(step)) {
             StringBuilder name = new StringBuilder();
             name.append("[").append(currentStory.getExamples().getCurrentExample()).append("] ")
-                    .append(expandParameters(step, currentStory.getExamples().getCurrentExampleParams()));
+                    .append(expandParameters(step, currentStory.getExamples().getCurrentExampleParams(), rq));
             rq.setName(normalizeName(name.toString()));
             rq.setDescription(joinMeta(currentStory.getExamples().getCurrentExampleParams()));
 
@@ -250,7 +240,7 @@ class JBehaveUtils {
         JBehaveContext.Story currentStory = JBehaveContext.getCurrentStory();
         StartTestItemRQ rq = new StartTestItemRQ();
         rq.setName(normalizeName(
-                expandParameters(scenario, metasToMap(currentStory.getStoryMeta(), currentStory.getScenarioMeta()))));
+                expandParameters(scenario, metasToMap(currentStory.getStoryMeta(), currentStory.getScenarioMeta()), rq)));
         rq.setStartTime(Calendar.getInstance().getTime());
         rq.setType("SCENARIO");
         rq.setDescription(joinMetas(currentStory.getStoryMeta(), currentStory.getScenarioMeta()));
@@ -406,16 +396,29 @@ class JBehaveUtils {
     }
 
     @VisibleForTesting
-    static String expandParameters(String stepName, Map<String, String> parameters) {
+    static String expandParameters(String stepName, Map<String, String> parameters, StartTestItemRQ rq) {
         Matcher m = STEP_NAME_PATTERN.matcher(stepName);
         StringBuffer buffer = new StringBuffer();
+        List<ParameterResource> params = new ArrayList<>();
         while (m.find()) {
-            if (parameters.containsKey(m.group(1))) {
-                m.appendReplacement(buffer, parameters.get(m.group(1)));
+            String key = m.group(1);
+            if (parameters.containsKey(key)) {
+                String value = parameters.get(key);
+                m.appendReplacement(buffer, value);
+                ParameterResource param = buildParameter(key, value);
+                params.add(param);
             }
         }
         m.appendTail(buffer);
+        rq.setParameters(CollectionUtils.isEmpty(params) ? null : params);
         return buffer.toString();
+    }
+
+    private static ParameterResource buildParameter(String key, String value) {
+        ParameterResource parameterResource = new ParameterResource();
+        parameterResource.setKey(key);
+        parameterResource.setValue(value);
+        return parameterResource;
     }
 
     private static String normalizeName(String string) {
