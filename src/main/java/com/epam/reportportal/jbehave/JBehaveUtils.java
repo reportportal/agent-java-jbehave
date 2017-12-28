@@ -181,16 +181,17 @@ class JBehaveUtils {
 
 		StartTestItemRQ rq = new StartTestItemRQ();
 
-        if (currentStory.hasExamples() && currentStory.getExamples().hasStep(step)) {
-        	List<ParameterResource> parameters = new ArrayList<>();
+		if (currentStory.hasExamples() && currentStory.getExamples().hasStep(step)) {
+			List<ParameterResource> parameters = new ArrayList<>();
 			String name = expandParameters("[" + currentStory.getExamples().getCurrentExample() + "] " + step,
-					currentStory.getExamples().getCurrentExampleParams(), parameters);
+					currentStory.getExamples().getCurrentExampleParams(), parameters
+			);
 			rq.setParameters(parameters);
 			rq.setName(normalizeName(name));
-        } else {
-            rq.setName(normalizeName(step));
-            rq.setDescription(joinMetas(currentStory.getStoryMeta(), currentStory.getScenarioMeta()));
-        }
+		} else {
+			rq.setName(normalizeName(step));
+			rq.setDescription(joinMetas(currentStory.getStoryMeta(), currentStory.getScenarioMeta()));
+		}
 
 		rq.setStartTime(Calendar.getInstance().getTime());
 		rq.setType("STEP");
@@ -232,14 +233,14 @@ class JBehaveUtils {
 
 		LOGGER.debug("Starting Scenario in ReportPortal: {}", scenario);
 
-        JBehaveContext.Story currentStory = JBehaveContext.getCurrentStory();
-        StartTestItemRQ rq = new StartTestItemRQ();
+		JBehaveContext.Story currentStory = JBehaveContext.getCurrentStory();
+		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(normalizeName(expandParameters(scenario, metasToMap(currentStory.getStoryMeta(), currentStory.getScenarioMeta()),
 				Collections.<ParameterResource>emptyList()
 		)));
-        rq.setStartTime(Calendar.getInstance().getTime());
-        rq.setType("SCENARIO");
-        rq.setDescription(joinMetas(currentStory.getStoryMeta(), currentStory.getScenarioMeta()));
+		rq.setStartTime(Calendar.getInstance().getTime());
+		rq.setType("SCENARIO");
+		rq.setDescription(joinMetas(currentStory.getStoryMeta(), currentStory.getScenarioMeta()));
 
 		Maybe<String> rs = RP.get().startTestItem(currentStory.getCurrentStoryId(), rq);
 		currentStory.setCurrentScenario(rs);
@@ -313,30 +314,30 @@ class JBehaveUtils {
 
 	}
 
-    private static Map<String, String> metaToMap(Meta meta) {
-        if (null == meta) {
-            return Collections.emptyMap();
-        }
-        Map<String, String> metaMap = new HashMap<>(meta.getPropertyNames().size());
-        for (String name : meta.getPropertyNames()) {
-            metaMap.put(name, meta.getProperty(name));
-        }
-        return metaMap;
+	private static Map<String, String> metaToMap(Meta meta) {
+		if (null == meta) {
+			return Collections.emptyMap();
+		}
+		Map<String, String> metaMap = new HashMap<>(meta.getPropertyNames().size());
+		for (String name : meta.getPropertyNames()) {
+			metaMap.put(name, meta.getProperty(name));
+		}
+		return metaMap;
 
 	}
 
-    // TODO rename as join metas
-    private static Map<String, String> metasToMap(Meta... metas) {
-        if (null != metas && metas.length > 0) {
-            Map<String, String> metaMap = new HashMap<>();
-            for (Meta meta : metas) {
-                metaMap.putAll(metaToMap(meta));
-            }
-            return metaMap;
-        } else {
-            return Collections.emptyMap();
-        }
-    }
+	// TODO rename as join metas
+	private static Map<String, String> metasToMap(Meta... metas) {
+		if (null != metas && metas.length > 0) {
+			Map<String, String> metaMap = new HashMap<>();
+			for (Meta meta : metas) {
+				metaMap.putAll(metaToMap(meta));
+			}
+			return metaMap;
+		} else {
+			return Collections.emptyMap();
+		}
+	}
 
 	private static String joinMeta(Map<String, String> metaParameters) {
 		Iterator<Entry<String, String>> metaParametersIterator = metaParameters.entrySet().iterator();
@@ -390,40 +391,40 @@ class JBehaveUtils {
 		}));
 	}
 
-    @VisibleForTesting
-    static String expandParameters(String stepName, Map<String, String> parameters, List<ParameterResource> parameterResources) {
-        Matcher m = STEP_NAME_PATTERN.matcher(stepName);
-        StringBuffer buffer = new StringBuffer();
-        while (m.find()) {
-            String key = m.group(1);
-            if (parameters.containsKey(key)) {
-                String value = parameters.get(key);
-                m.appendReplacement(buffer, value);
-                ParameterResource param = buildParameter(key, value);
+	@VisibleForTesting
+	static String expandParameters(String stepName, Map<String, String> parameters, List<ParameterResource> parameterResources) {
+		Matcher m = STEP_NAME_PATTERN.matcher(stepName);
+		StringBuffer buffer = new StringBuffer();
+		while (m.find()) {
+			String key = m.group(1);
+			if (parameters.containsKey(key)) {
+				String value = parameters.get(key);
+				m.appendReplacement(buffer, value);
+				ParameterResource param = buildParameter(key, value);
 				parameterResources.add(param);
-            }
-        }
-        m.appendTail(buffer);
-        return buffer.toString();
-    }
+			}
+		}
+		m.appendTail(buffer);
+		return buffer.toString();
+	}
 
-    private static ParameterResource buildParameter(String key, String value) {
-        ParameterResource parameterResource = new ParameterResource();
-        parameterResource.setKey(key);
-        parameterResource.setValue(value);
-        return parameterResource;
-    }
+	private static ParameterResource buildParameter(String key, String value) {
+		ParameterResource parameterResource = new ParameterResource();
+		parameterResource.setKey(key);
+		parameterResource.setValue(value);
+		return parameterResource;
+	}
 
-    private static String normalizeName(String string) {
-        String name;
-        if (Strings.isNullOrEmpty(string)) {
-            name = "UNKNOWN";
-        } else if (string.length() > MAX_NAME_LENGTH) {
-            name = string.substring(0, MAX_NAME_LENGTH - 1);
-        } else {
-            name = string;
-        }
-        return name;
+	private static String normalizeName(String string) {
+		String name;
+		if (Strings.isNullOrEmpty(string)) {
+			name = "UNKNOWN";
+		} else if (string.length() > MAX_NAME_LENGTH) {
+			name = string.substring(0, MAX_NAME_LENGTH - 1);
+		} else {
+			name = string;
+		}
+		return name;
 
 	}
 
