@@ -30,7 +30,6 @@ import org.jbehave.core.model.OutcomesTable;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.model.StoryDuration;
-import org.jbehave.core.reporters.NullStoryReporter;
 import org.jbehave.core.reporters.StoryReporter;
 
 import java.util.List;
@@ -58,7 +57,7 @@ public class ReportPortalStoryReporter implements StoryReporter {
 
 	@Override
 	public void storyCancelled(Story story, StoryDuration storyDuration) {
-
+		JBehaveUtils.finishStory();
 	}
 
 	@Override
