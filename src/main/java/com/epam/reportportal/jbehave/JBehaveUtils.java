@@ -30,7 +30,6 @@ import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import io.reactivex.Maybe;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Story;
@@ -186,10 +185,10 @@ class JBehaveUtils {
         StartTestItemRQ rq = new StartTestItemRQ();
 
         if (currentStory.hasExamples() && currentStory.getExamples().hasStep(step)) {
-            StringBuilder name = new StringBuilder();
-            name.append("[").append(currentStory.getExamples().getCurrentExample()).append("] ")
-                    .append(expandParameters(step, currentStory.getExamples().getCurrentExampleParams(), rq));
-            rq.setName(normalizeName(name.toString()));
+        	List<ParameterResource> parameters = new ArrayList<>();
+        	parameters.add(buildParameter("example", String.valueOf(currentStory.getExamples().getCurrentExample())));
+			String name = expandParameters(step, currentStory.getExamples().getCurrentExampleParams(), parameters);
+			rq.setName(normalizeName(name));
             rq.setDescription(joinMeta(currentStory.getExamples().getCurrentExampleParams()));
 
         } else {
@@ -239,8 +238,9 @@ class JBehaveUtils {
 
         JBehaveContext.Story currentStory = JBehaveContext.getCurrentStory();
         StartTestItemRQ rq = new StartTestItemRQ();
-        rq.setName(normalizeName(
-                expandParameters(scenario, metasToMap(currentStory.getStoryMeta(), currentStory.getScenarioMeta()), rq)));
+		rq.setName(normalizeName(expandParameters(scenario, metasToMap(currentStory.getStoryMeta(), currentStory.getScenarioMeta()),
+				Collections.<ParameterResource>emptyList()
+		)));
         rq.setStartTime(Calendar.getInstance().getTime());
         rq.setType("SCENARIO");
         rq.setDescription(joinMetas(currentStory.getStoryMeta(), currentStory.getScenarioMeta()));
@@ -321,7 +321,7 @@ class JBehaveUtils {
         if (null == meta) {
             return Collections.emptyMap();
         }
-        Map<String, String> metaMap = new HashMap<String, String>(meta.getPropertyNames().size());
+        Map<String, String> metaMap = new HashMap<>(meta.getPropertyNames().size());
         for (String name : meta.getPropertyNames()) {
             metaMap.put(name, meta.getProperty(name));
         }
@@ -332,7 +332,7 @@ class JBehaveUtils {
     // TODO rename as join metas
     private static Map<String, String> metasToMap(Meta... metas) {
         if (null != metas && metas.length > 0) {
-            Map<String, String> metaMap = new HashMap<String, String>();
+            Map<String, String> metaMap = new HashMap<>();
             for (Meta meta : metas) {
                 metaMap.putAll(metaToMap(meta));
             }
@@ -396,21 +396,19 @@ class JBehaveUtils {
     }
 
     @VisibleForTesting
-    static String expandParameters(String stepName, Map<String, String> parameters, StartTestItemRQ rq) {
+    static String expandParameters(String stepName, Map<String, String> parameters, List<ParameterResource> parameterResources) {
         Matcher m = STEP_NAME_PATTERN.matcher(stepName);
         StringBuffer buffer = new StringBuffer();
-        List<ParameterResource> params = new ArrayList<>();
         while (m.find()) {
             String key = m.group(1);
             if (parameters.containsKey(key)) {
                 String value = parameters.get(key);
                 m.appendReplacement(buffer, value);
                 ParameterResource param = buildParameter(key, value);
-                params.add(param);
+				parameterResources.add(param);
             }
         }
         m.appendTail(buffer);
-        rq.setParameters(CollectionUtils.isEmpty(params) ? null : params);
         return buffer.toString();
     }
 
