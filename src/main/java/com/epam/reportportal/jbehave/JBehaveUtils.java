@@ -188,9 +188,8 @@ class JBehaveUtils {
         	List<ParameterResource> parameters = new ArrayList<>();
         	parameters.add(buildParameter("example", String.valueOf(currentStory.getExamples().getCurrentExample())));
 			String name = expandParameters(step, currentStory.getExamples().getCurrentExampleParams(), parameters);
+			rq.setParameters(parameters);
 			rq.setName(normalizeName(name));
-            rq.setDescription(joinMeta(currentStory.getExamples().getCurrentExampleParams()));
-
         } else {
             rq.setName(normalizeName(step));
             rq.setDescription(joinMetas(currentStory.getStoryMeta(), currentStory.getScenarioMeta()));
