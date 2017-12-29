@@ -26,6 +26,7 @@ import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.ta.reportportal.ws.model.FinishExecutionRQ;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
+import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import io.reactivex.Maybe;
@@ -181,14 +182,14 @@ class JBehaveUtils {
 		StartTestItemRQ rq = new StartTestItemRQ();
 
 		if (currentStory.hasExamples() && currentStory.getExamples().hasStep(step)) {
+			List<ParameterResource> parameters = new ArrayList<ParameterResource>();
 			StringBuilder name = new StringBuilder();
 			name.append("[")
 					.append(currentStory.getExamples().getCurrentExample())
 					.append("] ")
-					.append(expandParameters(step, currentStory.getExamples().getCurrentExampleParams()));
+					.append(expandParameters(step, currentStory.getExamples().getCurrentExampleParams(), parameters));
+			rq.setParameters(parameters);
 			rq.setName(normalizeName(name.toString()));
-			rq.setDescription(joinMeta(currentStory.getExamples().getCurrentExampleParams()));
-
 		} else {
 			rq.setName(normalizeName(step));
 			rq.setDescription(joinMetas(currentStory.getStoryMeta(), currentStory.getScenarioMeta()));
@@ -236,7 +237,9 @@ class JBehaveUtils {
 
 		JBehaveContext.Story currentStory = JBehaveContext.getCurrentStory();
 		StartTestItemRQ rq = new StartTestItemRQ();
-		rq.setName(normalizeName(expandParameters(scenario, metasToMap(currentStory.getStoryMeta(), currentStory.getScenarioMeta()))));
+		rq.setName(normalizeName(expandParameters(scenario, metasToMap(currentStory.getStoryMeta(), currentStory.getScenarioMeta()),
+				Collections.<ParameterResource>emptyList()
+		)));
 		rq.setStartTime(Calendar.getInstance().getTime());
 		rq.setType("SCENARIO");
 		rq.setDescription(joinMetas(currentStory.getStoryMeta(), currentStory.getScenarioMeta()));
@@ -391,16 +394,27 @@ class JBehaveUtils {
 	}
 
 	@VisibleForTesting
-	static String expandParameters(String stepName, Map<String, String> parameters) {
+	static String expandParameters(String stepName, Map<String, String> parameters, List<ParameterResource> parameterResources) {
 		Matcher m = STEP_NAME_PATTERN.matcher(stepName);
 		StringBuffer buffer = new StringBuffer();
 		while (m.find()) {
-			if (parameters.containsKey(m.group(1))) {
-				m.appendReplacement(buffer, parameters.get(m.group(1)));
+			String key = m.group(1);
+			if (parameters.containsKey(key)) {
+				String value = parameters.get(key);
+				m.appendReplacement(buffer, value);
+				ParameterResource param = buildParameter(key, value);
+				parameterResources.add(param);
 			}
 		}
 		m.appendTail(buffer);
 		return buffer.toString();
+	}
+
+	private static ParameterResource buildParameter(String key, String value) {
+		ParameterResource parameterResource = new ParameterResource();
+		parameterResource.setKey(key);
+		parameterResource.setValue(value);
+		return parameterResource;
 	}
 
 	private static String normalizeName(String string) {
