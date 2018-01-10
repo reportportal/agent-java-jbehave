@@ -28,6 +28,7 @@ import com.epam.ta.reportportal.ws.model.FinishExecutionRQ;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
+import com.epam.ta.reportportal.ws.model.issue.Issue;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import io.reactivex.Maybe;
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +44,8 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.epam.reportportal.listeners.Statuses.SKIPPED;
 
 /**
  * Set of usefull utils related to JBehave -> ReportPortal integration
@@ -62,6 +65,8 @@ class JBehaveUtils {
 	private static final String KEY_VALUE_SEPARATOR = ":";
 
 	private static final String META_PARAMETER_SEPARATOR = " ";
+
+	public static final String NOT_ISSUE = "NOT_ISSUE";
 
 	@VisibleForTesting
 	static final Pattern STEP_NAME_PATTERN = Pattern.compile("<(.*?)>");
@@ -220,6 +225,12 @@ class JBehaveUtils {
 		FinishTestItemRQ rq = new FinishTestItemRQ();
 		rq.setEndTime(Calendar.getInstance().getTime());
 		rq.setStatus(status);
+
+		if (status.equals(SKIPPED) && !RP.get().getParameters().getSkippedAnIssue()) {
+			Issue issue = new Issue();
+			issue.setIssueType(NOT_ISSUE);
+			rq.setIssue(issue);
+		}
 
 		RP.get().finishTestItem(currentStory.getCurrentStep(), rq);
 		currentStory.setCurrentStep(null);
