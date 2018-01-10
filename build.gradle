@@ -14,7 +14,7 @@ repositories {
 
 }
 dependencies {
-    compile ('com.github.reportportal:client-java:5063560') {
+    compile ('com.epam.reportportal:client-java:4.0.0-BETA-1') {
         ext.compileScope = true
     }
     compile('com.github.reportportal:commons-model:bb756de') {
