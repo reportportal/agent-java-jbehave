@@ -43,7 +43,7 @@ public class JBehaveContext {
         }
     };
 
-    private static Deque<Maybe<String>> itemsCache = new LinkedList<>();
+    private static Deque<Maybe<String>> itemsCache = new LinkedList<Maybe<String>>();
 
     public static Story getCurrentStory() {
         return currentStory.get();
