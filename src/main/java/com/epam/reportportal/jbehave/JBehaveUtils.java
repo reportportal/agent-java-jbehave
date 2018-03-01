@@ -29,6 +29,7 @@ import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
+import com.epam.ta.reportportal.ws.model.log.SaveLogRQ;
 import io.reactivex.Maybe;
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Meta;
@@ -43,6 +44,8 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static rp.com.google.common.base.Throwables.getStackTraceAsString;
 
 /**
  * Set of usefull utils related to JBehave -> ReportPortal integration
@@ -292,6 +295,32 @@ class JBehaveUtils {
 			RP.get().finishTestItem(item, rq);
 
 		}
+	}
+
+	/**
+	 * Send stacktrace to ReportPortal
+	 *
+	 * @param cause
+	 */
+	public static void sendStackTraceToRP(final Throwable cause) {
+
+		ReportPortal.emitLog(new Function<String, SaveLogRQ>() {
+			@Override
+			public SaveLogRQ apply(String itemId) {
+				SaveLogRQ rq = new SaveLogRQ();
+				rq.setTestItemId(itemId);
+				rq.setLevel("ERROR");
+				rq.setLogTime(Calendar.getInstance().getTime());
+				if (cause != null) {
+					rq.setMessage(getStackTraceAsString(cause.getCause()));
+				} else {
+					rq.setMessage("Test has failed without exception");
+				}
+				rq.setLogTime(Calendar.getInstance().getTime());
+
+				return rq;
+			}
+		});
 	}
 
 	private static String joinMeta(Meta meta) {

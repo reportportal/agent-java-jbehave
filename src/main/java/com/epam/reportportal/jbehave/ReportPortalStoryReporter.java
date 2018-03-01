@@ -21,15 +21,7 @@
 package com.epam.reportportal.jbehave;
 
 import com.epam.reportportal.listeners.Statuses;
-import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.GivenStories;
-import org.jbehave.core.model.Lifecycle;
-import org.jbehave.core.model.Meta;
-import org.jbehave.core.model.Narrative;
-import org.jbehave.core.model.OutcomesTable;
-import org.jbehave.core.model.Scenario;
-import org.jbehave.core.model.Story;
-import org.jbehave.core.model.StoryDuration;
+import org.jbehave.core.model.*;
 import org.jbehave.core.reporters.StoryReporter;
 
 import java.util.List;
@@ -149,7 +141,8 @@ public class ReportPortalStoryReporter implements StoryReporter {
 
 	@Override
 	public void failed(String step, Throwable cause) {
-		JBehaveUtils.finishStep(Statuses.FAILED);
+        JBehaveUtils.sendStackTraceToRP(cause);
+        JBehaveUtils.finishStep(Statuses.FAILED);
 	}
 
 	@Override
