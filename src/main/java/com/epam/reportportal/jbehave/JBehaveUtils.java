@@ -312,7 +312,7 @@ class JBehaveUtils {
 				rq.setLevel("ERROR");
 				rq.setLogTime(Calendar.getInstance().getTime());
 				if (cause != null) {
-					rq.setMessage(getStackTraceAsString(cause.getCause()));
+					rq.setMessage(getStackTraceAsString(cause));
 				} else {
 					rq.setMessage("Test has failed without exception");
 				}
