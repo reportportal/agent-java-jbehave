@@ -22,7 +22,7 @@ package com.epam.reportportal.jbehave;
 
 import com.epam.reportportal.listeners.Statuses;
 import org.jbehave.core.model.*;
-import org.jbehave.core.reporters.StoryReporter;
+import org.jbehave.core.reporters.NullStoryReporter;
 
 import java.util.List;
 import java.util.Map;
@@ -35,17 +35,7 @@ import java.util.Map;
  * @author Andrei Varabyeu
  * 
  */
-public class ReportPortalStoryReporter implements StoryReporter {
-
-	@Override
-	public void scenarioMeta(Meta meta) {
-		JBehaveContext.getCurrentStory().setScenarioMeta(meta);
-	}
-
-	@Override
-	public void storyNotAllowed(Story story, String filter) {
-
-	}
+public class ReportPortalStoryReporter extends NullStoryReporter {
 
 	@Override
 	public void storyCancelled(Story story, StoryDuration storyDuration) {
@@ -63,33 +53,14 @@ public class ReportPortalStoryReporter implements StoryReporter {
 	}
 
 	@Override
-	public void narrative(Narrative narrative) {
-
-	}
-
-	@Override
-	public void lifecyle(Lifecycle lifecycle) {
-
-	}
-
-	@Override
-	public void beforeScenario(String scenarioTitle) {
-		JBehaveUtils.startScenario(scenarioTitle);
+	public void beforeScenario(Scenario scenario) {
+		JBehaveContext.getCurrentStory().setScenarioMeta(scenario.getMeta());
+		JBehaveUtils.startScenario(scenario.getTitle());
 	}
 
 	@Override
 	public void afterScenario() {
 		JBehaveUtils.finishScenario();
-	}
-
-	@Override
-	public void givenStories(GivenStories givenStories) {
-
-	}
-
-	@Override
-	public void givenStories(List<String> storyPaths) {
-
 	}
 
 	@Override
@@ -115,7 +86,6 @@ public class ReportPortalStoryReporter implements StoryReporter {
 	@Override
 	public void successful(String step) {
 		JBehaveUtils.finishStep(Statuses.PASSED);
-
 	}
 
 	@Override
@@ -124,11 +94,6 @@ public class ReportPortalStoryReporter implements StoryReporter {
             JBehaveUtils.startStep(step);
         }
         JBehaveUtils.finishStep(Statuses.SKIPPED);
-	}
-
-	@Override
-	public void comment(String step) {
-
 	}
 
 	@Override
@@ -143,31 +108,6 @@ public class ReportPortalStoryReporter implements StoryReporter {
 	public void failed(String step, Throwable cause) {
         JBehaveUtils.sendStackTraceToRP(cause);
         JBehaveUtils.finishStep(Statuses.FAILED);
-	}
-
-	@Override
-	public void failedOutcomes(String step, OutcomesTable table) {
-
-	}
-
-	@Override
-	public void restarted(String step, Throwable cause) {
-
-	}
-
-	@Override
-	public void restartedStory(Story story, Throwable cause) {
-
-	}
-
-	@Override
-	public void dryRun() {
-
-	}
-
-	@Override
-	public void pendingMethods(List<String> methods) {
-
 	}
 
 	@Override
