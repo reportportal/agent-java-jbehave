@@ -21,6 +21,7 @@
 package com.epam.reportportal.jbehave;
 
 import com.epam.reportportal.listeners.Statuses;
+
 import org.jbehave.core.model.*;
 import org.jbehave.core.reporters.NullStoryReporter;
 
@@ -40,6 +41,11 @@ public class ReportPortalStoryReporter extends NullStoryReporter {
 	@Override
 	public void storyCancelled(Story story, StoryDuration storyDuration) {
 		JBehaveUtils.finishStory();
+	}
+
+	@Override
+	public void storyNotAllowed(Story story, String filter) {
+		JBehaveUtils.skipStory(story);
 	}
 
 	@Override

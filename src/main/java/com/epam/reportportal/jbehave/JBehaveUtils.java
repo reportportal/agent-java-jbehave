@@ -20,6 +20,8 @@
  */
 package com.epam.reportportal.jbehave;
 
+import static rp.com.google.common.base.Throwables.getStackTraceAsString;
+
 import com.epam.reportportal.listeners.ListenerParameters;
 import com.epam.reportportal.listeners.Statuses;
 import com.epam.reportportal.service.Launch;
@@ -30,22 +32,36 @@ import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import com.epam.ta.reportportal.ws.model.log.SaveLogRQ;
-import io.reactivex.Maybe;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Story;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rp.com.google.common.annotations.VisibleForTesting;
-import rp.com.google.common.base.*;
-import rp.com.google.common.collect.Iterables;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static rp.com.google.common.base.Throwables.getStackTraceAsString;
+import io.reactivex.Maybe;
+import rp.com.google.common.annotations.VisibleForTesting;
+import rp.com.google.common.base.Function;
+import rp.com.google.common.base.Joiner;
+import rp.com.google.common.base.Strings;
+import rp.com.google.common.base.Supplier;
+import rp.com.google.common.base.Suppliers;
+import rp.com.google.common.collect.Iterables;
 
 /**
  * Set of usefull utils related to JBehave -> ReportPortal integration
@@ -103,6 +119,31 @@ class JBehaveUtils {
 	}
 
 	/**
+	 * Skips story. Adds story with story description to the current launch avoiding reporting story scenarios.
+	 *
+	 * @param story story to skip
+	 */
+	static void skipStory(Story story) {
+		Date currentTime = Calendar.getInstance().getTime();
+
+		StartTestItemRQ startStoryRq = new StartTestItemRQ();
+		if (Strings.isNullOrEmpty(story.getDescription().asString())) {
+			startStoryRq.setDescription(buildStoryDescriptionWithMeta(story));
+		}
+		startStoryRq.setName(normalizeName(story.getName()));
+		startStoryRq.setStartTime(currentTime);
+		startStoryRq.setType("STORY");
+		Maybe<String> storyId = RP.get().startTestItem(startStoryRq);
+		LOGGER.debug("Starting story in ReportPortal: StoryName={}, StoryId={}", story.getName(), storyId);
+
+		FinishTestItemRQ finishStoryRq = new FinishTestItemRQ();
+		finishStoryRq.setEndTime(currentTime);
+		finishStoryRq.setStatus("SKIPPED");
+		RP.get().finishTestItem(storyId, finishStoryRq);
+		LOGGER.debug("Finishing story in ReportPortal: StoryName={}, StoryId={}", story.getName(), storyId);
+	}
+
+	/**
 	 * Starts story (test suite level) in ReportPortal
 	 *
 	 * @param story
@@ -111,14 +152,8 @@ class JBehaveUtils {
 
 		StartTestItemRQ rq = new StartTestItemRQ();
 
-		Set<String> metaProperties = story.getMeta().getPropertyNames();
-		Map<String, String> metaMap = new HashMap<String, String>(metaProperties.size());
-		for (String metaProperty : metaProperties) {
-			metaMap.put(metaProperty, story.getMeta().getProperty(metaProperty));
-		}
-
 		if (Strings.isNullOrEmpty(story.getDescription().asString())) {
-			rq.setDescription(story.getDescription().asString() + "\n" + joinMeta(metaMap));
+			rq.setDescription(buildStoryDescriptionWithMeta(story));
 		}
 		rq.setName(normalizeName(story.getName()));
 		rq.setStartTime(Calendar.getInstance().getTime());
@@ -321,6 +356,15 @@ class JBehaveUtils {
 				return rq;
 			}
 		});
+	}
+
+	private static String buildStoryDescriptionWithMeta(Story story) {
+		Set<String> metaProperties = story.getMeta().getPropertyNames();
+		Map<String, String> metaMap = new HashMap<String, String>(metaProperties.size());
+		for (String metaProperty : metaProperties) {
+			metaMap.put(metaProperty, story.getMeta().getProperty(metaProperty));
+		}
+		return story.getDescription().asString() + "\n" + joinMeta(metaMap);
 	}
 
 	private static String joinMeta(Meta meta) {
