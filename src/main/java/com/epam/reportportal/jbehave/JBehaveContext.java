@@ -141,7 +141,7 @@ public class JBehaveContext {
         }
 
         public boolean hasExamples() {
-            return null != examples;
+            return null != examples && examples.getExamplesTable().getRowCount() > 0;
         }
 
         public Examples getExamples() {
