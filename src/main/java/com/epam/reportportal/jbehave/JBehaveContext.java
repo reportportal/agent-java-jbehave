@@ -43,7 +43,7 @@ public class JBehaveContext {
         }
     };
 
-    private static Deque<Maybe<String>> itemsCache = new LinkedList<Maybe<String>>();
+    private static Deque<Maybe<Long>> itemsCache = new LinkedList<>();
 
     public static Story getCurrentStory() {
         return currentStory.get();
@@ -53,17 +53,17 @@ public class JBehaveContext {
         currentStory.set(story);
     }
 
-    public static Deque<Maybe<String>> getItemsCache() {
+    public static Deque<Maybe<Long>> getItemsCache() {
         return itemsCache;
     }
 
     public static class Story {
 
-        private Maybe<String> currentStoryId;
+        private Maybe<Long> currentStoryId;
 
-        private Maybe<String> currentScenario;
+        private Maybe<Long> currentScenario;
 
-        private Maybe<String> currentStep;
+        private Maybe<Long> currentStep;
 
         private Examples examples;
 
@@ -88,7 +88,7 @@ public class JBehaveContext {
         /**
          * @param currentStep the currentStep to set
          */
-        public void setCurrentStep(Maybe<String> currentStep) {
+        public void setCurrentStep(Maybe<Long> currentStep) {
             if (null != currentStep) {
                 itemsCache.push(currentStep);
             } else {
@@ -97,7 +97,7 @@ public class JBehaveContext {
             this.currentStep = currentStep;
         }
 
-        public void setCurrentStoryId(Maybe<String> currentStoryId) {
+        public void setCurrentStoryId(Maybe<Long> currentStoryId) {
             if (null != currentStoryId) {
                 itemsCache.push(currentStoryId);
             } else {
@@ -106,21 +106,21 @@ public class JBehaveContext {
             this.currentStoryId = currentStoryId;
         }
 
-        public Maybe<String> getCurrentStoryId() {
+        public Maybe<Long> getCurrentStoryId() {
             return currentStoryId;
         }
 
         /**
          * @return the currentScenario
          */
-        public Maybe<String> getCurrentScenario() {
+        public Maybe<Long> getCurrentScenario() {
             return currentScenario;
         }
 
         /**
          * @param currentScenario the currentScenario to set
          */
-        public void setCurrentScenario(Maybe<String> currentScenario) {
+        public void setCurrentScenario(Maybe<Long> currentScenario) {
             if (null != currentScenario) {
                 itemsCache.push(currentScenario);
             } else {
@@ -132,7 +132,7 @@ public class JBehaveContext {
         /**
          * @return the currentStep
          */
-        public Maybe<String> getCurrentStep() {
+        public Maybe<Long> getCurrentStep() {
             return currentStep;
         }
 

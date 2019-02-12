@@ -85,7 +85,7 @@ class JBehaveUtils {
 			rq.setName(parameters.getLaunchName());
 			rq.setStartTime(startTime);
 			rq.setMode(parameters.getLaunchRunningMode());
-			rq.setTags(parameters.getTags());
+			rq.setAttributes(parameters.getAttributes());
 			rq.setDescription(parameters.getDescription());
 
 			return rp.newLaunch(rq);
@@ -126,7 +126,7 @@ class JBehaveUtils {
 		rq.setStartTime(Calendar.getInstance().getTime());
 		rq.setType("STORY");
 
-		Maybe<String> storyId;
+		Maybe<Long> storyId;
 		JBehaveContext.Story currentStory;
 
 		if (givenStory) {
@@ -134,8 +134,8 @@ class JBehaveUtils {
 			 * Given story means inner story. That's why we need to create
 			 * new story and assign parent to it
 			 */
-			Maybe<String> currentScenario = JBehaveContext.getCurrentStory().getCurrentScenario();
-			Maybe<String> parent = currentScenario != null ? currentScenario : JBehaveContext.getCurrentStory().getCurrentStoryId();
+			Maybe<Long> currentScenario = JBehaveContext.getCurrentStory().getCurrentScenario();
+			Maybe<Long> parent = currentScenario != null ? currentScenario : JBehaveContext.getCurrentStory().getCurrentStoryId();
 			storyId = RP.get().startTestItem(parent, rq);
 			currentStory = new JBehaveContext.Story();
 			currentStory.setParent(JBehaveContext.getCurrentStory());
@@ -204,7 +204,7 @@ class JBehaveUtils {
 		rq.setType("STEP");
 		LOGGER.debug("Starting Step in ReportPortal: {}", step);
 
-		Maybe<String> stepId = RP.get().startTestItem(currentStory.getCurrentScenario(), rq);
+		Maybe<Long> stepId = RP.get().startTestItem(currentStory.getCurrentScenario(), rq);
 		currentStory.setCurrentStep(stepId);
 
 	}
@@ -255,7 +255,7 @@ class JBehaveUtils {
 		rq.setType("SCENARIO");
 		rq.setDescription(joinMetas(currentStory.getStoryMeta(), currentStory.getScenarioMeta()));
 
-		Maybe<String> rs = RP.get().startTestItem(currentStory.getCurrentStoryId(), rq);
+		Maybe<Long> rs = RP.get().startTestItem(currentStory.getCurrentStoryId(), rq);
 		currentStory.setCurrentScenario(rs);
 	}
 
@@ -294,8 +294,8 @@ class JBehaveUtils {
 	 */
 	public static void makeSureAllItemsFinished(String status) {
 
-		Deque<Maybe<String>> items = JBehaveContext.getItemsCache();
-		Maybe<String> item;
+		Deque<Maybe<Long>> items = JBehaveContext.getItemsCache();
+		Maybe<Long> item;
 		while (null != (item = items.poll())) {
 			FinishTestItemRQ rq = new FinishTestItemRQ();
 			rq.setEndTime(Calendar.getInstance().getTime());
