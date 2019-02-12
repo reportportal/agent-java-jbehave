@@ -84,7 +84,7 @@ class JBehaveUtils {
 			rq.setName(parameters.getLaunchName());
 			rq.setStartTime(startTime);
 			rq.setMode(parameters.getLaunchRunningMode());
-			rq.setAttributes(parameters.getAttributes());
+			rq.setAttributes(parameters.getAttributes() == null ? new HashSet<ItemAttributeResource>() : parameters.getAttributes());
 			rq.setDescription(parameters.getDescription());
 
 			final Boolean skippedAnIssue = parameters.getSkippedAnIssue();
