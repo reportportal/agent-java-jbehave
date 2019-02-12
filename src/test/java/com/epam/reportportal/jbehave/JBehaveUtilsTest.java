@@ -61,6 +61,16 @@ public class JBehaveUtilsTest {
 	}
 
 	@Test
+	public void testStepParametersReplacementWithSpecialChars() {
+		List<ParameterResource> params = new ArrayList<>();
+		String result = JBehaveUtils.expandParameters("Given I am on the <parameter1> page",
+				ImmutableMap.of("parameter1", "${repl1}"), params);
+		Assert.assertThat("Incorrect parameters replacement", result, Matchers.is("Given I am on the ${repl1} page"));
+		Assert.assertEquals("Incorrect parameters key expand", "parameter1", params.get(0).getKey());
+		Assert.assertEquals("Incorrect parameters value expand", "${repl1}", params.get(0).getValue());
+	}
+
+	@Test
 	public void testStepParametersReplacementNegative() {
 		List<ParameterResource> params = new ArrayList<ParameterResource>();
 		String result = JBehaveUtils.expandParameters("Given that I am on",
