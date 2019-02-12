@@ -24,10 +24,7 @@ import com.epam.reportportal.listeners.ListenerParameters;
 import com.epam.reportportal.listeners.Statuses;
 import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.ReportPortal;
-import com.epam.ta.reportportal.ws.model.FinishExecutionRQ;
-import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
-import com.epam.ta.reportportal.ws.model.ParameterResource;
-import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
+import com.epam.ta.reportportal.ws.model.*;
 import com.epam.ta.reportportal.ws.model.issue.Issue;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import io.reactivex.Maybe;
@@ -66,6 +63,8 @@ class JBehaveUtils {
 
 	private static final String META_PARAMETER_SEPARATOR = " ";
 
+	private static final String SKIPPED_ISSUE_KEY = "skippedIssue";
+
 	public static final String NOT_ISSUE = "NOT_ISSUE";
 
 	@VisibleForTesting
@@ -87,6 +86,13 @@ class JBehaveUtils {
 			rq.setMode(parameters.getLaunchRunningMode());
 			rq.setAttributes(parameters.getAttributes());
 			rq.setDescription(parameters.getDescription());
+
+			final Boolean skippedAnIssue = parameters.getSkippedAnIssue();
+			ItemAttributeResource skippedIssueAttr = new ItemAttributeResource(SKIPPED_ISSUE_KEY,
+					skippedAnIssue == null ? "true" : String.valueOf(skippedAnIssue),
+					true
+			);
+			rq.getAttributes().add(skippedIssueAttr);
 
 			return rp.newLaunch(rq);
 		}
