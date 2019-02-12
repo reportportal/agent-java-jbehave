@@ -261,7 +261,7 @@ class JBehaveUtils {
 			return;
 		}
 
-		LOGGER.debug("finishing scenario in ReportPortal: {}");
+		LOGGER.debug("finishing scenario in ReportPortal");
 		FinishTestItemRQ rq = new FinishTestItemRQ();
 		rq.setEndTime(Calendar.getInstance().getTime());
 		rq.setStatus(status);
