@@ -430,7 +430,7 @@ class JBehaveUtils {
 			String key = m.group(1);
 			if (parameters.containsKey(key)) {
 				String value = parameters.get(key);
-				m.appendReplacement(buffer, value);
+				m.appendReplacement(buffer, Matcher.quoteReplacement(value));
 				ParameterResource param = buildParameter(key, value);
 				parameterResources.add(param);
 			}
