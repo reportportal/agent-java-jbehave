@@ -112,7 +112,7 @@ class JBehaveUtils {
 		StartTestItemRQ rq = new StartTestItemRQ();
 
 		Set<String> metaProperties = story.getMeta().getPropertyNames();
-		Map<String, String> metaMap = new HashMap<String, String>(metaProperties.size());
+		Map<String, String> metaMap = new HashMap<>(metaProperties.size());
 		for (String metaProperty : metaProperties) {
 			metaMap.put(metaProperty, story.getMeta().getProperty(metaProperty));
 		}
@@ -185,7 +185,7 @@ class JBehaveUtils {
 		StartTestItemRQ rq = new StartTestItemRQ();
 
 		if (currentStory.hasExamples() && currentStory.getExamples().hasStep(step)) {
-			List<ParameterResource> parameters = new ArrayList<ParameterResource>();
+			List<ParameterResource> parameters = new ArrayList<>();
 			StringBuilder name = new StringBuilder();
 			name.append("[")
 					.append(currentStory.getExamples().getCurrentExample())
@@ -349,7 +349,7 @@ class JBehaveUtils {
 		if (null == meta) {
 			return Collections.emptyMap();
 		}
-		Map<String, String> metaMap = new HashMap<String, String>(meta.getPropertyNames().size());
+		Map<String, String> metaMap = new HashMap<>(meta.getPropertyNames().size());
 		for (String name : meta.getPropertyNames()) {
 			metaMap.put(name, meta.getProperty(name));
 		}
@@ -360,7 +360,7 @@ class JBehaveUtils {
 	// TODO rename as join metas
 	private static Map<String, String> metasToMap(Meta... metas) {
 		if (null != metas && metas.length > 0) {
-			Map<String, String> metaMap = new HashMap<String, String>();
+			Map<String, String> metaMap = new HashMap<>();
 			for (Meta meta : metas) {
 				metaMap.putAll(metaToMap(meta));
 			}

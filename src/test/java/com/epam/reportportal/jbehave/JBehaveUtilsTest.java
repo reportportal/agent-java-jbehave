@@ -41,7 +41,7 @@ public class JBehaveUtilsTest {
 	@Test
 	public void testStepParametersPattern() {
 		Matcher m = JBehaveUtils.STEP_NAME_PATTERN.matcher(STEP_NAME);
-		List<String> results = new ArrayList<String>();
+		List<String> results = new ArrayList<>();
 		while (m.find()) {
 			results.add(m.group(1));
 		}
@@ -50,7 +50,7 @@ public class JBehaveUtilsTest {
 
 	@Test
 	public void testStepParametersReplacement() {
-		List<ParameterResource> params = new ArrayList<ParameterResource>();
+		List<ParameterResource> params = new ArrayList<>();
 		String result = JBehaveUtils.expandParameters(STEP_NAME,
 				ImmutableMap.<String, String> builder().put("parameter1", "repl1").put("parameter2", "repl2").build(), params);
 		Assert.assertThat("Incorrect parameters replacement", result, Matchers.is("Given that I am on the repl1 page with repl2 value"));
@@ -72,7 +72,7 @@ public class JBehaveUtilsTest {
 
 	@Test
 	public void testStepParametersReplacementNegative() {
-		List<ParameterResource> params = new ArrayList<ParameterResource>();
+		List<ParameterResource> params = new ArrayList<>();
 		String result = JBehaveUtils.expandParameters("Given that I am on",
 				ImmutableMap.<String, String> builder().put("parameter1", "repl1").put("parameter2", "repl2").build(), params);
 		Assert.assertThat("Incorrect parameters replacement", result, Matchers.is("Given that I am on"));
