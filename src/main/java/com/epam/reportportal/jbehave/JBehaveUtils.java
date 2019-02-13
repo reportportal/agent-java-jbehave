@@ -88,10 +88,10 @@ class JBehaveUtils {
 			rq.setDescription(parameters.getDescription());
 
 			final Boolean skippedAnIssue = parameters.getSkippedAnIssue();
-			ItemAttributeResource skippedIssueAttr = new ItemAttributeResource(SKIPPED_ISSUE_KEY,
-					skippedAnIssue == null ? "true" : String.valueOf(skippedAnIssue),
-					true
-			);
+			ItemAttributeResource skippedIssueAttr = new ItemAttributeResource();
+			skippedIssueAttr.setKey(SKIPPED_ISSUE_KEY);
+			skippedIssueAttr.setValue(skippedAnIssue == null ? "true" : skippedAnIssue.toString());
+			skippedIssueAttr.setSystem(true);
 			rq.getAttributes().add(skippedIssueAttr);
 
 			return rp.newLaunch(rq);
