@@ -53,6 +53,7 @@ public class JBehaveContextStoryTest {
         story.setCurrentScenario(null);
         story.setCurrentStoryId(null);
         setEmptyMap("itemsCache");
+        setEmptyMap("stepsCache");
     }
 
     @Test

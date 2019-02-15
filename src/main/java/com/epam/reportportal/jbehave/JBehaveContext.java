@@ -15,7 +15,6 @@
  */
 package com.epam.reportportal.jbehave;
 
-import com.epam.reportportal.listeners.Statuses;
 import io.reactivex.Maybe;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.Meta;
@@ -41,6 +40,7 @@ public class JBehaveContext {
     };
 
     private static Map<Story, Deque<Maybe<String>>> itemsCache = new ConcurrentHashMap<>();
+    private static Map<Story, Deque<Maybe<String>>> stepsCache = new ConcurrentHashMap<>();
 
     public static Story getCurrentStory() {
         return currentStory.get();
@@ -52,28 +52,37 @@ public class JBehaveContext {
 
     public static Deque<Maybe<String>> getItemsCache() {
         Deque<Maybe<String>> merged = new LinkedList<>();
-        for (Deque<Maybe<String>> value : itemsCache.values()) {
+        merged.addAll(mergeMapValues(stepsCache));
+        merged.addAll(mergeMapValues(itemsCache));
+        return merged;
+    }
+
+    private static Deque<Maybe<String>> mergeMapValues(Map<Story, Deque<Maybe<String>>> map) {
+        Deque<Maybe<String>> merged = new LinkedList<>();
+        for (Deque<Maybe<String>> value : map.values()) {
             merged.addAll(value);
         }
         return merged;
     }
 
-    private static Deque<Maybe<String>> getEntryFromCache(Story story) {
-        Deque<Maybe<String>> entry = itemsCache.get(story);
+    private static Deque<Maybe<String>> getEntryFrom(Map<Story, Deque<Maybe<String>>> cache, Story story) {
+        Deque<Maybe<String>> entry = cache.get(story);
         if (entry == null) {
             entry = new LinkedList<>();
-            itemsCache.put(story, entry);
+            cache.put(story, entry);
         }
         return entry;
     }
 
-    private static void updateCache(Story story, Maybe<String> currentItem, Maybe<String> item) {
-        Deque<Maybe<String>> cache = getEntryFromCache(story);
+    private static Deque<Maybe<String>> updateCache(Map<Story, Deque<Maybe<String>>> cache, Story story,
+            Maybe<String> currentItem, Maybe<String> item) {
+        Deque<Maybe<String>> cacheEntry = getEntryFrom(cache, story);
         if (null != item) {
-            cache.push(item);
+            cacheEntry.push(item);
         } else {
-            cache.remove(currentItem);
+            cacheEntry.remove(currentItem);
         }
+        return cacheEntry;
     }
 
     public static class Story {
@@ -109,12 +118,12 @@ public class JBehaveContext {
          * @param currentStep the currentStep to set
          */
         public void setCurrentStep(Maybe<String> currentStep) {
-            updateCache(this, this.currentStep, currentStep);
-            this.currentStep = currentStep;
+            Deque<Maybe<String>> cacheEntry = updateCache(stepsCache, this, this.currentStep, currentStep);
+            this.currentStep = cacheEntry.peek();
         }
 
         public void setCurrentStoryId(Maybe<String> currentStoryId) {
-            updateCache(this, this.currentStoryId, currentStoryId);
+            updateCache(itemsCache, this, this.currentStoryId, currentStoryId);
             this.currentStoryId = currentStoryId;
         }
 
@@ -133,7 +142,7 @@ public class JBehaveContext {
          * @param currentScenario the currentScenario to set
          */
         public void setCurrentScenario(Maybe<String> currentScenario) {
-            updateCache(this, this.currentScenario, currentScenario);
+            updateCache(itemsCache, this, this.currentScenario, currentScenario);
             this.currentScenario = currentScenario;
         }
 
