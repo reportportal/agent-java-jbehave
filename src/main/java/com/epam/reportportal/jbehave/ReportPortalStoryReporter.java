@@ -85,7 +85,7 @@ public class ReportPortalStoryReporter extends NullStoryReporter {
 
 	@Override
 	public void successful(String step) {
-		JBehaveUtils.finishStep(Statuses.PASSED);
+		JBehaveUtils.finishStep();
 	}
 
 	@Override
