@@ -43,7 +43,7 @@ public class ReportPortalEmbeddable implements Embeddable {
     }
 
     @Override
-    public void run() throws Throwable {
+    public void run() {
         try {
             embeddable.run();
         } finally {

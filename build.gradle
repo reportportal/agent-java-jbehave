@@ -22,7 +22,7 @@ dependencies {
     }
 
 
-    compile 'org.jbehave:jbehave-core:4.2'
+    compile 'org.jbehave:jbehave-core:4.4'
 }
 
 publishing.publications.all {
