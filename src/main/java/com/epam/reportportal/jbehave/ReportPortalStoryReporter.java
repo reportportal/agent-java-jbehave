@@ -69,8 +69,8 @@ public class ReportPortalStoryReporter extends NullStoryReporter {
 	}
 
 	@Override
-	public void example(Map<String, String> tableRow) {
-		JBehaveContext.getCurrentStory().getExamples().nextExample();
+	public void example(Map<String, String> tableRow, int exampleIndex) {
+		JBehaveContext.getCurrentStory().getExamples().setCurrentExample(exampleIndex);
 	}
 
 	@Override
