@@ -167,11 +167,11 @@ public class JBehaveContext {
     }
 
     public static class Examples {
-        private ExamplesTable examplesTable;
+        private final ExamplesTable examplesTable;
 
         private int currentExample;
 
-        private List<String> steps;
+        private final List<String> steps;
 
         Examples(List<String> steps, ExamplesTable examplesTable) {
             this.examplesTable = examplesTable;
@@ -199,8 +199,8 @@ public class JBehaveContext {
             return steps.contains(step);
         }
 
-        public void nextExample() {
-            currentExample++;
+        public void setCurrentExample(int currentExample) {
+            this.currentExample = currentExample;
         }
 
     }
