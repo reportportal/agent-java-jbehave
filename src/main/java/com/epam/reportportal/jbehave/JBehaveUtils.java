@@ -207,6 +207,10 @@ class JBehaveUtils {
 
 	}
 
+	public static void finishStep() {
+		finishStep(JBehaveContext.getCurrentStory().getCurrentStepStatus());
+	}
+
 	/**
 	 * Finishes step in ReportPortal
 	 *

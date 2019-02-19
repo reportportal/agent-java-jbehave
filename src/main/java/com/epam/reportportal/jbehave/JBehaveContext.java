@@ -20,6 +20,7 @@
  */
 package com.epam.reportportal.jbehave;
 
+import com.epam.reportportal.listeners.Statuses;
 import io.reactivex.Maybe;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.Meta;
@@ -64,6 +65,7 @@ public class JBehaveContext {
         private Maybe<String> currentScenario;
 
         private Maybe<String> currentStep;
+        private String currentStepStatus = Statuses.PASSED;
 
         private Examples examples;
 
@@ -134,6 +136,14 @@ public class JBehaveContext {
          */
         public Maybe<String> getCurrentStep() {
             return currentStep;
+        }
+
+        public String getCurrentStepStatus() {
+            return currentStepStatus;
+        }
+
+        public void setCurrentStepStatus(String currentStepStatus) {
+            this.currentStepStatus = currentStepStatus;
         }
 
         public void setExamples(Examples examples) {
