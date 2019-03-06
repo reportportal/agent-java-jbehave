@@ -199,7 +199,7 @@ class JBehaveUtils {
 
 		Maybe<String> stepId = RP.get().startTestItem(currentStory.getCurrentScenario(), rq);
 		currentStory.setCurrentStep(stepId);
-
+		currentStory.setCurrentStepStatus(Statuses.PASSED);
 	}
 
 	public static void finishStep() {
