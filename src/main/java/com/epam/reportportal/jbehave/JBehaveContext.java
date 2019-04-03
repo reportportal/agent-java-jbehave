@@ -24,6 +24,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * JBehave test execution context
@@ -39,7 +40,7 @@ public class JBehaveContext {
         }
     };
 
-    private static Deque<Maybe<String>> itemsCache = new LinkedList<>();
+    private static Map<Story, Deque<Maybe<String>>> itemsCache = new ConcurrentHashMap<>();
 
     public static Story getCurrentStory() {
         return currentStory.get();
@@ -50,7 +51,29 @@ public class JBehaveContext {
     }
 
     public static Deque<Maybe<String>> getItemsCache() {
-        return itemsCache;
+        Deque<Maybe<String>> merged = new LinkedList<>();
+        for (Deque<Maybe<String>> value : itemsCache.values()) {
+            merged.addAll(value);
+        }
+        return merged;
+    }
+
+    private static Deque<Maybe<String>> getEntryFromCache(Story story) {
+        Deque<Maybe<String>> entry = itemsCache.get(story);
+        if (entry == null) {
+            entry = new LinkedList<>();
+            itemsCache.put(story, entry);
+        }
+        return entry;
+    }
+
+    private static void updateCache(Story story, Maybe<String> currentItem, Maybe<String> item) {
+        Deque<Maybe<String>> cache = getEntryFromCache(story);
+        if (null != item) {
+            cache.push(item);
+        } else {
+            cache.remove(currentItem);
+        }
     }
 
     public static class Story {
@@ -86,20 +109,12 @@ public class JBehaveContext {
          * @param currentStep the currentStep to set
          */
         public void setCurrentStep(Maybe<String> currentStep) {
-            if (null != currentStep) {
-                itemsCache.push(currentStep);
-            } else {
-                itemsCache.remove(this.currentStep);
-            }
+            updateCache(this, this.currentStep, currentStep);
             this.currentStep = currentStep;
         }
 
         public void setCurrentStoryId(Maybe<String> currentStoryId) {
-            if (null != currentStoryId) {
-                itemsCache.push(currentStoryId);
-            } else {
-                itemsCache.remove(this.currentStoryId);
-            }
+            updateCache(this, this.currentStoryId, currentStoryId);
             this.currentStoryId = currentStoryId;
         }
 
@@ -118,11 +133,7 @@ public class JBehaveContext {
          * @param currentScenario the currentScenario to set
          */
         public void setCurrentScenario(Maybe<String> currentScenario) {
-            if (null != currentScenario) {
-                itemsCache.push(currentScenario);
-            } else {
-                itemsCache.remove(this.currentScenario);
-            }
+            updateCache(this, this.currentScenario, currentScenario);
             this.currentScenario = currentScenario;
         }
 
