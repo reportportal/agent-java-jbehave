@@ -47,7 +47,7 @@ import static rp.com.google.common.base.Throwables.getStackTraceAsString;
  *
  * @author Andrei Varabyeu
  */
-class JBehaveUtils {
+public class JBehaveUtils {
 
 	private JBehaveUtils() {
 		// static utilities class
