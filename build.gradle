@@ -23,6 +23,9 @@ dependencies {
 
 
     compile 'org.jbehave:jbehave-core:4.4'
+
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.0'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.0'
 }
 
 publishing.publications.all {
