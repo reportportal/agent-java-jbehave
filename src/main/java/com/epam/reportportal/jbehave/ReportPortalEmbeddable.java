@@ -31,24 +31,24 @@ import org.jbehave.core.embedder.Embedder;
  */
 public class ReportPortalEmbeddable implements Embeddable {
 
-    private Embeddable embeddable;
+	private Embeddable embeddable;
 
-    public ReportPortalEmbeddable(Embeddable embeddable) {
-        this.embeddable = embeddable;
-    }
+	public ReportPortalEmbeddable(Embeddable embeddable) {
+		this.embeddable = embeddable;
+	}
 
-    @Override
-    public void useEmbedder(Embedder embedder) {
-        embeddable.useEmbedder(embedder);
-    }
+	@Override
+	public void useEmbedder(Embedder embedder) {
+		embeddable.useEmbedder(embedder);
+	}
 
-    @Override
-    public void run() throws Throwable {
-        try {
-            embeddable.run();
-        } finally {
-            JBehaveUtils.finishLaunch();
-        }
-    }
+	@Override
+	public void run() {
+		try {
+			embeddable.run();
+		} finally {
+			JBehaveUtils.finishLaunch();
+		}
+	}
 
 }

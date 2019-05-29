@@ -21,15 +21,7 @@
 package com.epam.reportportal.jbehave;
 
 import com.epam.reportportal.listeners.Statuses;
-import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.model.GivenStories;
-import org.jbehave.core.model.Lifecycle;
-import org.jbehave.core.model.Meta;
-import org.jbehave.core.model.Narrative;
-import org.jbehave.core.model.OutcomesTable;
-import org.jbehave.core.model.Scenario;
-import org.jbehave.core.model.Story;
-import org.jbehave.core.model.StoryDuration;
+import org.jbehave.core.model.*;
 import org.jbehave.core.reporters.StoryReporter;
 
 import java.util.List;
@@ -91,12 +83,22 @@ public class ReportPortalStoryReporter implements StoryReporter {
 	}
 
 	@Override
+	public void beforeGivenStories() {
+
+	}
+
+	@Override
 	public void givenStories(GivenStories givenStories) {
 
 	}
 
 	@Override
 	public void givenStories(List<String> storyPaths) {
+
+	}
+
+	@Override
+	public void afterGivenStories() {
 
 	}
 
@@ -108,6 +110,11 @@ public class ReportPortalStoryReporter implements StoryReporter {
 	@Override
 	public void example(Map<String, String> tableRow) {
 		JBehaveContext.getCurrentStory().getExamples().nextExample();
+	}
+
+	@Override
+	public void example(Map<String, String> tableRow, int exampleIndex) {
+
 	}
 
 	@Override
@@ -198,6 +205,11 @@ public class ReportPortalStoryReporter implements StoryReporter {
 			}
 		}
 		JBehaveUtils.finishScenario(Statuses.SKIPPED);
+	}
+
+	@Override
+	public void beforeScenario(Scenario scenario) {
+
 	}
 
 	private void simulateStep(String step, String status) {

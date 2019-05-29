@@ -36,173 +36,173 @@ import java.util.Map;
  */
 public class JBehaveContext {
 
-    private static ThreadLocal<Story> currentStory = new ThreadLocal<JBehaveContext.Story>() {
-        @Override
-        protected Story initialValue() {
-            return new Story();
-        }
-    };
+	private static ThreadLocal<Story> currentStory = new ThreadLocal<JBehaveContext.Story>() {
+		@Override
+		protected Story initialValue() {
+			return new Story();
+		}
+	};
 
-    private static Deque<Maybe<Long>> itemsCache = new LinkedList<>();
+	private static Deque<Maybe<String>> itemsCache = new LinkedList<>();
 
-    public static Story getCurrentStory() {
-        return currentStory.get();
-    }
+	public static Story getCurrentStory() {
+		return currentStory.get();
+	}
 
-    public static void setCurrentStory(Story story) {
-        currentStory.set(story);
-    }
+	public static void setCurrentStory(Story story) {
+		currentStory.set(story);
+	}
 
-    public static Deque<Maybe<Long>> getItemsCache() {
-        return itemsCache;
-    }
+	public static Deque<Maybe<String>> getItemsCache() {
+		return itemsCache;
+	}
 
-    public static class Story {
+	public static class Story {
 
-        private Maybe<Long> currentStoryId;
+		private Maybe<String> currentStoryId;
 
-        private Maybe<Long> currentScenario;
+		private Maybe<String> currentScenario;
 
-        private Maybe<Long> currentStep;
+		private Maybe<String> currentStep;
 
-        private Examples examples;
+		private Examples examples;
 
-        private Meta scenarioMeta;
+		private Meta scenarioMeta;
 
-        private Meta storyMeta;
+		private Meta storyMeta;
 
-        private Story parent;
+		private Story parent;
 
-        public boolean hasParent() {
-            return null != parent;
-        }
+		public boolean hasParent() {
+			return null != parent;
+		}
 
-        public Story getParent() {
-            return parent;
-        }
+		public Story getParent() {
+			return parent;
+		}
 
-        public void setParent(Story parent) {
-            this.parent = parent;
-        }
+		public void setParent(Story parent) {
+			this.parent = parent;
+		}
 
-        /**
-         * @param currentStep the currentStep to set
-         */
-        public void setCurrentStep(Maybe<Long> currentStep) {
-            if (null != currentStep) {
-                itemsCache.push(currentStep);
-            } else {
-                itemsCache.remove(this.currentStep);
-            }
-            this.currentStep = currentStep;
-        }
+		/**
+		 * @param currentStep the currentStep to set
+		 */
+		public void setCurrentStep(Maybe<String> currentStep) {
+			if (null != currentStep) {
+				itemsCache.push(currentStep);
+			} else {
+				itemsCache.remove(this.currentStep);
+			}
+			this.currentStep = currentStep;
+		}
 
-        public void setCurrentStoryId(Maybe<Long> currentStoryId) {
-            if (null != currentStoryId) {
-                itemsCache.push(currentStoryId);
-            } else {
-                itemsCache.remove(this.currentStoryId);
-            }
-            this.currentStoryId = currentStoryId;
-        }
+		public void setCurrentStoryId(Maybe<String> currentStoryId) {
+			if (null != currentStoryId) {
+				itemsCache.push(currentStoryId);
+			} else {
+				itemsCache.remove(this.currentStoryId);
+			}
+			this.currentStoryId = currentStoryId;
+		}
 
-        public Maybe<Long> getCurrentStoryId() {
-            return currentStoryId;
-        }
+		public Maybe<String> getCurrentStoryId() {
+			return currentStoryId;
+		}
 
-        /**
-         * @return the currentScenario
-         */
-        public Maybe<Long> getCurrentScenario() {
-            return currentScenario;
-        }
+		/**
+		 * @return the currentScenario
+		 */
+		public Maybe<String> getCurrentScenario() {
+			return currentScenario;
+		}
 
-        /**
-         * @param currentScenario the currentScenario to set
-         */
-        public void setCurrentScenario(Maybe<Long> currentScenario) {
-            if (null != currentScenario) {
-                itemsCache.push(currentScenario);
-            } else {
-                itemsCache.remove(this.currentScenario);
-            }
-            this.currentScenario = currentScenario;
-        }
+		/**
+		 * @param currentScenario the currentScenario to set
+		 */
+		public void setCurrentScenario(Maybe<String> currentScenario) {
+			if (null != currentScenario) {
+				itemsCache.push(currentScenario);
+			} else {
+				itemsCache.remove(this.currentScenario);
+			}
+			this.currentScenario = currentScenario;
+		}
 
-        /**
-         * @return the currentStep
-         */
-        public Maybe<Long> getCurrentStep() {
-            return currentStep;
-        }
+		/**
+		 * @return the currentStep
+		 */
+		public Maybe<String> getCurrentStep() {
+			return currentStep;
+		}
 
-        public void setExamples(Examples examples) {
-            this.examples = examples;
-        }
+		public void setExamples(Examples examples) {
+			this.examples = examples;
+		}
 
-        public boolean hasExamples() {
-            return null != examples;
-        }
+		public boolean hasExamples() {
+			return null != examples;
+		}
 
-        public Examples getExamples() {
-            return examples;
-        }
+		public Examples getExamples() {
+			return examples;
+		}
 
-        public void setScenarioMeta(Meta scenarioMeta) {
-            this.scenarioMeta = scenarioMeta;
-        }
+		public void setScenarioMeta(Meta scenarioMeta) {
+			this.scenarioMeta = scenarioMeta;
+		}
 
-        public Meta getScenarioMeta() {
-            return scenarioMeta;
-        }
+		public Meta getScenarioMeta() {
+			return scenarioMeta;
+		}
 
-        public void setStoryMeta(Meta storyMeta) {
-            this.storyMeta = storyMeta;
-        }
+		public void setStoryMeta(Meta storyMeta) {
+			this.storyMeta = storyMeta;
+		}
 
-        public Meta getStoryMeta() {
-            return storyMeta;
-        }
+		public Meta getStoryMeta() {
+			return storyMeta;
+		}
 
-    }
+	}
 
-    public static class Examples {
-        private ExamplesTable examplesTable;
+	public static class Examples {
+		private ExamplesTable examplesTable;
 
-        private int currentExample;
+		private int currentExample;
 
-        private List<String> steps;
+		private List<String> steps;
 
-        Examples(List<String> steps, ExamplesTable examplesTable) {
-            this.examplesTable = examplesTable;
-            this.currentExample = -1;
-            this.steps = steps;
-        }
+		Examples(List<String> steps, ExamplesTable examplesTable) {
+			this.examplesTable = examplesTable;
+			this.currentExample = -1;
+			this.steps = steps;
+		}
 
-        public ExamplesTable getExamplesTable() {
-            return examplesTable;
-        }
+		public ExamplesTable getExamplesTable() {
+			return examplesTable;
+		}
 
-        public Map<String, String> getCurrentExampleParams() {
-            return examplesTable.getRow(currentExample);
-        }
+		public Map<String, String> getCurrentExampleParams() {
+			return examplesTable.getRow(currentExample);
+		}
 
-        public int getCurrentExample() {
-            return currentExample;
-        }
+		public int getCurrentExample() {
+			return currentExample;
+		}
 
-        public List<String> getSteps() {
-            return steps;
-        }
+		public List<String> getSteps() {
+			return steps;
+		}
 
-        public boolean hasStep(String step) {
-            return steps.contains(step);
-        }
+		public boolean hasStep(String step) {
+			return steps.contains(step);
+		}
 
-        public void nextExample() {
-            currentExample++;
-        }
+		public void nextExample() {
+			currentExample++;
+		}
 
-    }
+	}
 
 }

@@ -24,7 +24,11 @@ import com.epam.reportportal.listeners.ListenerParameters;
 import com.epam.reportportal.listeners.Statuses;
 import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.ReportPortal;
-import com.epam.ta.reportportal.ws.model.*;
+import com.epam.ta.reportportal.ws.model.FinishExecutionRQ;
+import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
+import com.epam.ta.reportportal.ws.model.ParameterResource;
+import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
+import com.epam.ta.reportportal.ws.model.attribute.ItemAttributesRQ;
 import com.epam.ta.reportportal.ws.model.issue.Issue;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import io.reactivex.Maybe;
@@ -84,11 +88,11 @@ class JBehaveUtils {
 			rq.setName(parameters.getLaunchName());
 			rq.setStartTime(startTime);
 			rq.setMode(parameters.getLaunchRunningMode());
-			rq.setAttributes(parameters.getAttributes() == null ? new HashSet<ItemAttributeResource>() : parameters.getAttributes());
+			rq.setAttributes(parameters.getAttributes() == null ? new HashSet<ItemAttributesRQ>() : parameters.getAttributes());
 			rq.setDescription(parameters.getDescription());
 
-			final Boolean skippedAnIssue = parameters.getSkippedAnIssue();
-			ItemAttributeResource skippedIssueAttr = new ItemAttributeResource();
+			Boolean skippedAnIssue = parameters.getSkippedAnIssue();
+			ItemAttributesRQ skippedIssueAttr = new ItemAttributesRQ();
 			skippedIssueAttr.setKey(SKIPPED_ISSUE_KEY);
 			skippedIssueAttr.setValue(skippedAnIssue == null ? "true" : skippedAnIssue.toString());
 			skippedIssueAttr.setSystem(true);
@@ -132,7 +136,7 @@ class JBehaveUtils {
 		rq.setStartTime(Calendar.getInstance().getTime());
 		rq.setType("STORY");
 
-		Maybe<Long> storyId;
+		Maybe<String> storyId;
 		JBehaveContext.Story currentStory;
 
 		if (givenStory) {
@@ -140,8 +144,8 @@ class JBehaveUtils {
 			 * Given story means inner story. That's why we need to create
 			 * new story and assign parent to it
 			 */
-			Maybe<Long> currentScenario = JBehaveContext.getCurrentStory().getCurrentScenario();
-			Maybe<Long> parent = currentScenario != null ? currentScenario : JBehaveContext.getCurrentStory().getCurrentStoryId();
+			Maybe<String> currentScenario = JBehaveContext.getCurrentStory().getCurrentScenario();
+			Maybe<String> parent = currentScenario != null ? currentScenario : JBehaveContext.getCurrentStory().getCurrentStoryId();
 			storyId = RP.get().startTestItem(parent, rq);
 			currentStory = new JBehaveContext.Story();
 			currentStory.setParent(JBehaveContext.getCurrentStory());
@@ -210,7 +214,7 @@ class JBehaveUtils {
 		rq.setType("STEP");
 		LOGGER.debug("Starting Step in ReportPortal: {}", step);
 
-		Maybe<Long> stepId = RP.get().startTestItem(currentStory.getCurrentScenario(), rq);
+		Maybe<String> stepId = RP.get().startTestItem(currentStory.getCurrentScenario(), rq);
 		currentStory.setCurrentStep(stepId);
 
 	}
@@ -261,7 +265,7 @@ class JBehaveUtils {
 		rq.setType("SCENARIO");
 		rq.setDescription(joinMetas(currentStory.getStoryMeta(), currentStory.getScenarioMeta()));
 
-		Maybe<Long> rs = RP.get().startTestItem(currentStory.getCurrentStoryId(), rq);
+		Maybe<String> rs = RP.get().startTestItem(currentStory.getCurrentStoryId(), rq);
 		currentStory.setCurrentScenario(rs);
 	}
 
@@ -300,8 +304,8 @@ class JBehaveUtils {
 	 */
 	public static void makeSureAllItemsFinished(String status) {
 
-		Deque<Maybe<Long>> items = JBehaveContext.getItemsCache();
-		Maybe<Long> item;
+		Deque<Maybe<String>> items = JBehaveContext.getItemsCache();
+		Maybe<String> item;
 		while (null != (item = items.poll())) {
 			FinishTestItemRQ rq = new FinishTestItemRQ();
 			rq.setEndTime(Calendar.getInstance().getTime());

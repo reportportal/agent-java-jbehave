@@ -13,16 +13,24 @@ repositories {
     maven { url "https://jitpack.io" }
 
 }
+
+ext {
+    jbehaveVersion='4.5.1'
+}
+
 dependencies {
-    compile ('com.github.reportportal:client-java:bbf173d4') {
+    compile ('com.github.reportportal:client-java:ecd9415') {
         ext.compileScope = true
     }
-    compile('com.github.reportportal:commons-model:63ef134') {
+    compile('com.github.reportportal:commons-model:d157752') {
         ext.compileScope = true
     }
 
+    compile "org.jbehave:jbehave-core:${jbehaveVersion}"
+}
 
-    compile 'org.jbehave:jbehave-core:4.1.3'
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.7'
 }
 
 publishing.publications.all {
