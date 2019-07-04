@@ -5,8 +5,8 @@ plugins {
 apply plugin: 'java'
 apply from: 'release.gradle'
 apply from: 'quality.gradle'
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 repositories {
     jcenter()
     maven { url 'http://dl.bintray.com/epam/reportportal' }
@@ -22,7 +22,7 @@ dependencies {
     }
 
 
-    compile 'org.jbehave:jbehave-core:4.4'
+    compile 'org.jbehave:jbehave-core:4.5'
 
     testImplementation 'org.powermock:powermock-module-junit4:2.0.0'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.0'
