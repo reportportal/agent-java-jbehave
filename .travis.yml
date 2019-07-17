@@ -1,1 +1,9 @@
 language: java
+
+script: ./gradlew build
+
+jdk:
+  - oraclejdk8
+
+notifications:
+  slack: reportportal-dev:fl6xWHVQp1jvsMmCJxYW9YKP
