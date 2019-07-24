@@ -25,14 +25,19 @@ ext {
 
 dependencies {
     if (releaseMode) {
-        compile 'com.epam.reportportal:client-java:4.0.16'
-        compile 'com.epam.reportportal:commons-model:5.0.0-BETA-6'
+        compile 'com.epam.reportportal:client-java:5.0.0-BETA-1'
+        compile 'com.epam.reportportal:commons-model:5.0.0-BETA-7'
     } else {
-        compile 'com.github.reportportal:client-java:d27d103'
-        compile 'com.github.reportportal:commons-model:25f966e'
-
+        compile 'com.github.reportportal:client-java:1173ab3'
+        compile 'com.github.reportportal:commons-model:c9e2d05'
     }
     compile "org.jbehave:jbehave-core:${jbehaveVersion}"
+}
+
+release {
+    git {
+        requireBranch = 'v5-beta'
+    }
 }
 
 wrapper {

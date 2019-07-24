@@ -93,6 +93,11 @@ class JBehaveUtils {
 			skippedIssueAttr.setSystem(true);
 			rq.getAttributes().add(skippedIssueAttr);
 
+			rq.setRerun(parameters.isRerun());
+			if (StringUtils.isNotEmpty(parameters.getRerunOf())) {
+				rq.setRerunOf(parameters.getRerunOf());
+			}
+
 			return rp.newLaunch(rq);
 		}
 	});
@@ -252,7 +257,8 @@ class JBehaveUtils {
 
 		JBehaveContext.Story currentStory = JBehaveContext.getCurrentStory();
 		StartTestItemRQ rq = new StartTestItemRQ();
-		rq.setName(normalizeName(expandParameters(scenario,
+		rq.setName(normalizeName(expandParameters(
+				scenario,
 				metasToMap(currentStory.getStoryMeta(), currentStory.getScenarioMeta()),
 				Collections.<ParameterResource>emptyList()
 		)));
