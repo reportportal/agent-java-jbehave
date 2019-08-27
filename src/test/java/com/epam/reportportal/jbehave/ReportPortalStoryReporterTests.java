@@ -19,7 +19,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.Collections;
+import java.util.HashSet;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -65,7 +65,7 @@ public class ReportPortalStoryReporterTests {
 		ListenerParameters parameters = new ListenerParameters();
 		parameters.setLaunchName("launchName");
 		parameters.setLaunchRunningMode(Mode.DEFAULT);
-		parameters.setAttributes(Collections.emptySet());
+		parameters.setAttributes(new HashSet<>());
 		parameters.setDescription("description");
 		return parameters;
 	}
