@@ -23,6 +23,7 @@ import com.epam.ta.reportportal.ws.model.FinishExecutionRQ;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
+import com.epam.ta.reportportal.ws.model.attribute.ItemAttributesRQ;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import com.epam.ta.reportportal.ws.model.log.SaveLogRQ;
 import io.reactivex.Maybe;
@@ -32,7 +33,10 @@ import org.jbehave.core.model.Story;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rp.com.google.common.annotations.VisibleForTesting;
-import rp.com.google.common.base.*;
+import rp.com.google.common.base.Function;
+import rp.com.google.common.base.Joiner;
+import rp.com.google.common.base.Supplier;
+import rp.com.google.common.base.Suppliers;
 import rp.com.google.common.collect.Iterables;
 
 import java.util.*;
@@ -40,6 +44,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static rp.com.google.common.base.Strings.isNullOrEmpty;
 import static rp.com.google.common.base.Throwables.getStackTraceAsString;
 
 /**
@@ -61,6 +66,8 @@ public class JBehaveUtils {
 
 	private static final String META_PARAMETER_SEPARATOR = " ";
 
+	private static final String SKIPPED_ISSUE_KEY = "skippedIssue";
+
 	@VisibleForTesting
 	static final Pattern STEP_NAME_PATTERN = Pattern.compile("<(.*?)>");
 
@@ -78,8 +85,19 @@ public class JBehaveUtils {
 			rq.setName(parameters.getLaunchName());
 			rq.setStartTime(startTime);
 			rq.setMode(parameters.getLaunchRunningMode());
-			rq.setTags(parameters.getTags());
+			rq.setAttributes(parameters.getAttributes());
 			rq.setDescription(parameters.getDescription());
+			rq.setRerun(parameters.isRerun());
+			if (!isNullOrEmpty(parameters.getRerunOf())) {
+				rq.setRerunOf(parameters.getRerunOf());
+			}
+			if (null != parameters.getSkippedAnIssue()) {
+				ItemAttributesRQ skippedIssueAttribute = new ItemAttributesRQ();
+				skippedIssueAttribute.setKey(SKIPPED_ISSUE_KEY);
+				skippedIssueAttribute.setValue(parameters.getSkippedAnIssue().toString());
+				skippedIssueAttribute.setSystem(true);
+				rq.getAttributes().add(skippedIssueAttribute);
+			}
 
 			return rp.newLaunch(rq);
 		}
@@ -112,7 +130,7 @@ public class JBehaveUtils {
 			metaMap.put(metaProperty, story.getMeta().getProperty(metaProperty));
 		}
 
-		if (Strings.isNullOrEmpty(story.getDescription().asString())) {
+		if (isNullOrEmpty(story.getDescription().asString())) {
 			rq.setDescription(story.getDescription().asString() + "\n" + joinMeta(metaMap));
 		}
 		rq.setName(normalizeName(story.getName()));
@@ -239,7 +257,9 @@ public class JBehaveUtils {
 
 		JBehaveContext.Story currentStory = JBehaveContext.getCurrentStory();
 		StartTestItemRQ rq = new StartTestItemRQ();
-		rq.setName(normalizeName(expandParameters(scenario, metasToMap(currentStory.getStoryMeta(), currentStory.getScenarioMeta()),
+		rq.setName(normalizeName(expandParameters(
+				scenario,
+				metasToMap(currentStory.getStoryMeta(), currentStory.getScenarioMeta()),
 				Collections.<ParameterResource>emptyList()
 		)));
 		rq.setStartTime(Calendar.getInstance().getTime());
@@ -305,9 +325,9 @@ public class JBehaveUtils {
 
 		ReportPortal.emitLog(new Function<String, SaveLogRQ>() {
 			@Override
-			public SaveLogRQ apply(String itemId) {
+			public SaveLogRQ apply(String itemUuid) {
 				SaveLogRQ rq = new SaveLogRQ();
-				rq.setTestItemId(itemId);
+				rq.setItemUuid(itemUuid);
 				rq.setLevel("ERROR");
 				rq.setLogTime(Calendar.getInstance().getTime());
 				if (cause != null) {
@@ -447,7 +467,7 @@ public class JBehaveUtils {
 
 	private static String normalizeName(String string) {
 		String name;
-		if (Strings.isNullOrEmpty(string)) {
+		if (isNullOrEmpty(string)) {
 			name = "UNKNOWN";
 		} else if (string.length() > MAX_NAME_LENGTH) {
 			name = string.substring(0, MAX_NAME_LENGTH - 1);
