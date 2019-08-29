@@ -8,6 +8,7 @@ import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortal.Builder;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
+import com.epam.ta.reportportal.ws.model.issue.Issue;
 import com.epam.ta.reportportal.ws.model.launch.Mode;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
 import io.reactivex.Maybe;
@@ -37,27 +38,29 @@ public class ReportPortalStoryReporterTests {
 		Maybe<String> step = Maybe.just(STEP);
 		story.setCurrentScenario(scenario);
 		Launch launch = mockLaunch();
+		final Issue issue = mock(Issue.class);
 		when(launch.startTestItem(eq(scenario), any(StartTestItemRQ.class))).thenReturn(step);
 		ReportPortalStoryReporter storyReporter = new ReportPortalStoryReporter();
 		storyReporter.beforeStep(STEP);
+		story.getCurrentStep().setIssue(issue);
 		verifyStep(story, step, Statuses.PASSED);
 
 		Exception exception = mock(Exception.class);
 		PowerMockito.doNothing().when(JBehaveUtils.class, "sendStackTraceToRP", exception);
+		story.setCurrentStepStatus(Statuses.FAILED);
 		storyReporter.failed(STEP, exception);
 		verify(launch).finishTestItem(eq(step), argThat(new ArgumentMatcher<FinishTestItemRQ>() {
 			@Override
 			public boolean matches(FinishTestItemRQ argument) {
-				return Statuses.FAILED.equals(argument.getStatus());
+				return Statuses.FAILED.equals(argument.getStatus()) && issue.equals(argument.getIssue());
 			}
 		}));
-		story.setCurrentStepStatus(Statuses.FAILED);
 		storyReporter.beforeStep(STEP);
 		verifyStep(story, step, Statuses.PASSED);
 	}
 
 	private static void verifyStep(Story story, Maybe<String> step, String status) {
-		Assert.assertEquals(step, story.getCurrentStep());
+		Assert.assertEquals(step, story.getCurrentStep().getStepId());
 		Assert.assertEquals(Statuses.PASSED, story.getCurrentStepStatus());
 	}
 
