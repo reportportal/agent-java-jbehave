@@ -104,7 +104,7 @@ public class JBehaveContextStoryTest {
                     for (int count = 0; count < 50; count++) {
                         currentStory.setCurrentStep(maybe);
                     }
-                    assertEquals(maybe, currentStory.getCurrentStep());
+                    assertEquals(maybe, currentStory.getCurrentStep().getStepId());
                     return null;
                 }
             });

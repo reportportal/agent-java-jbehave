@@ -15,6 +15,7 @@
  */
 package com.epam.reportportal.jbehave;
 
+import com.epam.reportportal.jbehave.JBehaveContext.Step;
 import com.epam.reportportal.listeners.ListenerParameters;
 import com.epam.reportportal.listeners.Statuses;
 import com.epam.reportportal.service.Launch;
@@ -215,15 +216,17 @@ public class JBehaveUtils {
 
 		JBehaveContext.Story currentStory = JBehaveContext.getCurrentStory();
 
-		if (null == currentStory.getCurrentStep()) {
+		Step currentStep = currentStory.getCurrentStep();
+		if (null == currentStep) {
 			return;
 		}
-		LOGGER.debug("Finishing Step in ReportPortal: {}", currentStory.getCurrentStep());
+		LOGGER.debug("Finishing Step in ReportPortal: {}", currentStep.getStepId());
 		FinishTestItemRQ rq = new FinishTestItemRQ();
 		rq.setEndTime(Calendar.getInstance().getTime());
 		rq.setStatus(status);
+		rq.setIssue(currentStep.getIssue());
 
-		RP.get().finishTestItem(currentStory.getCurrentStep(), rq);
+		RP.get().finishTestItem(currentStep.getStepId(), rq);
 		currentStory.setCurrentStep(null);
 
 	}
