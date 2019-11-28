@@ -22,13 +22,15 @@ import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.Meta;
 
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * JBehave test execution context
@@ -37,12 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class JBehaveContext {
 
-    private static ThreadLocal<Story> currentStory = new ThreadLocal<JBehaveContext.Story>() {
-        @Override
-        protected Story initialValue() {
-            return new Story();
-        }
-    };
+    private static ThreadLocal<Story> currentStory = ThreadLocal.withInitial(Story::new);
 
     private static Map<Story, Deque<Maybe<String>>> itemsCache = new ConcurrentHashMap<>();
     private static Map<Story, Deque<Step>> stepsCache = new ConcurrentHashMap<>();
@@ -57,14 +54,9 @@ public class JBehaveContext {
 
     public static Deque<Maybe<String>> getItemsCache() {
         Deque<Maybe<String>> merged = new LinkedList<>();
-        Map<Story, Deque<Maybe<String>>> steps = new HashMap<>();
-        for(Entry<Story, Deque<Step>> entry : stepsCache.entrySet()) {
-            Deque<Maybe<String>> stepsDeque = new LinkedList<>();
-            for(Step step : entry.getValue()) {
-                stepsDeque.add(step.getStepId());
-            }
-            steps.put(entry.getKey(), stepsDeque);
-        }
+        Map<Story, Deque<Maybe<String>>> steps = stepsCache.entrySet().stream()
+                .collect(toMap(Entry::getKey, v -> v.getValue().stream().map(Step::getStepId)
+                        .collect(toCollection(LinkedList::new))));
         merged.addAll(mergeMapValues(steps));
         merged.addAll(mergeMapValues(itemsCache));
         return merged;
@@ -79,23 +71,17 @@ public class JBehaveContext {
     }
 
     private static <T> Deque<T> getEntryFrom(Map<Story, Deque<T>> cache, Story story) {
-        Deque<T> entry = cache.get(story);
-        if (entry == null) {
-            entry = new LinkedList<>();
-            cache.put(story, entry);
-        }
-        return entry;
+        return cache.computeIfAbsent(story, k -> new LinkedList<>());
     }
 
-    private static Deque<Maybe<String>> updateCache(Map<Story, Deque<Maybe<String>>> cache, Story story,
-            Maybe<String> currentItem, Maybe<String> item) {
+    private static void updateCache(Map<Story, Deque<Maybe<String>>> cache, Story story,
+                                    Maybe<String> currentItem, Maybe<String> item) {
         Deque<Maybe<String>> cacheEntry = getEntryFrom(cache, story);
         if (null != item) {
             cacheEntry.push(item);
         } else {
             cacheEntry.remove(currentItem);
         }
-        return cacheEntry;
     }
 
     public static class Story {
@@ -127,7 +113,7 @@ public class JBehaveContext {
         }
 
         /**
-         * @param currentStep the currentStep to set
+         * @param currentStepId the currentStep to set
          */
         public void setCurrentStep(Maybe<String> currentStepId) {
             Deque<Step> cacheEntry = getEntryFrom(stepsCache, this);
