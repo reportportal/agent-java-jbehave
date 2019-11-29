@@ -1,41 +1,36 @@
 plugins {
     id 'net.researchgate.release' version '2.8.0'
-    id 'com.jfrog.bintray' version '1.7'
+    id 'com.jfrog.bintray' version '1.8.4'
 }
+
 apply plugin: 'java'
-apply from: 'release.gradle'
+apply from: 'https://raw.githubusercontent.com/reportportal/gradle-scripts/master/release-commons.gradle'
 apply from: 'quality.gradle'
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
 repositories {
     jcenter()
     maven { url 'http://dl.bintray.com/epam/reportportal' }
     maven { url 'https://jitpack.io' }
 
 }
+
 dependencies {
-    compile ('com.epam.reportportal:client-java:4.0.12') {
+    compile ('com.epam.reportportal:client-java:4.0.18') {
         ext.compileScope = true
     }
     compile('com.epam.reportportal:commons-model:4.2.0') {
         ext.compileScope = true
     }
 
-
     compile 'org.jbehave:jbehave-core:4.5'
 
-    testImplementation 'org.powermock:powermock-module-junit4:2.0.0'
-    testImplementation 'org.powermock:powermock-api-mockito2:2.0.0'
+    testImplementation 'org.powermock:powermock-module-junit4:2.0.2'
+    testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
 }
 
-publishing.publications.all {
-    pom.withXml {
-        asNode().dependencies.'*'.findAll() {
-            it.scope.text() == 'runtime' && (project.configurations.compile.allDependencies.find { dep ->
-                dep.name == it.artifactId.text() && dep.hasProperty('compileScope') && dep.compileScope
-            })
-        }.each {
-            it.scope*.value = 'compile'
-        }
-    }
+wrapper {
+    gradleVersion = '5.4.1'
 }
