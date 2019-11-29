@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 import static rp.com.google.common.base.Throwables.getStackTraceAsString;
 
 /**
- * Set of usefull utils related to JBehave -> ReportPortal integration
+ * Set of usefull utils related to JBehave -&gt; ReportPortal integration
  *
  * @author Andrei Varabyeu
  */
