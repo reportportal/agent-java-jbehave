@@ -16,7 +16,7 @@ repositories {
 
 dependencies {
     if (releaseMode) {
-        compile 'com.epam.reportportal:client-java:5.0.0-BETA-4'
+        compile 'com.epam.reportportal:client-java:5.0.0-BETA-7'
         compile 'com.epam.reportportal:commons-model:5.0.0'
     } else {
         compile 'com.github.reportportal:client-java:2d69e5b'
