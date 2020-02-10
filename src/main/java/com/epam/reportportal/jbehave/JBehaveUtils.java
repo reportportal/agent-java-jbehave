@@ -84,25 +84,7 @@ public class JBehaveUtils {
 		public Launch get() {
 			ReportPortal rp = ReportPortal.builder().build();
 			ListenerParameters parameters = rp.getParameters();
-
-			StartLaunchRQ rq = new StartLaunchRQ();
-			rq.setName(parameters.getLaunchName());
-			rq.setStartTime(startTime);
-			rq.setMode(parameters.getLaunchRunningMode());
-			rq.setAttributes(parameters.getAttributes());
-			rq.setDescription(parameters.getDescription());
-			rq.setRerun(parameters.isRerun());
-			if (!isNullOrEmpty(parameters.getRerunOf())) {
-				rq.setRerunOf(parameters.getRerunOf());
-			}
-			if (null != parameters.getSkippedAnIssue()) {
-				ItemAttributesRQ skippedIssueAttribute = new ItemAttributesRQ();
-				skippedIssueAttribute.setKey(SKIPPED_ISSUE_KEY);
-				skippedIssueAttribute.setValue(parameters.getSkippedAnIssue().toString());
-				skippedIssueAttribute.setSystem(true);
-				rq.getAttributes().add(skippedIssueAttribute);
-			}
-			rq.getAttributes().addAll(SystemAttributesExtractor.extract(AGENT_PROPERTIES_FILE));
+			StartLaunchRQ rq = buildStartLaunchRQ(startTime, parameters);
 			return rp.newLaunch(rq);
 		}
 	});
@@ -346,6 +328,28 @@ public class JBehaveUtils {
 				return rq;
 			}
 		});
+	}
+
+	public static StartLaunchRQ buildStartLaunchRQ(Date startTime, ListenerParameters parameters) {
+		StartLaunchRQ rq = new StartLaunchRQ();
+		rq.setName(parameters.getLaunchName());
+		rq.setStartTime(startTime);
+		rq.setMode(parameters.getLaunchRunningMode());
+		rq.setAttributes(parameters.getAttributes());
+		rq.setDescription(parameters.getDescription());
+		rq.setRerun(parameters.isRerun());
+		if (!isNullOrEmpty(parameters.getRerunOf())) {
+			rq.setRerunOf(parameters.getRerunOf());
+		}
+		if (null != parameters.getSkippedAnIssue()) {
+			ItemAttributesRQ skippedIssueAttribute = new ItemAttributesRQ();
+			skippedIssueAttribute.setKey(SKIPPED_ISSUE_KEY);
+			skippedIssueAttribute.setValue(parameters.getSkippedAnIssue().toString());
+			skippedIssueAttribute.setSystem(true);
+			rq.getAttributes().add(skippedIssueAttribute);
+		}
+		rq.getAttributes().addAll(SystemAttributesExtractor.extract(AGENT_PROPERTIES_FILE));
+		return rq;
 	}
 
 	private static String joinMeta(Meta meta) {
