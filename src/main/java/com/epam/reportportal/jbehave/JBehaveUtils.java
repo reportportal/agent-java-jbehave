@@ -20,6 +20,7 @@ import com.epam.reportportal.listeners.ListenerParameters;
 import com.epam.reportportal.listeners.Statuses;
 import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.ReportPortal;
+import com.epam.reportportal.utils.properties.SystemAttributesExtractor;
 import com.epam.ta.reportportal.ws.model.FinishExecutionRQ;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.ParameterResource;
@@ -61,6 +62,8 @@ public class JBehaveUtils {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JBehaveUtils.class);
 
+	private static final String AGENT_PROPERTIES_FILE = "agent.properties";
+
 	private static final int MAX_NAME_LENGTH = 256;
 
 	private static final String KEY_VALUE_SEPARATOR = ":";
@@ -81,25 +84,7 @@ public class JBehaveUtils {
 		public Launch get() {
 			ReportPortal rp = ReportPortal.builder().build();
 			ListenerParameters parameters = rp.getParameters();
-
-			StartLaunchRQ rq = new StartLaunchRQ();
-			rq.setName(parameters.getLaunchName());
-			rq.setStartTime(startTime);
-			rq.setMode(parameters.getLaunchRunningMode());
-			rq.setAttributes(parameters.getAttributes());
-			rq.setDescription(parameters.getDescription());
-			rq.setRerun(parameters.isRerun());
-			if (!isNullOrEmpty(parameters.getRerunOf())) {
-				rq.setRerunOf(parameters.getRerunOf());
-			}
-			if (null != parameters.getSkippedAnIssue()) {
-				ItemAttributesRQ skippedIssueAttribute = new ItemAttributesRQ();
-				skippedIssueAttribute.setKey(SKIPPED_ISSUE_KEY);
-				skippedIssueAttribute.setValue(parameters.getSkippedAnIssue().toString());
-				skippedIssueAttribute.setSystem(true);
-				rq.getAttributes().add(skippedIssueAttribute);
-			}
-
+			StartLaunchRQ rq = buildStartLaunchRQ(startTime, parameters);
 			return rp.newLaunch(rq);
 		}
 	});
@@ -343,6 +328,28 @@ public class JBehaveUtils {
 				return rq;
 			}
 		});
+	}
+
+	public static StartLaunchRQ buildStartLaunchRQ(Date startTime, ListenerParameters parameters) {
+		StartLaunchRQ rq = new StartLaunchRQ();
+		rq.setName(parameters.getLaunchName());
+		rq.setStartTime(startTime);
+		rq.setMode(parameters.getLaunchRunningMode());
+		rq.setAttributes(parameters.getAttributes());
+		rq.setDescription(parameters.getDescription());
+		rq.setRerun(parameters.isRerun());
+		if (!isNullOrEmpty(parameters.getRerunOf())) {
+			rq.setRerunOf(parameters.getRerunOf());
+		}
+		if (null != parameters.getSkippedAnIssue()) {
+			ItemAttributesRQ skippedIssueAttribute = new ItemAttributesRQ();
+			skippedIssueAttribute.setKey(SKIPPED_ISSUE_KEY);
+			skippedIssueAttribute.setValue(parameters.getSkippedAnIssue().toString());
+			skippedIssueAttribute.setSystem(true);
+			rq.getAttributes().add(skippedIssueAttribute);
+		}
+		rq.getAttributes().addAll(SystemAttributesExtractor.extract(AGENT_PROPERTIES_FILE));
+		return rq;
 	}
 
 	private static String joinMeta(Meta meta) {

@@ -20,7 +20,7 @@ dependencies {
         compile 'com.epam.reportportal:client-java:5.0.0-BETA-7'
         compile 'com.epam.reportportal:commons-model:5.0.0'
     } else {
-        compile 'com.github.reportportal:client-java:5.0.0-BETA-7'
+        compile 'com.github.reportportal:client-java:2689300'
         compile 'com.github.reportportal:commons-model:5.0.0'
     }
     compile 'org.jbehave:jbehave-core:4.5.1'
@@ -31,6 +31,12 @@ dependencies {
 
 wrapper {
     gradleVersion = '5.4.1'
+}
+
+processResources {
+    filesMatching('agent.properties') {
+        expand(project.properties)
+    }
 }
 
 afterReleaseBuild.dependsOn bintrayUpload
