@@ -348,7 +348,7 @@ public class JBehaveUtils {
 			skippedIssueAttribute.setSystem(true);
 			rq.getAttributes().add(skippedIssueAttribute);
 		}
-		rq.getAttributes().addAll(SystemAttributesExtractor.extract(AGENT_PROPERTIES_FILE));
+		rq.getAttributes().addAll(SystemAttributesExtractor.extract(AGENT_PROPERTIES_FILE, JBehaveUtils.class.getClassLoader()));
 		return rq;
 	}
 
