@@ -1,13 +1,14 @@
 plugins {
     id 'java'
 }
-apply from: 'https://raw.githubusercontent.com/reportportal/gradle-scripts/master/release-commons.gradle'
-apply from: 'https://raw.githubusercontent.com/reportportal/gradle-scripts/master/build-quality.gradle'
+project.ext.releaseMode = project.hasProperty('releaseMode')
+
+def branch = releaseMode ? '5.0.0' : 'develop'
+apply from: "https://raw.githubusercontent.com/reportportal/gradle-scripts/$branch/build-quality.gradle"
+apply from: "https://raw.githubusercontent.com/reportportal/gradle-scripts/$branch/release-commons.gradle"
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
-
-project.ext.releaseMode = project.hasProperty('releaseMode')
 
 repositories {
     jcenter()
@@ -16,11 +17,11 @@ repositories {
 
 dependencies {
     if (releaseMode) {
-        compile 'com.epam.reportportal:client-java:5.0.0-BETA-4'
+        compile 'com.epam.reportportal:client-java:5.0.0-RC-1'
         compile 'com.epam.reportportal:commons-model:5.0.0'
     } else {
-        compile 'com.github.reportportal:client-java:2d69e5b'
-        compile 'com.github.reportportal:commons-model:2f23f50'
+        compile 'com.epam.reportportal:client-java:5.0.0-RC-1'
+        compile 'com.github.reportportal:commons-model:5.0.0'
     }
     compile 'org.jbehave:jbehave-core:4.5.1'
 
@@ -31,4 +32,12 @@ dependencies {
 wrapper {
     gradleVersion = '5.4.1'
 }
+
+processResources {
+    filesMatching('agent.properties') {
+        expand(project.properties)
+    }
+}
+
+afterReleaseBuild.dependsOn bintrayUpload
 

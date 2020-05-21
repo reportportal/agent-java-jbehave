@@ -46,7 +46,6 @@ public class ReportPortalStoryReporterTests {
 		verifyStep(story, step, Statuses.PASSED);
 
 		Exception exception = mock(Exception.class);
-		PowerMockito.doNothing().when(JBehaveUtils.class, "sendStackTraceToRP", exception);
 		story.setCurrentStepStatus(Statuses.FAILED);
 		storyReporter.failed(STEP, exception);
 		verify(launch).finishTestItem(eq(step), argThat(new ArgumentMatcher<FinishTestItemRQ>() {
