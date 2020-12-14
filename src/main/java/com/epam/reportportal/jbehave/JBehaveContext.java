@@ -15,6 +15,7 @@
  */
 package com.epam.reportportal.jbehave;
 
+import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.ta.reportportal.ws.model.issue.Issue;
 
 import io.reactivex.Maybe;
@@ -156,11 +157,11 @@ public class JBehaveContext {
             return currentStep;
         }
 
-        public String getCurrentStepStatus() {
+        public ItemStatus getCurrentStepStatus() {
             return currentStep.getCurrentStepStatus();
         }
 
-        public void setCurrentStepStatus(String currentStepStatus) {
+        public void setCurrentStepStatus(ItemStatus currentStepStatus) {
             this.currentStep.setCurrentStepStatus(currentStepStatus);
         }
 
@@ -239,7 +240,7 @@ public class JBehaveContext {
 
         private Issue issue;
 
-        private String currentStepStatus;
+        private ItemStatus currentStepStatus;
 
         public Step(Maybe<String> stepId) {
             this.stepId = stepId;
@@ -257,11 +258,11 @@ public class JBehaveContext {
             this.issue = issue;
         }
 
-        public String getCurrentStepStatus() {
+        public ItemStatus getCurrentStepStatus() {
             return currentStepStatus;
         }
 
-        public void setCurrentStepStatus(String currentStepStatus) {
+        public void setCurrentStepStatus(ItemStatus currentStepStatus) {
             this.currentStepStatus = currentStepStatus;
         }
 

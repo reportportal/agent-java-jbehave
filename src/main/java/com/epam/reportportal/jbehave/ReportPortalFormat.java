@@ -15,30 +15,44 @@
  */
 package com.epam.reportportal.jbehave;
 
+import com.epam.reportportal.service.ReportPortal;
+import com.epam.reportportal.utils.MemoizingSupplier;
 import org.jbehave.core.reporters.FilePrintStreamFactory;
 import org.jbehave.core.reporters.Format;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.reporters.StoryReporterBuilder;
+import rp.com.google.common.util.concurrent.ThreadFactoryBuilder;
+
+import java.util.concurrent.Executors;
 
 /**
  * ReportPortal format. Adds possibility to report story execution results to
  * ReportPortal. Requires using one of execution decorators to start and finish
  * execution in RP
- * 
+ *
  * @author Andrei Varabyeu
- * 
  */
 public class ReportPortalFormat extends Format {
 
-	public static final Format INSTANCE = new ReportPortalFormat();
+    public static final Format INSTANCE = new ReportPortalFormat();
 
-	private ReportPortalFormat() {
-		super("REPORT_PORTAL");
-	}
+    private final MemoizingSupplier<StoryReporter> reporter;
 
-	@Override
-	public StoryReporter createStoryReporter(FilePrintStreamFactory factory, StoryReporterBuilder storyReporterBuilder) {
-		return new ReportPortalStoryReporter();
-	}
+    public ReportPortalFormat() {
+        this(ReportPortal.builder().build());
+    }
 
+    public ReportPortalFormat(ReportPortal rp) {
+        super("REPORT_PORTAL");
+        reporter = createStoryReporter(rp);
+    }
+
+    protected MemoizingSupplier<StoryReporter> createStoryReporter(final ReportPortal rp) {
+        return new MemoizingSupplier<>(() -> new ReportPortalStoryReporter(rp));
+    }
+
+    @Override
+    public StoryReporter createStoryReporter(FilePrintStreamFactory factory, StoryReporterBuilder storyReporterBuilder) {
+        return reporter.get();
+    }
 }

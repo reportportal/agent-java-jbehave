@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library'
 }
 project.ext.releaseMode = project.hasProperty('releaseMode')
 
@@ -11,20 +11,18 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
+    maven { url "http://dl.bintray.com/epam/reportportal" }
+    maven { url "https://jitpack.io" }
     jcenter()
-    releaseMode ? maven { url 'http://dl.bintray.com/epam/reportportal' } : maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    if (releaseMode) {
-        compile 'com.epam.reportportal:client-java:5.0.1'
-        compile 'com.epam.reportportal:commons-model:5.0.0'
-    } else {
-        compile 'com.epam.reportportal:client-java:5.0.1'
-        compile 'com.github.reportportal:commons-model:5.0.0'
-    }
-    compile 'org.jbehave:jbehave-core:4.5.1'
+    api 'com.epam.reportportal:client-java:5.0.17'
+    api 'com.github.reportportal:commons-model:5.0.0'
+    api 'org.jbehave:jbehave-core:4.5.1'
+    api 'com.google.code.findbugs:jsr305:3.0.2'
 
+    testImplementation 'com.github.reportportal:agent-java-test-utils:ddcf50ee20'
     testImplementation 'org.powermock:powermock-module-junit4:2.0.2'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.2'
 }
