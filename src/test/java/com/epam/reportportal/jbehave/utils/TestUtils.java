@@ -16,9 +16,6 @@
 
 package com.epam.reportportal.jbehave.utils;
 
-import com.epam.reportportal.jbehave.ReportPortalFormat;
-import com.epam.reportportal.jbehave.ReportPortalStoryReporter;
-import com.epam.reportportal.jbehave.integration.feature.EmptySteps;
 import com.epam.reportportal.listeners.ListenerParameters;
 import com.epam.reportportal.restendpoint.http.MultiPartRequest;
 import com.epam.reportportal.service.ReportPortalClient;
@@ -63,7 +60,8 @@ public class TestUtils {
     private TestUtils() {
     }
 
-    public static void run(final Format format, final String story, final Object ... steps) {
+    public static void run(@Nonnull final Format format, @Nonnull final List<String> stories,
+                           @Nullable final Object ... steps) {
         Properties viewResources = new Properties();
         CrossReference xref = new CrossReference();
 
@@ -100,7 +98,11 @@ public class TestUtils {
                 steps
         );
         embedder.useCandidateSteps(stepsFactory.createCandidateSteps());
-        embedder.runStoriesAsPaths(Collections.singletonList(story));
+        embedder.runStoriesAsPaths(stories);
+    }
+
+    public static void run(@Nonnull final Format format, @Nonnull final String story, @Nullable final Object ... steps) {
+        run(format, Collections.singletonList(story), steps);
     }
 
     public static StartTestItemRQ extractRequest(ArgumentCaptor<StartTestItemRQ> captor, String methodType) {
