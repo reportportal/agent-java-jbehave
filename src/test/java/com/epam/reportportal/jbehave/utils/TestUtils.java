@@ -144,15 +144,11 @@ public class TestUtils {
         String launch = ofNullable(launchUuid).orElse(CommonUtils.namedId("launch_"));
         when(client.startLaunch(any())).thenReturn(createMaybe(new StartLaunchRS(launch, 1L)));
 
-        String rootItemId = CommonUtils.namedId(ROOT_SUITE_PREFIX);
-        Maybe<ItemCreatedRS> rootMaybe = createMaybe(new ItemCreatedRS(rootItemId, rootItemId));
-        when(client.startTestItem(any())).thenReturn(rootMaybe);
-
-        String parentId = ofNullable(suiteUuid).map(s -> {
+        String rootItemId = ofNullable(suiteUuid).map(s -> {
             Maybe<ItemCreatedRS> suiteMaybe = createMaybe(new ItemCreatedRS(s, s));
-            when(client.startTestItem(same(rootItemId), any())).thenReturn(suiteMaybe);
+            when(client.startTestItem(any())).thenReturn(suiteMaybe);
             return s;
-        }).orElse(rootItemId);
+        }).orElseGet(()->CommonUtils.namedId(ROOT_SUITE_PREFIX));
 
         List<Maybe<ItemCreatedRS>> testResponses = testSteps.stream()
                 .map(Pair::getKey)
@@ -161,7 +157,7 @@ public class TestUtils {
 
         Maybe<ItemCreatedRS> first = testResponses.get(0);
         Maybe<ItemCreatedRS>[] other = testResponses.subList(1, testResponses.size()).toArray(new Maybe[0]);
-        when(client.startTestItem(same(parentId), any())).thenReturn(first, other);
+        when(client.startTestItem(same(rootItemId), any())).thenReturn(first, other);
 
         testSteps.forEach(test -> {
             String testClassUuid = test.getKey();

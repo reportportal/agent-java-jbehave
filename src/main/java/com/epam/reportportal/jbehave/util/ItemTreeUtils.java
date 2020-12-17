@@ -10,19 +10,19 @@ import org.jbehave.core.model.Story;
 
 public class ItemTreeUtils {
 
-    private ItemTreeUtils() {
-        throw new AssertionError("No instances should exist for the class!");
-    }
+	private ItemTreeUtils() {
+		throw new AssertionError("No instances should exist for the class!");
+	}
 
-    public static TestItemTree.ItemTreeKey createKey(String key) {
-        return TestItemTree.ItemTreeKey.of(key);
-    }
+	public static TestItemTree.ItemTreeKey createKey(String key) {
+		return TestItemTree.ItemTreeKey.of(key);
+	}
 
-    public static TestItemTree.ItemTreeKey createKey(Story key) {
-        return TestItemTree.ItemTreeKey.of(key.getPath());
-    }
+	public static TestItemTree.ItemTreeKey createKey(Story key) {
+		return TestItemTree.ItemTreeKey.of(key.getPath());
+	}
 
-    public static TestItemTree.ItemTreeKey createKey(Scenario key) {
-        return TestItemTree.ItemTreeKey.of("SCENARIO:" + key.getTitle());
-    }
+	public static TestItemTree.ItemTreeKey createKey(Scenario key) {
+		return TestItemTree.ItemTreeKey.of(key.getTitle());
+	}
 }
