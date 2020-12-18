@@ -22,15 +22,14 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class CodeRefTest {
+public class SimpleCodeRefTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
-	private final List<String> stepIds = Stream.generate(()->CommonUtils.namedId("step_")).limit(2).collect(Collectors.toList());
+	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("step_")).limit(2).collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
 	private ReportPortalStepFormat format;
@@ -43,7 +42,7 @@ public class CodeRefTest {
 	}
 
 	private static final String SIMPLE_CODE_REFERENCE_STORY = "stories/DummyScenario.story";
-	private static final List<String> STEPS = Arrays.asList("Given I have empty step", "Then I have another empty step");
+	private static final List<String> DUMMY_SCENARIO_STEPS = Arrays.asList("Given I have empty step", "Then I have another empty step");
 
 	@Test
 	public void verify_code_reference_generation() {
@@ -69,9 +68,9 @@ public class CodeRefTest {
 		assertThat(scenarioRq.getType(), allOf(notNullValue(), equalTo(ItemType.SCENARIO.name())));
 
 		List<StartTestItemRQ> stepRqs = items.subList(2, items.size());
-		IntStream.range(0, stepRqs.size()).forEach(i->{
+		IntStream.range(0, stepRqs.size()).forEach(i -> {
 			StartTestItemRQ step = stepRqs.get(i);
-			String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEPS.get(i));
+			String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", DUMMY_SCENARIO_STEPS.get(i));
 			assertThat(step.getCodeRef(), allOf(notNullValue(), equalTo(stepCodeRef)));
 			assertThat(step.getType(), allOf(notNullValue(), equalTo(ItemType.STEP.name())));
 		});
