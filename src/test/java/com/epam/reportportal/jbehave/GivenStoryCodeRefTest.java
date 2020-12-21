@@ -28,7 +28,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class ComplexCodeRefTest {
+public class GivenStoryCodeRefTest {
 
 	private final String rootStoryId = CommonUtils.namedId("root_story_");
 	private final String scenarioId = CommonUtils.namedId("root_scenario_");

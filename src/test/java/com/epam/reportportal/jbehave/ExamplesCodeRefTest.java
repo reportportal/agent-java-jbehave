@@ -6,12 +6,9 @@ package com.epam.reportportal.jbehave;
 
 import com.epam.reportportal.jbehave.integration.feature.StockExamplesSteps;
 import com.epam.reportportal.jbehave.utils.TestUtils;
-import com.epam.reportportal.listeners.ItemStatus;
-import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.reportportal.util.test.CommonUtils;
-import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,15 +20,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
-public class ExamplesTest {
+public class ExamplesCodeRefTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
@@ -94,9 +87,8 @@ public class ExamplesTest {
 		put("status", "ON");
 	}});
 
-
 	@Test
-	public void verify_story_with_examples_names_types_and_parameters() {
+	public void verify_story_with_examples() {
 		TestUtils.run(format, "stories/Examples.story", new StockExamplesSteps());
 
 		verify(client, times(1)).startTestItem(any());
@@ -106,38 +98,6 @@ public class ExamplesTest {
 		verify(client, times(3)).startTestItem(same(exampleIds.get(0)), startCaptor.capture());
 		verify(client, times(3)).startTestItem(same(exampleIds.get(1)), startCaptor.capture());
 
-		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
-		List<StartTestItemRQ> examples = startItems.subList(0, 2);
-		IntStream.range(0, examples.size()).forEach(i -> {
-			StartTestItemRQ rq = examples.get(i);
-			assertThat(rq.getName(), equalTo(EXAMPLE_NAMES.get(i)));
-			assertThat(rq.getType(), equalTo(ItemType.TEST.name()));
-			assertThat(rq.getParameters(), hasSize(4));
-			rq.getParameters().forEach(p -> assertThat(EXAMPLE_PARAMETERS.get(i), hasEntry(p.getKey(), p.getValue())));
-		});
-
-		List<StartTestItemRQ> steps = startItems.subList(2, 2 + 6);
-		IntStream.range(0, examples.size()).forEach(i -> {
-			StartTestItemRQ rq = steps.get(i);
-			assertThat(rq.getName(), equalTo(STEP_NAMES.get(i)));
-			assertThat(rq.getType(), equalTo(ItemType.STEP.name()));
-			assertThat(rq.getParameters(), hasSize(STEP_PARAMETERS.get(i).size()));
-			rq.getParameters().forEach(p -> assertThat(STEP_PARAMETERS.get(i), hasEntry(p.getKey(), p.getValue())));
-		});
-
-		ArgumentCaptor<FinishTestItemRQ> finishStepCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
-		stepIds.forEach(s -> verify(client, times(1)).finishTestItem(same(s.getValue()), finishStepCaptor.capture()));
-		List<FinishTestItemRQ> finishSteps = finishStepCaptor.getAllValues();
-		assertThat(finishSteps, hasSize(6));
-		finishSteps.forEach(rq->assertThat(rq.getStatus(), equalTo(ItemStatus.PASSED.name())));
-
-		ArgumentCaptor<FinishTestItemRQ> finishExampleCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
-		exampleIds.forEach(s -> verify(client, times(1)).finishTestItem(same(s), finishExampleCaptor.capture()));
-		finishExampleCaptor.getAllValues().forEach(rq->assertThat(rq.getStatus(), nullValue()));
-
-		ArgumentCaptor<FinishTestItemRQ> finishCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
-		verify(client, times(1)).finishTestItem(same(scenarioId), finishCaptor.capture());
-		verify(client, times(1)).finishTestItem(same(storyId), finishCaptor.capture());
-		finishCaptor.getAllValues().forEach(rq->assertThat(rq.getStatus(), nullValue()));
+		// TODO: finish this test
 	}
 }

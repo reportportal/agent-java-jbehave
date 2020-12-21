@@ -1,3 +1,5 @@
+A story description
+
 Scenario: The scenario
 
 Given I have empty step

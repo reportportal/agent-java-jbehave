@@ -1,8 +1,8 @@
 Scenario: Stock trade alert
 
-Given a stock of <symbol> and a <threshold>
-When the stock is traded at <price>
-Then the alert status should be <status>
+Given a stock of symbol <symbol> and a threshold <threshold>
+When the stock is traded at price <price>
+Then the alert status should be status <status>
 
 Examples:
 |symbol|threshold|price|status|

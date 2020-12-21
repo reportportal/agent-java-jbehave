@@ -34,16 +34,15 @@ import org.jbehave.core.configuration.MostUsefulConfiguration;
 import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.embedder.EmbedderControls;
 import org.jbehave.core.embedder.NullEmbedderMonitor;
-import org.jbehave.core.i18n.LocalizedKeywords;
 import org.jbehave.core.io.LoadFromClasspath;
 import org.jbehave.core.io.UnderscoredCamelCaseResolver;
-import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.parsers.RegexStoryParser;
+import org.jbehave.core.parsers.StoryParser;
 import org.jbehave.core.reporters.FilePrintStreamFactory;
 import org.jbehave.core.reporters.Format;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.InstanceStepsFactory;
-import org.jbehave.core.steps.ParameterConverters;
 import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
 
@@ -65,7 +64,8 @@ public class TestUtils {
 	private TestUtils() {
 	}
 
-	public static void run(@Nonnull final Format format, @Nonnull final List<String> stories, @Nullable final Object... steps) {
+	public static void run(@Nonnull final Format format, @Nonnull final List<String> stories, @Nonnull final StoryParser parser,
+			@Nullable final Object... steps) {
 		Properties viewResources = new Properties();
 
 		Embedder embedder = new Embedder();
@@ -80,6 +80,7 @@ public class TestUtils {
 
 		embedder.useConfiguration(new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(TestUtils.class))
 				.useStoryPathResolver(new UnderscoredCamelCaseResolver())
+				.useStoryParser(parser)
 				.useStoryReporterBuilder(new StoryReporterBuilder().withDefaultFormats()
 						.withPathResolver(new FilePrintStreamFactory.ResolveToPackagedName())
 						.withViewResources(viewResources)
@@ -92,6 +93,10 @@ public class TestUtils {
 		);
 		embedder.useCandidateSteps(stepsFactory.createCandidateSteps());
 		embedder.runStoriesAsPaths(stories);
+	}
+
+	public static void run(@Nonnull final Format format, @Nonnull final List<String> stories, @Nullable final Object... steps) {
+		run(format, stories, new RegexStoryParser(), steps);
 	}
 
 	public static void run(@Nonnull final Format format, @Nonnull final String story, @Nullable final Object... steps) {
