@@ -31,13 +31,12 @@ public class NoScenarioTest {
 	private final String stepId = CommonUtils.namedId("step_");
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private ReportPortalStepFormat format;
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
 
 	@BeforeEach
 	public void setupMock() {
 		TestUtils.mockLaunch(client, null, storyId, scenarioId, stepId);
 		TestUtils.mockBatchLogging(client);
-		format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
 	}
 
 	private static final String STORY_NAME = "NoScenario.story";

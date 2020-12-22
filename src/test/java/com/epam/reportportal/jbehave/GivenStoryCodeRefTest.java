@@ -58,14 +58,13 @@ public class GivenStoryCodeRefTest {
 	).collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private ReportPortalStepFormat format;
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
 
 	@BeforeEach
 	public void setupMock() {
 		TestUtils.mockLaunch(client, null, rootStoryId, stepIds);
 		TestUtils.mockNestedSteps(client, nestedStepIds);
 		TestUtils.mockBatchLogging(client);
-		format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
 	}
 
 	private static final String GIVEN_STORIES_STORY = "stories/GivenStories.story";
