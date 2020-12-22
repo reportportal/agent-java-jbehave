@@ -50,10 +50,12 @@ public class GivenStoryCodeRefTest {
 			Collections.singletonList(outerScenarioId)
 	), Pair.of(scenarioId, Arrays.asList(innerGivenStoryId, stepId)));
 
-	private final List<Pair<String, String>> nestedStepIds = Stream.concat(Stream.concat(
-			outerStepIds.stream().map(s -> Pair.of(outerScenarioId, s)),
-			Stream.of(Pair.of(innerGivenStoryId, innerScenarioId))
-	), innerStepIds.stream().map(s -> Pair.of(innerScenarioId, s))).collect(Collectors.toList());
+	private final List<Pair<String, String>> nestedStepIds = Stream.concat(
+			Stream.concat(outerStepIds.stream().map(s -> Pair.of(outerScenarioId, s)),
+					Stream.of(Pair.of(innerGivenStoryId, innerScenarioId))
+			),
+			innerStepIds.stream().map(s -> Pair.of(innerScenarioId, s))
+	).collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
 	private ReportPortalStepFormat format;
@@ -99,7 +101,8 @@ public class GivenStoryCodeRefTest {
 		assertThat(outerGivenStory.getType(), equalTo(ItemType.STORY.name()));
 
 		StartTestItemRQ rootScenario = items.get(2);
-		String rootScenarioCodeRef = GIVEN_STORIES_STORY + "/[SCENARIO:A scenario in which the user can run additional stories as pre-requisites]";
+		String rootScenarioCodeRef =
+				GIVEN_STORIES_STORY + "/[SCENARIO:A scenario in which the user can run additional stories as pre-requisites]";
 		assertThat(rootScenario.getCodeRef(), equalTo(rootScenarioCodeRef));
 		assertThat(rootScenario.getType(), equalTo(ItemType.SCENARIO.name()));
 
@@ -109,7 +112,7 @@ public class GivenStoryCodeRefTest {
 		assertThat(outerScenario.getType(), equalTo(ItemType.SCENARIO.name()));
 
 		List<StartTestItemRQ> outerScenarioSteps = items.subList(4, 6);
-		IntStream.range(0, outerScenarioSteps.size()).forEach(i->{
+		IntStream.range(0, outerScenarioSteps.size()).forEach(i -> {
 			StartTestItemRQ rq = outerScenarioSteps.get(i);
 			String outerScenarioStepCodeRef = outerScenarioCodeRef + String.format("/[STEP:%s]", DUMMY_SCENARIO_STEPS.get(i));
 			assertThat(rq.getCodeRef(), equalTo(outerScenarioStepCodeRef));
@@ -132,7 +135,7 @@ public class GivenStoryCodeRefTest {
 		assertThat(innerScenario.getType(), equalTo(ItemType.SCENARIO.name()));
 
 		List<StartTestItemRQ> innerScenarioSteps = items.subList(9, 11);
-		IntStream.range(0, innerScenarioSteps.size()).forEach(i->{
+		IntStream.range(0, innerScenarioSteps.size()).forEach(i -> {
 			StartTestItemRQ rq = innerScenarioSteps.get(i);
 			String innerStepCodeRef = innerScenarioCodeRef + String.format("/[STEP:%s]", INLINE_PARAMETERS_STEPS.get(i));
 			assertThat(rq.getCodeRef(), equalTo(innerStepCodeRef));

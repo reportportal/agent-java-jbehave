@@ -17,6 +17,7 @@
 package com.epam.reportportal.jbehave.utils;
 
 import com.epam.reportportal.listeners.ListenerParameters;
+import com.epam.reportportal.listeners.LogLevel;
 import com.epam.reportportal.restendpoint.http.MultiPartRequest;
 import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.reportportal.util.test.CommonUtils;
@@ -41,6 +42,7 @@ import org.jbehave.core.reporters.Format;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.InstanceStepsFactory;
+import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
 
 import javax.annotation.Nonnull;
@@ -51,6 +53,9 @@ import java.util.stream.Collectors;
 import static com.epam.reportportal.util.test.CommonUtils.createMaybe;
 import static com.epam.reportportal.util.test.CommonUtils.generateUniqueId;
 import static java.util.Optional.ofNullable;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
@@ -196,5 +201,23 @@ public class TestUtils {
 		result.setEnable(true);
 		result.setCallbackReportingEnabled(true);
 		return result;
+	}
+
+	public static void verifyLogged(@Nonnull final ArgumentCaptor<MultiPartRequest> logCaptor, @Nullable final String itemId,
+			@Nonnull final LogLevel level, @Nonnull final String message) {
+		List<SaveLogRQ> expectedErrorList = logCaptor.getAllValues()
+				.stream()
+				.flatMap(l -> l.getSerializedRQs().stream())
+				.map(MultiPartRequest.MultiPartSerialized::getRequest)
+				.filter(l -> l instanceof List)
+				.flatMap(l -> ((List<?>) l).stream())
+				.filter(l -> l instanceof SaveLogRQ)
+				.map(l -> (SaveLogRQ) l)
+				.filter(l -> level.name().equals(l.getLevel()))
+				.filter(l -> l.getMessage() != null && l.getMessage().contains(message))
+				.collect(Collectors.toList());
+		assertThat(expectedErrorList, hasSize(1));
+		SaveLogRQ expectedError = expectedErrorList.get(0);
+		assertThat(expectedError.getItemUuid(), equalTo(itemId));
 	}
 }

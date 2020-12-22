@@ -16,9 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -48,13 +46,11 @@ public class ExamplesCodeRefTest {
 		format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
 	}
 
-	private static final List<String> EXAMPLE_NODES = Arrays.asList(
-			"[EXAMPLE:[symbol:STK1;threshold:10.0;price:5.0;status:OFF]]",
+	private static final List<String> EXAMPLE_NODES = Arrays.asList("[EXAMPLE:[symbol:STK1;threshold:10.0;price:5.0;status:OFF]]",
 			"[EXAMPLE:[symbol:STK1;threshold:10.0;price:11.0;status:ON]]"
 	);
 
-	private static final List<String> STEP_NAMES = Arrays.asList(
-			"Given a stock of symbol <symbol> and a threshold <threshold>",
+	private static final List<String> STEP_NAMES = Arrays.asList("Given a stock of symbol <symbol> and a threshold <threshold>",
 			"When the stock is traded at price <price>",
 			"Then the alert status should be status <status>"
 	);
@@ -77,7 +73,7 @@ public class ExamplesCodeRefTest {
 
 		List<StartTestItemRQ> items = startCaptor.getAllValues();
 		List<StartTestItemRQ> examples = exampleCaptor.getAllValues();
-		IntStream.range(0, examples.size()).forEach(i->{
+		IntStream.range(0, examples.size()).forEach(i -> {
 			StartTestItemRQ rq = examples.get(i);
 			String exampleCodeRef = scenarioCodeRef + "/" + EXAMPLE_NODES.get(i);
 			assertThat(rq.getCodeRef(), equalTo(exampleCodeRef));

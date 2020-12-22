@@ -17,14 +17,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class NoScenarioTest {
 
@@ -83,9 +81,9 @@ public class NoScenarioTest {
 		assertThat(stepFinish.getStatus(), equalTo(ItemStatus.PASSED.name()));
 
 		FinishTestItemRQ scenarioFinish = finishItems.get(1);
-		assertThat(scenarioFinish.getStatus(), nullValue());
+		assertThat(scenarioFinish.getStatus(), equalTo(ItemStatus.PASSED.name()));
 
 		FinishTestItemRQ storyFinish = finishItems.get(2);
-		assertThat(storyFinish.getStatus(), nullValue());
+		assertThat(storyFinish.getStatus(), equalTo(ItemStatus.PASSED.name()));
 	}
 }

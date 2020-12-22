@@ -1,6 +1,5 @@
 package com.epam.reportportal.jbehave.integration.feature;
 
-import com.epam.reportportal.annotations.ParameterKey;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Named;
 import org.jbehave.core.annotations.Then;

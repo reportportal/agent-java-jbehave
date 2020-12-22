@@ -94,7 +94,6 @@ public class ExamplesTest {
 		put("status", "ON");
 	}});
 
-
 	@Test
 	public void verify_story_with_examples_names_types_and_parameters() {
 		TestUtils.run(format, "stories/Examples.story", new StockExamplesSteps());
@@ -131,15 +130,15 @@ public class ExamplesTest {
 		stepIds.forEach(s -> verify(client, times(1)).finishTestItem(same(s.getValue()), finishStepCaptor.capture()));
 		List<FinishTestItemRQ> finishSteps = finishStepCaptor.getAllValues();
 		assertThat(finishSteps, hasSize(6));
-		finishSteps.forEach(rq->assertThat(rq.getStatus(), equalTo(ItemStatus.PASSED.name())));
+		finishSteps.forEach(rq -> assertThat(rq.getStatus(), equalTo(ItemStatus.PASSED.name())));
 
 		ArgumentCaptor<FinishTestItemRQ> finishExampleCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
 		exampleIds.forEach(s -> verify(client, times(1)).finishTestItem(same(s), finishExampleCaptor.capture()));
-		finishExampleCaptor.getAllValues().forEach(rq->assertThat(rq.getStatus(), nullValue()));
+		finishExampleCaptor.getAllValues().forEach(rq -> assertThat(rq.getStatus(), equalTo(ItemStatus.PASSED.name())));
 
 		ArgumentCaptor<FinishTestItemRQ> finishCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
 		verify(client, times(1)).finishTestItem(same(scenarioId), finishCaptor.capture());
 		verify(client, times(1)).finishTestItem(same(storyId), finishCaptor.capture());
-		finishCaptor.getAllValues().forEach(rq->assertThat(rq.getStatus(), nullValue()));
+		finishCaptor.getAllValues().forEach(rq -> assertThat(rq.getStatus(), equalTo(ItemStatus.PASSED.name())));
 	}
 }

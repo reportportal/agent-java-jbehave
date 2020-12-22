@@ -18,14 +18,20 @@ package com.epam.reportportal.jbehave;
 import com.epam.reportportal.jbehave.util.ItemTreeUtils;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.ItemType;
+import com.epam.reportportal.listeners.LogLevel;
 import com.epam.reportportal.service.Launch;
+import com.epam.reportportal.service.LaunchImpl;
+import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.tree.TestItemTree;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.epam.ta.reportportal.ws.model.attribute.ItemAttributesRQ;
+import com.epam.ta.reportportal.ws.model.issue.Issue;
+import com.epam.ta.reportportal.ws.model.log.SaveLogRQ;
 import io.reactivex.Maybe;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.model.*;
@@ -34,6 +40,7 @@ import org.jbehave.core.reporters.NullStoryReporter;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,7 +52,6 @@ import static java.util.Optional.ofNullable;
  * JBehave Reporter for reporting results into ReportPortal. Requires using
  */
 public class ReportPortalStepStoryReporter extends NullStoryReporter {
-
 	private static final String CODE_REFERENCE_DELIMITER = "/";
 	private static final String CODE_REFERENCE_ITEM_TYPE_DELIMITER = ":";
 	private static final String PARAMETER_ITEMS_DELIMITER = ";";
@@ -59,6 +65,12 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	private static final String EXAMPLE_PARAMETER_DELIMITER = PARAMETER_ITEMS_DELIMITER + " ";
 	private static final String EXAMPLE_KEY_VALUE_DELIMITER = CODE_REFERENCE_ITEM_TYPE_DELIMITER + " ";
 	private static final String NO_NAME = "No name";
+
+	public static final Issue NOT_ISSUE = new Issue();
+
+	static {
+		NOT_ISSUE.setIssueType(LaunchImpl.NOT_ISSUE);
+	}
 
 	private final Supplier<Launch> launch;
 	private final TestItemTree itemTree;
@@ -379,17 +391,143 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	}
 
 	/**
-	 * Finishes the last item in the structure
+	 * Finishes an item in the structure
+	 *
+	 * @param item   an item to finish
+	 * @param status a status to set on finish
 	 */
-	protected void finishLastItem(@Nullable final ItemStatus status) {
-		TestItemTree.TestItemLeaf item = getLeaf();
+	protected void finishItem(@Nullable final TestItemTree.TestItemLeaf item, @Nullable final ItemStatus status) {
 		ofNullable(item).ifPresent(i -> {
 			FinishTestItemRQ rq = new FinishTestItemRQ();
 			rq.setEndTime(Calendar.getInstance().getTime());
 			rq.setStatus(ofNullable(status).map(Enum::name).orElse(null));
 			launch.get().finishTestItem(i.getItemId(), rq);
+			i.setStatus(status);
+		});
+	}
+
+	/**
+	 * Finishes the last item in the structure
+	 *
+	 * @param status a status to set on finish
+	 */
+	protected void finishLastItem(@Nullable final ItemStatus status) {
+		TestItemTree.TestItemLeaf item = getLeaf();
+		finishItem(item, status);
+		structure.pollLast();
+	}
+
+	/**
+	 * Calculate an Item status according to its child item status and current status. E.G.: SUITE-TEST or TEST-STEP.
+	 * <p>
+	 * Example 1:
+	 * - Current status: {@link ItemStatus#FAILED}
+	 * - Child item status: {@link ItemStatus#SKIPPED}
+	 * Result: {@link ItemStatus#FAILED}
+	 * <p>
+	 * Example 2:
+	 * - Current status: {@link ItemStatus#PASSED}
+	 * - Child item status: {@link ItemStatus#SKIPPED}
+	 * Result: {@link ItemStatus#PASSED}
+	 * <p>
+	 * Example 3:
+	 * - Current status: {@link ItemStatus#PASSED}
+	 * - Child item status: {@link ItemStatus#FAILED}
+	 * Result: {@link ItemStatus#FAILED}
+	 * <p>
+	 * Example 4:
+	 * - Current status: {@link ItemStatus#SKIPPED}
+	 * - Child item status: {@link ItemStatus#FAILED}
+	 * Result: {@link ItemStatus#FAILED}
+	 *
+	 * @param currentStatus an Item status
+	 * @param childStatus   a status of its child element
+	 * @return new status
+	 */
+	@Nullable
+	protected ItemStatus evaluateStatus(@Nullable final ItemStatus currentStatus, @Nullable final ItemStatus childStatus) {
+		if (childStatus == null) {
+			return currentStatus;
+		}
+		ItemStatus status = ofNullable(currentStatus).orElse(childStatus);
+		switch (childStatus) {
+			case PASSED:
+			case SKIPPED:
+			case STOPPED:
+			case INFO:
+			case WARN:
+				return status;
+			case CANCELLED:
+				switch (status) {
+					case PASSED:
+					case SKIPPED:
+					case STOPPED:
+					case INFO:
+					case WARN:
+						return ItemStatus.CANCELLED;
+					default:
+						return currentStatus;
+				}
+			case INTERRUPTED:
+				switch (status) {
+					case PASSED:
+					case SKIPPED:
+					case STOPPED:
+					case INFO:
+					case WARN:
+					case CANCELLED:
+						return ItemStatus.INTERRUPTED;
+					default:
+						return currentStatus;
+				}
+			default:
+				return childStatus;
+		}
+	}
+
+	protected void evaluateAndFinishLastItem() {
+		TestItemTree.TestItemLeaf item = getLeaf();
+		ofNullable(item).ifPresent(i -> {
+			ItemStatus status = i.getStatus();
+			for (Map.Entry<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf> entry : i.getChildItems().entrySet()) {
+				TestItemTree.TestItemLeaf value = entry.getValue();
+				if (value != null) {
+					status = evaluateStatus(status, value.getStatus());
+				}
+			}
+			i.setStatus(status);
+			finishItem(i, status);
 		});
 		structure.pollLast();
+	}
+
+	/**
+	 * Prepare a function which creates a {@link SaveLogRQ} from a {@link Throwable}
+	 *
+	 * @param level   a log level
+	 * @param message a message to attach
+	 * @return a {@link SaveLogRQ} supplier {@link Function}
+	 */
+	@Nonnull
+	protected Function<String, SaveLogRQ> getLogSupplier(@Nonnull final LogLevel level, @Nullable final String message) {
+		return itemUuid -> {
+			SaveLogRQ rq = new SaveLogRQ();
+			rq.setItemUuid(itemUuid);
+			rq.setLevel(level.name());
+			rq.setLogTime(Calendar.getInstance().getTime());
+			rq.setMessage(message);
+			rq.setLogTime(Calendar.getInstance().getTime());
+			return rq;
+		};
+	}
+
+	/**
+	 * Send a message to report portal about appeared failure
+	 *
+	 * @param thrown {@link Throwable} object with details of the failure
+	 */
+	protected void sendStackTraceToRP(@Nullable final Throwable thrown) {
+		ofNullable(thrown).ifPresent(t -> ReportPortal.emitLog(getLogSupplier(LogLevel.ERROR, ExceptionUtils.getStackTrace(t))));
 	}
 
 	@Override
@@ -414,7 +552,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void afterStory(boolean givenStory) {
-		finishLastItem(null);
+		evaluateAndFinishLastItem();
 	}
 
 	/**
@@ -432,7 +570,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void afterScenario() {
-		finishLastItem(null);
+		evaluateAndFinishLastItem();
 	}
 
 	/**
@@ -450,7 +588,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	public void example(Map<String, String> tableRow, int exampleIndex) {
 		Entity<?> e = structure.getLast();
 		if (e.type() == ItemType.TEST) {
-			finishLastItem(null);
+			evaluateAndFinishLastItem();
 		}
 		structure.add(new Entity<>(ItemType.TEST, tableRow)); // type TEST is used for Examples
 	}
@@ -462,14 +600,20 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 
 	@Override
 	public void afterExamples() {
-		finishLastItem(null);
+		evaluateAndFinishLastItem();
 	}
 
-	protected void finishStep(TestItemTree.TestItemLeaf step, ItemStatus status) {
+	protected void finishStep(final @Nonnull TestItemTree.TestItemLeaf step, final @Nonnull ItemStatus status, @Nullable Issue issue) {
 		FinishTestItemRQ rq = new FinishTestItemRQ();
 		rq.setEndTime(Calendar.getInstance().getTime());
 		rq.setStatus(status.name());
+		rq.setIssue(issue);
 		launch.get().finishTestItem(step.getItemId(), rq);
+		step.setStatus(status);
+	}
+
+	protected void finishStep(final @Nonnull TestItemTree.TestItemLeaf step, final @Nonnull ItemStatus status) {
+		finishStep(step, status, null);
 	}
 
 	/**
@@ -492,13 +636,16 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	public void notPerformed(String step) {
 		structure.add(new Entity<>(ItemType.STEP, step));
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
+		ReportPortal.emitLog(item.getItemId(),
+				getLogSupplier(LogLevel.WARN, "Step execution was skipped by JBehave, see previous steps for errors.")
+		);
 		structure.pollLast();
-		finishStep(item, ItemStatus.SKIPPED);
+		finishStep(item, ItemStatus.SKIPPED, NOT_ISSUE);
 	}
 
 	@Override
 	public void failed(String step, Throwable cause) {
-		JBehaveUtils.sendStackTraceToRP(cause);
+		sendStackTraceToRP(cause);
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
 		structure.pollLast();
 		finishStep(item, ItemStatus.FAILED);
@@ -513,7 +660,14 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 
 	@Override
 	public void pending(String step) {
-		simulateStep(step);
+		structure.add(new Entity<>(ItemType.STEP, step));
+		TestItemTree.TestItemLeaf item = retrieveLeaf();
+		ReportPortal.emitLog(
+				item.getItemId(),
+				getLogSupplier(LogLevel.WARN, String.format("Unable to locate a step implementation: '%s'", step))
+		);
+		structure.pollLast();
+		finishStep(item, ItemStatus.SKIPPED);
 	}
 
 	@Override
