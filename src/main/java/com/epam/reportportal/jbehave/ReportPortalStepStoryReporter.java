@@ -25,6 +25,7 @@ import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.epam.ta.reportportal.ws.model.attribute.ItemAttributesRQ;
 import io.reactivex.Maybe;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.model.*;
@@ -46,7 +47,6 @@ import static java.util.Optional.ofNullable;
 public class ReportPortalStepStoryReporter extends NullStoryReporter {
 
 	private static final String CODE_REFERENCE_DELIMITER = "/";
-
 	private static final String CODE_REFERENCE_ITEM_TYPE_DELIMITER = ":";
 	private static final String PARAMETER_ITEMS_DELIMITER = ";";
 	private static final String CODE_REFERENCE_ITEM_START = "[";
@@ -58,6 +58,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	private static final String EXAMPLE = "EXAMPLE";
 	private static final String EXAMPLE_PARAMETER_DELIMITER = PARAMETER_ITEMS_DELIMITER + " ";
 	private static final String EXAMPLE_KEY_VALUE_DELIMITER = CODE_REFERENCE_ITEM_TYPE_DELIMITER + " ";
+	private static final String NO_NAME = "No name";
 
 	private final Supplier<Launch> launch;
 	private final TestItemTree itemTree;
@@ -139,7 +140,8 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	}
 
 	protected String getScenarioName(Scenario scenario) {
-		return scenario.getTitle();
+		String title = scenario.getTitle();
+		return StringUtils.isBlank(title) ? NO_NAME : title;
 	}
 
 	@Nonnull
@@ -292,14 +294,19 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 				case STORY:
 					Story story = (Story) entity.get();
 					TestItemTree.ItemTreeKey storyKey = ItemTreeUtils.createKey(story);
-					leafChain.add(ImmutablePair.of(storyKey, children.computeIfAbsent(storyKey, k -> createLeaf(ItemType.STORY,
-							buildStartStoryRq(story, getCodeRef(leafChain, k, ItemType.STORY), itemDate),
-							parentId
-					))));
+					leafChain.add(ImmutablePair.of(storyKey,
+							children.computeIfAbsent(
+									storyKey,
+									k -> createLeaf(ItemType.STORY,
+											buildStartStoryRq(story, getCodeRef(leafChain, k, ItemType.STORY), itemDate),
+											parentId
+									)
+							)
+					));
 					break;
 				case SCENARIO:
 					Scenario scenario = (Scenario) entity.get();
-					TestItemTree.ItemTreeKey scenarioKey = ItemTreeUtils.createKey(scenario);
+					TestItemTree.ItemTreeKey scenarioKey = ItemTreeUtils.createKey(getScenarioName(scenario));
 					leafChain.add(ImmutablePair.of(scenarioKey, children.computeIfAbsent(scenarioKey, k -> createLeaf(ItemType.SCENARIO,
 							buildStartScenarioRq(scenario, getCodeRef(leafChain, k, ItemType.SCENARIO), itemDate),
 							parentId
@@ -308,10 +315,15 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 				case TEST: // type TEST == an Example
 					Map<String, String> example = (Map<String, String>) entity.get();
 					TestItemTree.ItemTreeKey exampleKey = ItemTreeUtils.createKey(example);
-					leafChain.add(ImmutablePair.of(exampleKey, children.computeIfAbsent(exampleKey, k -> createLeaf(ItemType.TEST,
-							buildStartExampleRq(example, getCodeRef(leafChain, k, ItemType.TEST), itemDate),
-							parentId
-					))));
+					leafChain.add(ImmutablePair.of(exampleKey,
+							children.computeIfAbsent(
+									exampleKey,
+									k -> createLeaf(ItemType.TEST,
+											buildStartExampleRq(example, getCodeRef(leafChain, k, ItemType.TEST), itemDate),
+											parentId
+									)
+							)
+					));
 					break;
 				case STEP:
 					boolean hasExample = ofNullable(previousEntity).map(e -> e.type).orElse(null) == ItemType.TEST;
@@ -350,7 +362,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 					leafChain.add(ImmutablePair.of(storyKey, children.get(storyKey)));
 					break;
 				case SCENARIO:
-					TestItemTree.ItemTreeKey scenarioKey = ItemTreeUtils.createKey((Scenario) entity.get());
+					TestItemTree.ItemTreeKey scenarioKey = ItemTreeUtils.createKey(getScenarioName((Scenario) entity.get()));
 					leafChain.add(ImmutablePair.of(scenarioKey, children.get(scenarioKey)));
 					break;
 				case TEST: // type TEST == an Example

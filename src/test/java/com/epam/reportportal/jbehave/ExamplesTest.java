@@ -106,6 +106,7 @@ public class ExamplesTest {
 		verify(client, times(3)).startTestItem(same(exampleIds.get(0)), startCaptor.capture());
 		verify(client, times(3)).startTestItem(same(exampleIds.get(1)), startCaptor.capture());
 
+		// Start items verification
 		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
 		List<StartTestItemRQ> examples = startItems.subList(0, 2);
 		IntStream.range(0, examples.size()).forEach(i -> {
@@ -125,6 +126,7 @@ public class ExamplesTest {
 			rq.getParameters().forEach(p -> assertThat(STEP_PARAMETERS.get(i), hasEntry(p.getKey(), p.getValue())));
 		});
 
+		// Finish items verification
 		ArgumentCaptor<FinishTestItemRQ> finishStepCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
 		stepIds.forEach(s -> verify(client, times(1)).finishTestItem(same(s.getValue()), finishStepCaptor.capture()));
 		List<FinishTestItemRQ> finishSteps = finishStepCaptor.getAllValues();
