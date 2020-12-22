@@ -32,13 +32,12 @@ public class SimpleCodeRefTest {
 	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("step_")).limit(2).collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private ReportPortalStepFormat format;
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
 
 	@BeforeEach
 	public void setupMock() {
 		TestUtils.mockLaunch(client, null, storyId, scenarioId, stepIds);
 		TestUtils.mockBatchLogging(client);
-		format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
 	}
 
 	private static final String SIMPLE_CODE_REFERENCE_STORY = "stories/DummyScenario.story";
