@@ -59,6 +59,10 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
+/**
+ * This class shouldn't be like that, since it goes against inheritance philosophy. But this is my try to avoid Mockito context collision
+ * issues on virtual environments.
+ */
 public class BaseTest {
 	public static final String ROOT_SUITE_PREFIX = "root_";
 
