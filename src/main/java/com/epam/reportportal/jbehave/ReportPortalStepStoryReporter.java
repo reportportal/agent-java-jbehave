@@ -530,6 +530,26 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 		ofNullable(thrown).ifPresent(t -> ReportPortal.emitLog(getLogSupplier(LogLevel.ERROR, ExceptionUtils.getStackTrace(t))));
 	}
 
+	protected void finishStep(final @Nonnull TestItemTree.TestItemLeaf step, final @Nonnull ItemStatus status, @Nullable Issue issue) {
+		FinishTestItemRQ rq = new FinishTestItemRQ();
+		rq.setEndTime(Calendar.getInstance().getTime());
+		rq.setStatus(status.name());
+		rq.setIssue(issue);
+		launch.get().finishTestItem(step.getItemId(), rq);
+		step.setStatus(status);
+	}
+
+	protected void finishStep(final @Nonnull TestItemTree.TestItemLeaf step, final @Nonnull ItemStatus status) {
+		finishStep(step, status, null);
+	}
+
+	protected void simulateStep(String step) {
+		structure.add(new Entity<>(ItemType.STEP, step));
+		TestItemTree.TestItemLeaf item = retrieveLeaf();
+		structure.pollLast();
+		finishStep(item, ItemStatus.SKIPPED);
+	}
+
 	@Override
 	public void storyCancelled(Story story, StoryDuration storyDuration) {
 		finishLastItem(ItemStatus.SKIPPED);
@@ -603,19 +623,6 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 		evaluateAndFinishLastItem();
 	}
 
-	protected void finishStep(final @Nonnull TestItemTree.TestItemLeaf step, final @Nonnull ItemStatus status, @Nullable Issue issue) {
-		FinishTestItemRQ rq = new FinishTestItemRQ();
-		rq.setEndTime(Calendar.getInstance().getTime());
-		rq.setStatus(status.name());
-		rq.setIssue(issue);
-		launch.get().finishTestItem(step.getItemId(), rq);
-		step.setStatus(status);
-	}
-
-	protected void finishStep(final @Nonnull TestItemTree.TestItemLeaf step, final @Nonnull ItemStatus status) {
-		finishStep(step, status, null);
-	}
-
 	/**
 	 * Finishes step in ReportPortal
 	 */
@@ -649,13 +656,6 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
 		structure.pollLast();
 		finishStep(item, ItemStatus.FAILED);
-	}
-
-	private void simulateStep(String step) {
-		structure.add(new Entity<>(ItemType.STEP, step));
-		TestItemTree.TestItemLeaf item = retrieveLeaf();
-		structure.pollLast();
-		finishStep(item, ItemStatus.SKIPPED);
 	}
 
 	@Override
@@ -707,5 +707,4 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 		}
 
 	}
-
 }
