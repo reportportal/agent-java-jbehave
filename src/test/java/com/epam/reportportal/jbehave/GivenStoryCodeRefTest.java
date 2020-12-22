@@ -4,7 +4,6 @@
 
 package com.epam.reportportal.jbehave;
 
-import com.epam.reportportal.jbehave.utils.TestUtils;
 import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
@@ -28,7 +27,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class GivenStoryCodeRefTest {
+public class GivenStoryCodeRefTest extends BaseTest {
 
 	private final String rootStoryId = CommonUtils.namedId("root_story_");
 	private final String scenarioId = CommonUtils.namedId("root_scenario_");
@@ -58,13 +57,13 @@ public class GivenStoryCodeRefTest {
 	).collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, standardParameters()));
 
 	@BeforeEach
 	public void setupMock() {
-		TestUtils.mockLaunch(client, null, rootStoryId, stepIds);
-		TestUtils.mockNestedSteps(client, nestedStepIds);
-		TestUtils.mockBatchLogging(client);
+		mockLaunch(client, null, rootStoryId, stepIds);
+		mockNestedSteps(client, nestedStepIds);
+		mockBatchLogging(client);
 	}
 
 	private static final String GIVEN_STORIES_STORY = "stories/GivenStories.story";
@@ -76,7 +75,7 @@ public class GivenStoryCodeRefTest {
 
 	@Test
 	public void verify_code_reference_generation_given_stories() {
-		TestUtils.run(format, GIVEN_STORIES_STORY);
+		run(format, GIVEN_STORIES_STORY);
 
 		ArgumentCaptor<StartTestItemRQ> captor = ArgumentCaptor.forClass(StartTestItemRQ.class);
 		verify(client, times(1)).startTestItem(captor.capture());

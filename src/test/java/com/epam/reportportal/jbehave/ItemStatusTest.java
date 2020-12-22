@@ -6,7 +6,6 @@ package com.epam.reportportal.jbehave;
 
 import com.epam.reportportal.jbehave.integration.feature.EmptySteps;
 import com.epam.reportportal.jbehave.integration.feature.FailedSteps;
-import com.epam.reportportal.jbehave.utils.TestUtils;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.LogLevel;
 import com.epam.reportportal.restendpoint.http.MultiPartRequest;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.epam.reportportal.jbehave.utils.TestUtils.verifyLogged;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,26 +29,26 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-public class ItemStatusTest {
+public class ItemStatusTest extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("step_")).limit(2).collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, standardParameters()));
 
 	@BeforeEach
 	public void setupMock() {
-		TestUtils.mockLaunch(client, null, storyId, scenarioId, stepIds);
-		TestUtils.mockBatchLogging(client);
+		mockLaunch(client, null, storyId, scenarioId, stepIds);
+		mockBatchLogging(client);
 	}
 
 	private static final String FAILED_SCENARIO_PATH = "stories/FailedScenario.story";
 
 	@Test
 	public void verify_a_step_failed_and_parent_status_calculated() {
-		TestUtils.run(format, FAILED_SCENARIO_PATH, new FailedSteps());
+		run(format, FAILED_SCENARIO_PATH, new FailedSteps());
 
 		verify(client).startTestItem(any());
 		verify(client).startTestItem(same(storyId), any());
@@ -76,7 +74,7 @@ public class ItemStatusTest {
 
 	@Test
 	public void verify_a_step_failed_and_a_step_skipped_parent_status_calculated() {
-		TestUtils.run(format, FAILED_SKIPPED_SCENARIO_PATH, new FailedSteps());
+		run(format, FAILED_SKIPPED_SCENARIO_PATH, new FailedSteps());
 
 		verify(client).startTestItem(any());
 		verify(client).startTestItem(same(storyId), any());
@@ -106,7 +104,7 @@ public class ItemStatusTest {
 
 	@Test
 	public void verify_a_step_skipped_and_a_step_failed_parent_status_calculated() {
-		TestUtils.run(format, SKIPPED_FAILED_SCENARIO_PATH, new FailedSteps());
+		run(format, SKIPPED_FAILED_SCENARIO_PATH, new FailedSteps());
 
 		verify(client).startTestItem(any());
 		verify(client).startTestItem(same(storyId), any());
@@ -142,7 +140,7 @@ public class ItemStatusTest {
 
 	@Test
 	public void verify_a_step_skipped_parent_status_calculated() {
-		TestUtils.run(format, SKIPPED_SCENARIO_PATH);
+		run(format, SKIPPED_SCENARIO_PATH);
 
 		verify(client).startTestItem(any());
 		verify(client).startTestItem(same(storyId), any());
@@ -173,7 +171,7 @@ public class ItemStatusTest {
 
 	@Test
 	public void verify_a_step_passed_and_a_step_skipped_parent_status_calculated() {
-		TestUtils.run(format, PASSED_SKIPPED_SCENARIO_PATH, new EmptySteps());
+		run(format, PASSED_SKIPPED_SCENARIO_PATH, new EmptySteps());
 
 		verify(client).startTestItem(any());
 		verify(client).startTestItem(same(storyId), any());

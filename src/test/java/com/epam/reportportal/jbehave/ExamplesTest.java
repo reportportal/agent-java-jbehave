@@ -5,7 +5,6 @@
 package com.epam.reportportal.jbehave;
 
 import com.epam.reportportal.jbehave.integration.feature.StockExamplesSteps;
-import com.epam.reportportal.jbehave.utils.TestUtils;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.service.ReportPortal;
@@ -31,7 +30,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
-public class ExamplesTest {
+public class ExamplesTest extends BaseTest{
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
@@ -42,13 +41,13 @@ public class ExamplesTest {
 			.collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, standardParameters()));
 
 	@BeforeEach
 	public void setupMock() {
-		TestUtils.mockLaunch(client, null, storyId, scenarioId, exampleIds);
-		TestUtils.mockNestedSteps(client, stepIds);
-		TestUtils.mockBatchLogging(client);
+		mockLaunch(client, null, storyId, scenarioId, exampleIds);
+		mockNestedSteps(client, stepIds);
+		mockBatchLogging(client);
 
 	}
 
@@ -96,7 +95,7 @@ public class ExamplesTest {
 
 	@Test
 	public void verify_story_with_examples_names_types_and_parameters() {
-		TestUtils.run(format, "stories/Examples.story", new StockExamplesSteps());
+		run(format, "stories/Examples.story", new StockExamplesSteps());
 
 		verify(client, times(1)).startTestItem(any());
 		verify(client, times(1)).startTestItem(same(storyId), any());

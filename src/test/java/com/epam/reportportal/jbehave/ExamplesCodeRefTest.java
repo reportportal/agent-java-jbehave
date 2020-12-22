@@ -5,7 +5,6 @@
 package com.epam.reportportal.jbehave;
 
 import com.epam.reportportal.jbehave.integration.feature.StockExamplesSteps;
-import com.epam.reportportal.jbehave.utils.TestUtils;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.reportportal.util.test.CommonUtils;
@@ -25,7 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.*;
 
-public class ExamplesCodeRefTest {
+public class ExamplesCodeRefTest extends BaseTest{
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
@@ -36,13 +35,13 @@ public class ExamplesCodeRefTest {
 			.collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, standardParameters()));
 
 	@BeforeEach
 	public void setupMock() {
-		TestUtils.mockLaunch(client, null, storyId, scenarioId, exampleIds);
-		TestUtils.mockNestedSteps(client, stepIds);
-		TestUtils.mockBatchLogging(client);
+		mockLaunch(client, null, storyId, scenarioId, exampleIds);
+		mockNestedSteps(client, stepIds);
+		mockBatchLogging(client);
 	}
 
 	private static final List<String> EXAMPLE_NODES = Arrays.asList("[EXAMPLE:[symbol:STK1;threshold:10.0;price:5.0;status:OFF]]",
@@ -58,7 +57,7 @@ public class ExamplesCodeRefTest {
 
 	@Test
 	public void verify_story_with_examples() {
-		TestUtils.run(format, EXAMPLES_STORY, new StockExamplesSteps());
+		run(format, EXAMPLES_STORY, new StockExamplesSteps());
 
 		verify(client, times(1)).startTestItem(any());
 		verify(client, times(1)).startTestItem(same(storyId), any());

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.epam.reportportal.jbehave.utils;
+package com.epam.reportportal.jbehave;
 
 import com.epam.reportportal.listeners.ListenerParameters;
 import com.epam.reportportal.listeners.LogLevel;
@@ -59,14 +59,10 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
-public class TestUtils {
-
+public class BaseTest {
 	public static final String ROOT_SUITE_PREFIX = "root_";
 
-	private TestUtils() {
-	}
-
-	public static void run(@Nonnull final Format format, @Nonnull final List<String> stories, @Nonnull final StoryParser parser,
+	public static void run(@Nonnull final Class<?> clazz, @Nonnull final Format format, @Nonnull final List<String> stories, @Nonnull final StoryParser parser,
 			@Nullable final Object... steps) {
 		Properties viewResources = new Properties();
 
@@ -80,7 +76,7 @@ public class TestUtils {
 				.doVerboseFailures(false)
 				.doVerboseFiltering(false));
 
-		embedder.useConfiguration(new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(TestUtils.class))
+		embedder.useConfiguration(new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(clazz))
 				.useStoryPathResolver(new UnderscoredCamelCaseResolver())
 				.useStoryParser(parser)
 				.useStoryReporterBuilder(new StoryReporterBuilder().withDefaultFormats()
@@ -97,11 +93,16 @@ public class TestUtils {
 		embedder.runStoriesAsPaths(stories);
 	}
 
-	public static void run(@Nonnull final Format format, @Nonnull final List<String> stories, @Nullable final Object... steps) {
+	public void run(@Nonnull final Format format, @Nonnull final List<String> stories, @Nonnull final StoryParser parser,
+			@Nullable final Object... steps) {
+		run(getClass(), format, stories, parser, steps);
+	}
+
+	public void run(@Nonnull final Format format, @Nonnull final List<String> stories, @Nullable final Object... steps) {
 		run(format, stories, new RegexStoryParser(), steps);
 	}
 
-	public static void run(@Nonnull final Format format, @Nonnull final String story, @Nullable final Object... steps) {
+	public void run(@Nonnull final Format format, @Nonnull final String story, @Nullable final Object... steps) {
 		run(format, Collections.singletonList(story), steps);
 	}
 

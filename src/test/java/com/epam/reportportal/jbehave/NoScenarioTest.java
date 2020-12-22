@@ -5,7 +5,6 @@
 package com.epam.reportportal.jbehave;
 
 import com.epam.reportportal.jbehave.integration.feature.EmptySteps;
-import com.epam.reportportal.jbehave.utils.TestUtils;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
@@ -24,19 +23,19 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class NoScenarioTest {
+public class NoScenarioTest extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final String stepId = CommonUtils.namedId("step_");
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, standardParameters()));
 
 	@BeforeEach
 	public void setupMock() {
-		TestUtils.mockLaunch(client, null, storyId, scenarioId, stepId);
-		TestUtils.mockBatchLogging(client);
+		mockLaunch(client, null, storyId, scenarioId, stepId);
+		mockBatchLogging(client);
 	}
 
 	private static final String STORY_NAME = "NoScenario.story";
@@ -46,7 +45,7 @@ public class NoScenarioTest {
 
 	@Test
 	public void verify_a_story_without_scenario() {
-		TestUtils.run(format, STORY_PATH, new EmptySteps());
+		run(format, STORY_PATH, new EmptySteps());
 
 		ArgumentCaptor<StartTestItemRQ> startCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
 		verify(client).startTestItem(startCaptor.capture());

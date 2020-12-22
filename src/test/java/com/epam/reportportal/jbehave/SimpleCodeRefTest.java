@@ -4,7 +4,6 @@
 
 package com.epam.reportportal.jbehave;
 
-import com.epam.reportportal.jbehave.utils.TestUtils;
 import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
@@ -25,19 +24,19 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class SimpleCodeRefTest {
+public class SimpleCodeRefTest extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("step_")).limit(2).collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, standardParameters()));
 
 	@BeforeEach
 	public void setupMock() {
-		TestUtils.mockLaunch(client, null, storyId, scenarioId, stepIds);
-		TestUtils.mockBatchLogging(client);
+		mockLaunch(client, null, storyId, scenarioId, stepIds);
+		mockBatchLogging(client);
 	}
 
 	private static final String SIMPLE_CODE_REFERENCE_STORY = "stories/DummyScenario.story";
@@ -45,7 +44,7 @@ public class SimpleCodeRefTest {
 
 	@Test
 	public void verify_code_reference_generation() {
-		TestUtils.run(format, SIMPLE_CODE_REFERENCE_STORY);
+		run(format, SIMPLE_CODE_REFERENCE_STORY);
 
 		ArgumentCaptor<StartTestItemRQ> captor = ArgumentCaptor.forClass(StartTestItemRQ.class);
 		verify(client, times(1)).startTestItem(captor.capture());
