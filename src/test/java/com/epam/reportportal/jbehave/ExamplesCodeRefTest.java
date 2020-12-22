@@ -36,14 +36,13 @@ public class ExamplesCodeRefTest {
 			.collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private ReportPortalStepFormat format;
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
 
 	@BeforeEach
 	public void setupMock() {
 		TestUtils.mockLaunch(client, null, storyId, scenarioId, exampleIds);
 		TestUtils.mockNestedSteps(client, stepIds);
 		TestUtils.mockBatchLogging(client);
-		format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
 	}
 
 	private static final List<String> EXAMPLE_NODES = Arrays.asList("[EXAMPLE:[symbol:STK1;threshold:10.0;price:5.0;status:OFF]]",
