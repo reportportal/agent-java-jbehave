@@ -15,20 +15,16 @@
  */
 package com.epam.reportportal.jbehave;
 
-import com.epam.reportportal.listeners.LogLevel;
-import com.epam.reportportal.service.ReportPortal;
-import com.epam.ta.reportportal.ws.model.log.SaveLogRQ;
-import io.reactivex.Maybe;
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Meta;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
-import static rp.com.google.common.base.Throwables.getStackTraceAsString;
 
 /**
  * Set of usefull utils related to JBehave -> ReportPortal integration
