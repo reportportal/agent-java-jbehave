@@ -20,8 +20,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.*;
 
 public class ExamplesCodeRefTest {
@@ -45,59 +48,46 @@ public class ExamplesCodeRefTest {
 		format = new ReportPortalStepFormat(ReportPortal.create(client, TestUtils.standardParameters()));
 	}
 
-	private static final List<String> EXAMPLE_NAMES = Arrays.asList(
-			"Example: [symbol: STK1; threshold: 10.0; price: 5.0; status: OFF]",
-			"Example: [symbol: STK1; threshold: 10.0; price: 11.0; status: ON]"
+	private static final List<String> EXAMPLE_NODES = Arrays.asList(
+			"[EXAMPLE:[symbol:STK1;threshold:10.0;price:5.0;status:OFF]]",
+			"[EXAMPLE:[symbol:STK1;threshold:10.0;price:11.0;status:ON]]"
 	);
-
-	private static final List<Map<String, String>> EXAMPLE_PARAMETERS = Arrays.asList(new HashMap<String, String>() {{
-		put("symbol", "STK1");
-		put("threshold", "10.0");
-		put("price", "5.0");
-		put("status", "OFF");
-	}}, new HashMap<String, String>() {{
-		put("symbol", "STK1");
-		put("threshold", "10.0");
-		put("price", "11.0");
-		put("status", "ON");
-	}});
 
 	private static final List<String> STEP_NAMES = Arrays.asList(
-			"Given a stock of symbol STK1 and a threshold 10.0",
-			"When the stock is traded at price 5.0",
-			"Then the alert status should be status OFF",
-			"Given a stock of symbol STK1 and a threshold 10.0",
-			"When the stock is traded at price 11.0",
-			"Then the alert status should be status ON"
+			"Given a stock of symbol <symbol> and a threshold <threshold>",
+			"When the stock is traded at price <price>",
+			"Then the alert status should be status <status>"
 	);
 
-	private static final List<Map<String, String>> STEP_PARAMETERS = Arrays.asList(new HashMap<String, String>() {{
-		put("symbol", "STK1");
-		put("threshold", "10.0");
-	}}, new HashMap<String, String>() {{
-		put("price", "5.0");
-	}}, new HashMap<String, String>() {{
-		put("status", "OFF");
-	}}, new HashMap<String, String>() {{
-		put("symbol", "STK1");
-		put("threshold", "10.0");
-	}}, new HashMap<String, String>() {{
-		put("price", "11.0");
-	}}, new HashMap<String, String>() {{
-		put("status", "ON");
-	}});
+	private static final String EXAMPLES_STORY = "stories/Examples.story";
 
 	@Test
 	public void verify_story_with_examples() {
-		TestUtils.run(format, "stories/Examples.story", new StockExamplesSteps());
+		TestUtils.run(format, EXAMPLES_STORY, new StockExamplesSteps());
 
 		verify(client, times(1)).startTestItem(any());
 		verify(client, times(1)).startTestItem(same(storyId), any());
+		ArgumentCaptor<StartTestItemRQ> exampleCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
+		verify(client, times(2)).startTestItem(same(scenarioId), exampleCaptor.capture());
 		ArgumentCaptor<StartTestItemRQ> startCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
-		verify(client, times(2)).startTestItem(same(scenarioId), startCaptor.capture());
 		verify(client, times(3)).startTestItem(same(exampleIds.get(0)), startCaptor.capture());
 		verify(client, times(3)).startTestItem(same(exampleIds.get(1)), startCaptor.capture());
 
-		// TODO: finish this test
+		String scenarioCodeRef = EXAMPLES_STORY + "/[SCENARIO:Stock trade alert]";
+
+		List<StartTestItemRQ> items = startCaptor.getAllValues();
+		List<StartTestItemRQ> examples = exampleCaptor.getAllValues();
+		IntStream.range(0, examples.size()).forEach(i->{
+			StartTestItemRQ rq = examples.get(i);
+			String exampleCodeRef = scenarioCodeRef + "/" + EXAMPLE_NODES.get(i);
+			assertThat(rq.getCodeRef(), equalTo(exampleCodeRef));
+
+			List<StartTestItemRQ> exampleSteps = items.subList(i * 3, i * 3 + 3);
+			IntStream.range(0, exampleSteps.size()).forEach(j -> {
+				StartTestItemRQ stepRq = exampleSteps.get(j);
+				String stepCodeRef = exampleCodeRef + "/" + String.format("[STEP:%s]", STEP_NAMES.get(j));
+				assertThat(stepRq.getCodeRef(), equalTo(stepCodeRef));
+			});
+		});
 	}
 }
