@@ -43,7 +43,7 @@ public class FailedPassedStepCodeRefTest extends BaseTest {
 
 	private static final String CODE_REFERENCE_STORY = "stories/status/FailedPassedScenario.story";
 	private static final String FAILED_SCENARIO_STEP = "Given I have a failed step";
-	private static final String DUMMY_SCENARIO_STEP = "And I have empty step";
+	private static final String DUMMY_SCENARIO_STEP = "Given I have empty step";
 	private static final List<String> SCENARIO_STEPS = Arrays.asList(FAILED_SCENARIO_STEP, DUMMY_SCENARIO_STEP);
 
 	@Test
