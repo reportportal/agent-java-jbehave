@@ -67,12 +67,6 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	private static final String EXAMPLE_KEY_VALUE_DELIMITER = CODE_REFERENCE_ITEM_TYPE_DELIMITER + " ";
 	private static final String NO_NAME = "No name";
 
-	public static final Issue NOT_ISSUE = new Issue();
-
-	static {
-		NOT_ISSUE.setIssueType(LaunchImpl.NOT_ISSUE);
-	}
-
 	private final Supplier<Launch> launch;
 	private final TestItemTree itemTree;
 
@@ -612,7 +606,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 				getLogSupplier(LogLevel.WARN, "Step execution was skipped by JBehave, see previous steps for errors.")
 		);
 		structure.pollLast();
-		finishStep(item, ItemStatus.SKIPPED, NOT_ISSUE);
+		finishStep(item, ItemStatus.SKIPPED, Launch.NOT_ISSUE);
 	}
 
 	@Override

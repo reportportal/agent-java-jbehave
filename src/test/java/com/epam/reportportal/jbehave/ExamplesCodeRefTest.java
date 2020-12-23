@@ -4,7 +4,7 @@
 
 package com.epam.reportportal.jbehave;
 
-import com.epam.reportportal.jbehave.integration.feature.StockExamplesSteps;
+import com.epam.reportportal.jbehave.integration.basic.StockExamplesSteps;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.reportportal.util.test.CommonUtils;

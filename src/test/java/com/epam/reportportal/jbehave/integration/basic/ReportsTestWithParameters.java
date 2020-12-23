@@ -1,4 +1,4 @@
-package com.epam.reportportal.jbehave.integration.feature;
+package com.epam.reportportal.jbehave.integration.basic;
 
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Named;
@@ -16,8 +16,8 @@ public class ReportsTestWithParameters {
 		LOGGER.info("It is test with parameters");
 	}
 
-	@When("I have parameter {string}")
-	public void iHaveParameterStr(String str) {
+	@When("I have parameter $str_param")
+	public void iHaveParameterStr(@Named("str_param") String str) {
 		LOGGER.info("String parameter {}", str);
 	}
 
@@ -26,8 +26,8 @@ public class ReportsTestWithParameters {
 		iHaveParameterStr(str);
 	}
 
-	@Then("I emit number {int} on level info")
-	public void infoLevel(int parameters) {
+	@Then("I emit number $int_param on level info")
+	public void infoLevel(@Named("int_param") int parameters) {
 		LOGGER.info("Test with parameters: " + parameters);
 	}
 

@@ -4,7 +4,7 @@
 
 package com.epam.reportportal.jbehave;
 
-import com.epam.reportportal.jbehave.integration.feature.StockExamplesSteps;
+import com.epam.reportportal.jbehave.integration.basic.StockExamplesSteps;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.service.ReportPortal;

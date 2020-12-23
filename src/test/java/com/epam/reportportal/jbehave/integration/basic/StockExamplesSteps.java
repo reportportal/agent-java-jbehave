@@ -2,7 +2,7 @@
  * Copyright (C) 2020 Epic Games, Inc. All Rights Reserved.
  */
 
-package com.epam.reportportal.jbehave.integration.feature;
+package com.epam.reportportal.jbehave.integration.basic;
 
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Named;

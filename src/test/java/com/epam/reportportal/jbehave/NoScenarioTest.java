@@ -4,7 +4,7 @@
 
 package com.epam.reportportal.jbehave;
 
-import com.epam.reportportal.jbehave.integration.feature.EmptySteps;
+import com.epam.reportportal.jbehave.integration.basic.EmptySteps;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;

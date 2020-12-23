@@ -6,7 +6,7 @@ package com.epam.reportportal.jbehave.status;
 
 import com.epam.reportportal.jbehave.BaseTest;
 import com.epam.reportportal.jbehave.ReportPortalStepFormat;
-import com.epam.reportportal.jbehave.integration.feature.FailedSteps;
+import com.epam.reportportal.jbehave.integration.basic.FailedSteps;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
@@ -41,7 +41,7 @@ public class ItemStatusFailedSkippedTest extends BaseTest {
 		mockBatchLogging(client);
 	}
 
-	private static final String FAILED_SKIPPED_SCENARIO_PATH = "stories/FailedSkippedScenario.story";
+	private static final String FAILED_SKIPPED_SCENARIO_PATH = "stories/status/FailedSkippedScenario.story";
 
 	@Test
 	public void verify_a_step_failed_and_a_step_skipped_parent_status_calculated() {

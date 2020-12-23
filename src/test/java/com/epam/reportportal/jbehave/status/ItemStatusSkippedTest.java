@@ -42,7 +42,7 @@ public class ItemStatusSkippedTest extends BaseTest {
 		mockBatchLogging(client);
 	}
 
-	private static final String SKIPPED_SCENARIO_PATH = "stories/SkippedScenario.story";
+	private static final String SKIPPED_SCENARIO_PATH = "stories/status/SkippedScenario.story";
 
 	@Test
 	public void verify_a_step_skipped_parent_status_calculated() {

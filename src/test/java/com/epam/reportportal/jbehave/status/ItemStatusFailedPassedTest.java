@@ -6,11 +6,9 @@ package com.epam.reportportal.jbehave.status;
 
 import com.epam.reportportal.jbehave.BaseTest;
 import com.epam.reportportal.jbehave.ReportPortalStepFormat;
+import com.epam.reportportal.jbehave.integration.basic.EmptySteps;
 import com.epam.reportportal.jbehave.integration.basic.FailedSteps;
 import com.epam.reportportal.listeners.ItemStatus;
-import com.epam.reportportal.listeners.LogLevel;
-import com.epam.reportportal.restendpoint.http.MultiPartRequest;
-import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.reportportal.util.test.CommonUtils;
@@ -25,12 +23,11 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class ItemStatusSkippedFailedTest extends BaseTest {
+public class ItemStatusFailedPassedTest extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
@@ -45,11 +42,11 @@ public class ItemStatusSkippedFailedTest extends BaseTest {
 		mockBatchLogging(client);
 	}
 
-	private static final String SKIPPED_FAILED_SCENARIO_PATH = "stories/status/SkippedFailedScenario.story";
+	private static final String FAILED_PASSED_SCENARIO_PATH = "stories/status/FailedPassedScenario.story";
 
 	@Test
-	public void verify_a_step_skipped_and_a_step_failed_parent_status_calculated() {
-		run(format, SKIPPED_FAILED_SCENARIO_PATH, new FailedSteps());
+	public void verify_a_step_failed_and_a_step_passed_parent_status_calculated() {
+		run(format, FAILED_PASSED_SCENARIO_PATH, new FailedSteps(), new EmptySteps());
 
 		verify(client).startTestItem(any());
 		verify(client).startTestItem(same(storyId), any());
@@ -61,23 +58,17 @@ public class ItemStatusSkippedFailedTest extends BaseTest {
 		verify(client).finishTestItem(same(scenarioId), finishCaptor.capture());
 		verify(client).finishTestItem(same(storyId), finishCaptor.capture());
 
-		ArgumentCaptor<MultiPartRequest> logCaptor = ArgumentCaptor.forClass(MultiPartRequest.class);
-		verify(client, atLeast(1)).log(logCaptor.capture());
-
 		List<FinishTestItemRQ> finishItems = finishCaptor.getAllValues();
 		FinishTestItemRQ stepOneFinish = finishItems.get(0);
-		assertThat(stepOneFinish.getStatus(), equalTo(ItemStatus.SKIPPED.name()));
+		assertThat(stepOneFinish.getStatus(), equalTo(ItemStatus.FAILED.name()));
 
 		FinishTestItemRQ stepTwoFinish = finishItems.get(1);
 		assertThat(stepTwoFinish.getStatus(), equalTo(ItemStatus.SKIPPED.name()));
-		assertThat(stepTwoFinish.getIssue(), sameInstance(Launch.NOT_ISSUE));
-
-		verifyLogged(logCaptor, stepIds.get(1), LogLevel.WARN, "Step execution was skipped by JBehave, see previous steps for errors.");
 
 		FinishTestItemRQ scenarioFinish = finishItems.get(2);
-		assertThat(scenarioFinish.getStatus(), equalTo(ItemStatus.SKIPPED.name()));
+		assertThat(scenarioFinish.getStatus(), equalTo(ItemStatus.FAILED.name()));
 
 		FinishTestItemRQ storyFinish = finishItems.get(3);
-		assertThat(storyFinish.getStatus(), equalTo(ItemStatus.SKIPPED.name()));
+		assertThat(storyFinish.getStatus(), equalTo(ItemStatus.FAILED.name()));
 	}
 }
