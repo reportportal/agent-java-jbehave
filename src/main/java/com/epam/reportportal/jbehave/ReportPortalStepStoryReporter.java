@@ -23,6 +23,7 @@ import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.LaunchImpl;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.tree.TestItemTree;
+import com.epam.reportportal.utils.StatusEvaluation;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
@@ -446,43 +447,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	 */
 	@Nullable
 	protected ItemStatus evaluateStatus(@Nullable final ItemStatus currentStatus, @Nullable final ItemStatus childStatus) {
-		if (childStatus == null) {
-			return currentStatus;
-		}
-		ItemStatus status = ofNullable(currentStatus).orElse(childStatus);
-		switch (childStatus) {
-			case PASSED:
-			case SKIPPED:
-			case STOPPED:
-			case INFO:
-			case WARN:
-				return status;
-			case CANCELLED:
-				switch (status) {
-					case PASSED:
-					case SKIPPED:
-					case STOPPED:
-					case INFO:
-					case WARN:
-						return ItemStatus.CANCELLED;
-					default:
-						return currentStatus;
-				}
-			case INTERRUPTED:
-				switch (status) {
-					case PASSED:
-					case SKIPPED:
-					case STOPPED:
-					case INFO:
-					case WARN:
-					case CANCELLED:
-						return ItemStatus.INTERRUPTED;
-					default:
-						return currentStatus;
-				}
-			default:
-				return childStatus;
-		}
+		return StatusEvaluation.evaluateStatus(currentStatus, childStatus);
 	}
 
 	protected void evaluateAndFinishLastItem() {
