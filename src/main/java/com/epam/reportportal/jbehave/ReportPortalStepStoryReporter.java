@@ -384,7 +384,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 					String beforeMethodName = (String) entity.get();
 					TestItemTree.ItemTreeKey beforeMethodKey = ItemTreeUtils.createKey(beforeMethodName);
 					leafChain.add(ImmutablePair.of(beforeMethodKey, children.computeIfAbsent(beforeMethodKey,
-							k -> createLeaf(ItemType.BEFORE_SUITE, buildStartBeforeMethodRq(beforeMethodName, itemDate), parentId)
+							k -> createLeaf(ItemType.BEFORE_METHOD, buildStartBeforeMethodRq(beforeMethodName, itemDate), parentId)
 					)));
 					break;
 			}
