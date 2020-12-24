@@ -111,27 +111,41 @@ public class BaseTest {
 	}
 
 	public static void mockLaunch(@Nonnull final ReportPortalClient client, @Nullable final String launchUuid,
-			@Nullable final String suiteUuid, @Nonnull String testClassUuid, @Nonnull String stepUuid) {
-		mockLaunch(client, launchUuid, suiteUuid, testClassUuid, Collections.singleton(stepUuid));
+			@Nullable final String storyUuid, @Nonnull String testClassUuid, @Nonnull String stepUuid) {
+		mockLaunch(client, launchUuid, storyUuid, testClassUuid, Collections.singleton(stepUuid));
 	}
 
 	public static void mockLaunch(@Nonnull final ReportPortalClient client, @Nullable final String launchUuid,
-			@Nullable final String suiteUuid, @Nonnull String testClassUuid, @Nonnull Collection<String> stepList) {
-		mockLaunch(client, launchUuid, suiteUuid, Collections.singletonList(Pair.of(testClassUuid, stepList)));
+			@Nullable final String storyUuid, @Nonnull String testClassUuid, @Nonnull Collection<String> stepList) {
+		mockLaunch(client, launchUuid, storyUuid, Collections.singletonList(Pair.of(testClassUuid, stepList)));
 	}
 
-	@SuppressWarnings("unchecked")
 	public static <T extends Collection<String>> void mockLaunch(@Nonnull final ReportPortalClient client,
-			@Nullable final String launchUuid, @Nullable final String suiteUuid, @Nonnull final Collection<Pair<String, T>> testSteps) {
+			@Nullable final String launchUuid, @Nullable final String storyUuid, @Nonnull final Collection<Pair<String, T>> testSteps) {
 		String launch = ofNullable(launchUuid).orElse(CommonUtils.namedId("launch_"));
 		when(client.startLaunch(any())).thenReturn(createMaybe(new StartLaunchRS(launch, 1L)));
+		when(client.finishLaunch(eq(launch), any())).thenReturn(createMaybe(new OperationCompletionRS()));
 
-		String rootItemId = ofNullable(suiteUuid).map(s -> {
+		mockStory(client, storyUuid, testSteps);
+	}
+
+	public static <T extends Collection<String>> void mockStory(@Nonnull final ReportPortalClient client,
+			@Nullable final String storyUuid, @Nonnull final Collection<Pair<String, T>> testSteps) {
+		String rootItemId = ofNullable(storyUuid).map(s -> {
 			Maybe<ItemCreatedRS> suiteMaybe = createMaybe(new ItemCreatedRS(s, s));
 			when(client.startTestItem(any())).thenReturn(suiteMaybe);
 			return s;
 		}).orElseGet(() -> CommonUtils.namedId(ROOT_SUITE_PREFIX));
 
+		Maybe<OperationCompletionRS> rootFinishMaybe = createMaybe(new OperationCompletionRS());
+		when(client.finishTestItem(same(rootItemId), any())).thenReturn(rootFinishMaybe);
+
+		mockScenario(client, rootItemId, testSteps);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends Collection<String>> void mockScenario(@Nonnull final ReportPortalClient client,
+			@Nonnull final String storyUuid, @Nonnull final Collection<Pair<String, T>> testSteps) {
 		List<Maybe<ItemCreatedRS>> testResponses = testSteps.stream()
 				.map(Pair::getKey)
 				.map(uuid -> createMaybe(new ItemCreatedRS(uuid, uuid)))
@@ -139,7 +153,7 @@ public class BaseTest {
 
 		Maybe<ItemCreatedRS> first = testResponses.get(0);
 		Maybe<ItemCreatedRS>[] other = testResponses.subList(1, testResponses.size()).toArray(new Maybe[0]);
-		when(client.startTestItem(same(rootItemId), any())).thenReturn(first, other);
+		when(client.startTestItem(same(storyUuid), any())).thenReturn(first, other);
 
 		testSteps.forEach(test -> {
 			String testClassUuid = test.getKey();
@@ -155,16 +169,6 @@ public class BaseTest {
 					createMaybe(new OperationCompletionRS())));
 			when(client.finishTestItem(same(testClassUuid), any())).thenReturn(createMaybe(new OperationCompletionRS()));
 		});
-
-		ofNullable(suiteUuid).ifPresent(s -> {
-			Maybe<OperationCompletionRS> suiteFinishMaybe = createMaybe(new OperationCompletionRS());
-			when(client.finishTestItem(same(s), any())).thenReturn(suiteFinishMaybe);
-		});
-
-		Maybe<OperationCompletionRS> rootFinishMaybe = createMaybe(new OperationCompletionRS());
-		when(client.finishTestItem(eq(rootItemId), any())).thenReturn(rootFinishMaybe);
-
-		when(client.finishLaunch(eq(launch), any())).thenReturn(createMaybe(new OperationCompletionRS()));
 	}
 
 	public static void mockBatchLogging(final ReportPortalClient client) {

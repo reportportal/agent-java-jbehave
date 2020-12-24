@@ -21,6 +21,7 @@ dependencies {
     api 'com.github.reportportal:commons-model:5.0.0'
     api ('org.jbehave:jbehave-core:4.5.1') {
         exclude group: 'org.hamcrest'
+        exclude group: 'junit'
     }
     api 'com.google.code.findbugs:jsr305:3.0.2'
 

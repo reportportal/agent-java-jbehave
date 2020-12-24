@@ -20,7 +20,6 @@ import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.listeners.LogLevel;
 import com.epam.reportportal.service.Launch;
-import com.epam.reportportal.service.LaunchImpl;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.tree.TestItemTree;
 import com.epam.reportportal.utils.StatusEvaluation;
@@ -66,6 +65,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	private static final String EXAMPLE_PARAMETER_DELIMITER = PARAMETER_ITEMS_DELIMITER + " ";
 	private static final String EXAMPLE_KEY_VALUE_DELIMITER = CODE_REFERENCE_ITEM_TYPE_DELIMITER + " ";
 	private static final String NO_NAME = "No name";
+	private static final String BEFORE_STORIES = "BeforeStories";
 
 	private final Supplier<Launch> launch;
 	private final TestItemTree itemTree;
@@ -266,6 +266,37 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 		return rq;
 	}
 
+	/**
+	 * Extension point to customize before story creation event/request
+	 *
+	 * @param name a name
+	 * @return Request to ReportPortal
+	 */
+	@Nonnull
+	protected StartTestItemRQ buildStartBeforeStoryRq(@Nonnull final String name, @Nullable final Date startTime) {
+		StartTestItemRQ rq = new StartTestItemRQ();
+		rq.setName(name);
+		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
+		rq.setType(ItemType.SCENARIO.name());
+		return rq;
+	}
+
+	/**
+	 * Extension point to customize before method creation event/request
+	 *
+	 * @param name a name
+	 * @return Request to ReportPortal
+	 */
+	@Nonnull
+	protected StartTestItemRQ buildStartBeforeMethodRq(@Nonnull final String name, @Nullable final Date startTime) {
+		StartTestItemRQ rq = new StartTestItemRQ();
+		rq.setName(name);
+		rq.setCodeRef(name);
+		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
+		rq.setType(ItemType.STEP.name());
+		return rq;
+	}
+
 	protected TestItemTree.TestItemLeaf createLeaf(@Nonnull final ItemType type, @Nonnull final StartTestItemRQ rq,
 			@Nullable final Maybe<String> parentId) {
 		Launch myLaunch = launch.get();
@@ -342,6 +373,20 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 							parentId
 					))));
 					break;
+				case BEFORE_SUITE:
+					String beforeStoryName = (String) entity.get();
+					TestItemTree.ItemTreeKey beforeStoryKey = ItemTreeUtils.createKey(beforeStoryName);
+					leafChain.add(ImmutablePair.of(beforeStoryKey, children.computeIfAbsent(beforeStoryKey,
+							k -> createLeaf(ItemType.BEFORE_SUITE, buildStartBeforeStoryRq(beforeStoryName, itemDate), parentId)
+					)));
+					break;
+				case BEFORE_METHOD:
+					String beforeMethodName = (String) entity.get();
+					TestItemTree.ItemTreeKey beforeMethodKey = ItemTreeUtils.createKey(beforeMethodName);
+					leafChain.add(ImmutablePair.of(beforeMethodKey, children.computeIfAbsent(beforeMethodKey,
+							k -> createLeaf(ItemType.BEFORE_SUITE, buildStartBeforeMethodRq(beforeMethodName, itemDate), parentId)
+					)));
+					break;
 			}
 			previousEntity = entity;
 		}
@@ -377,6 +422,8 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 					leafChain.add(ImmutablePair.of(exampleKey, children.get(exampleKey)));
 					break;
 				case STEP:
+				case BEFORE_SUITE:
+				case BEFORE_METHOD:
 					TestItemTree.ItemTreeKey stepKey = ItemTreeUtils.createKey((String) entity.get());
 					leafChain.add(ImmutablePair.of(stepKey, children.get(stepKey)));
 					break;
@@ -485,8 +532,8 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	 *
 	 * @param thrown {@link Throwable} object with details of the failure
 	 */
-	protected void sendStackTraceToRP(@Nullable final Throwable thrown) {
-		ofNullable(thrown).ifPresent(t -> ReportPortal.emitLog(getLogSupplier(LogLevel.ERROR, ExceptionUtils.getStackTrace(t))));
+	protected void sendStackTraceToRP(@Nonnull Maybe<String> itemId, @Nullable final Throwable thrown) {
+		ofNullable(thrown).ifPresent(t -> ReportPortal.emitLog(itemId, getLogSupplier(LogLevel.ERROR, ExceptionUtils.getStackTrace(t))));
 	}
 
 	protected void finishStep(final @Nonnull TestItemTree.TestItemLeaf step, final @Nonnull ItemStatus status, @Nullable Issue issue) {
@@ -541,6 +588,10 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void beforeScenario(Scenario scenario) {
+		TestItemTree.TestItemLeaf previousItem = getLeaf();
+		if (previousItem != null && previousItem.getType() == ItemType.BEFORE_SUITE) {
+			evaluateAndFinishLastItem();
+		}
 		structure.add(new Entity<>(ItemType.SCENARIO, scenario));
 	}
 
@@ -611,8 +662,16 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 
 	@Override
 	public void failed(String step, Throwable cause) {
-		sendStackTraceToRP(cause);
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
+		if (item.getType() != ItemType.STEP) {
+			// failed @BeforeStory, @BeforeScenario, etc. (annotated) methods
+			if (item.getType() == ItemType.STORY) {
+				structure.add(new Entity<>(ItemType.BEFORE_SUITE, BEFORE_STORIES));
+			}
+			structure.add(new Entity<>(ItemType.BEFORE_METHOD, step));
+			item = retrieveLeaf();
+		}
+		sendStackTraceToRP(item.getItemId(), cause);
 		structure.pollLast();
 		finishStep(item, ItemStatus.FAILED);
 	}
@@ -621,8 +680,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	public void pending(String step) {
 		structure.add(new Entity<>(ItemType.STEP, step));
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
-		ReportPortal.emitLog(
-				item.getItemId(),
+		ReportPortal.emitLog(item.getItemId(),
 				getLogSupplier(LogLevel.WARN, String.format("Unable to locate a step implementation: '%s'", step))
 		);
 		structure.pollLast();
