@@ -75,7 +75,7 @@ public class VerifyAfterStoryAnnotationFailed extends BaseTest {
 		assertThat(scenarioStart.getType(), equalTo(ItemType.SCENARIO.name()));
 
 		StartTestItemRQ beforeStoryStart = startItems.get(1);
-		assertThat(beforeStoryStart.getName(), equalTo("AfterStories"));
+		assertThat(beforeStoryStart.getName(), equalTo("AfterStory"));
 		assertThat(beforeStoryStart.getCodeRef(), nullValue());
 		assertThat(beforeStoryStart.getType(), equalTo(ItemType.TEST.name()));
 

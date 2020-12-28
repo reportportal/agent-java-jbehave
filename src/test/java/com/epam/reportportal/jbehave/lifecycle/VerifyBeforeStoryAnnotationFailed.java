@@ -68,7 +68,7 @@ public class VerifyBeforeStoryAnnotationFailed extends BaseTest {
 		// Start items verification
 		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
 		StartTestItemRQ beforeStoryStart = startItems.get(0);
-		assertThat(beforeStoryStart.getName(), equalTo("BeforeStories"));
+		assertThat(beforeStoryStart.getName(), equalTo("BeforeStory"));
 		assertThat(beforeStoryStart.getCodeRef(), nullValue());
 		assertThat(beforeStoryStart.getType(), equalTo(ItemType.TEST.name()));
 
