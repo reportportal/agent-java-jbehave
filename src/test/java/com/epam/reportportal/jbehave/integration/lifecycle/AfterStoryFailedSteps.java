@@ -4,7 +4,7 @@
 
 package com.epam.reportportal.jbehave.integration.lifecycle;
 
-import org.jbehave.core.annotations.BeforeStory;
+import org.jbehave.core.annotations.AfterStory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +13,7 @@ public class AfterStoryFailedSteps {
 
 	public static final String ERROR_MESSAGE = "A failed after story step";
 
-	@BeforeStory
+	@AfterStory
 	public void afterStoryFailed() {
 		LOGGER.info("Inside 'afterStoryFailed'");
 		throw new IllegalStateException(ERROR_MESSAGE);

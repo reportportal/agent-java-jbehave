@@ -66,11 +66,12 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	private static final String EXAMPLE_KEY_VALUE_DELIMITER = CODE_REFERENCE_ITEM_TYPE_DELIMITER + " ";
 	private static final String NO_NAME = "No name";
 	private static final String BEFORE_STORIES = "BeforeStories";
-
-	private final Supplier<Launch> launch;
-	private final TestItemTree itemTree;
+	private static final String AFTER_STORIES = "AfterStories";
 
 	private final Deque<Entity<?>> structure = new LinkedList<>();
+	private final Supplier<Launch> launch;
+	private final TestItemTree itemTree;
+	private volatile ItemType currentLifecycleItemType;
 
 	public ReportPortalStepStoryReporter(final Supplier<Launch> launchSupplier, TestItemTree testItemTree) {
 		launch = launchSupplier;
@@ -88,7 +89,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 				ItemType entityType = item.getValue().getType();
 				TestItemTree.ItemTreeKey key = item.getKey();
 				sb.append(CODE_REFERENCE_ITEM_START)
-						.append(entityType != ItemType.TEST ? entityType.name() : EXAMPLE)
+						.append(entityType != ItemType.SUITE ? entityType.name() : EXAMPLE)
 						.append(CODE_REFERENCE_ITEM_TYPE_DELIMITER)
 						.append(key.getName())
 						.append(CODE_REFERENCE_ITEM_END);
@@ -106,7 +107,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 			sb.append(getBaseCodeRef(parents))
 					.append(CODE_REFERENCE_DELIMITER)
 					.append(CODE_REFERENCE_ITEM_START)
-					.append(type != ItemType.TEST ? type.name() : EXAMPLE)
+					.append(type != ItemType.SUITE ? type.name() : EXAMPLE)
 					.append(CODE_REFERENCE_ITEM_TYPE_DELIMITER)
 					.append(key.getName())
 					.append(CODE_REFERENCE_ITEM_END);
@@ -267,33 +268,37 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	}
 
 	/**
-	 * Extension point to customize before story creation event/request
+	 * Extension point to customize lifecycle suite (before/after) creation event/request
 	 *
-	 * @param name a name
+	 * @param name      a lifecycle suite name
+	 * @param startTime item start time
 	 * @return Request to ReportPortal
 	 */
 	@Nonnull
-	protected StartTestItemRQ buildStartBeforeStoryRq(@Nonnull final String name, @Nullable final Date startTime) {
+	protected StartTestItemRQ buildLifecycleSuiteStartRq(@Nonnull final String name, @Nullable final Date startTime) {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(name);
 		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
-		rq.setType(ItemType.SCENARIO.name());
+		rq.setType(ItemType.TEST.name());
 		return rq;
 	}
 
 	/**
-	 * Extension point to customize before method creation event/request
+	 * Extension point to customize lifecycle method (before/after) creation event/request
 	 *
-	 * @param name a name
+	 * @param type      item type
+	 * @param name      a lifecycle method name
+	 * @param startTime item start time
 	 * @return Request to ReportPortal
 	 */
 	@Nonnull
-	protected StartTestItemRQ buildStartBeforeMethodRq(@Nonnull final String name, @Nullable final Date startTime) {
+	protected StartTestItemRQ buildLifecycleMethodStartRq(@Nonnull final ItemType type, @Nonnull final String name,
+			@Nullable final Date startTime) {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(name);
 		rq.setCodeRef(name);
 		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
-		rq.setType(ItemType.STEP.name());
+		rq.setType(type.name());
 		return rq;
 	}
 
@@ -350,21 +355,21 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 							parentId
 					))));
 					break;
-				case TEST: // type TEST == an Example
+				case SUITE: // type SUITE == an Example
 					Map<String, String> example = (Map<String, String>) entity.get();
 					TestItemTree.ItemTreeKey exampleKey = ItemTreeUtils.createKey(example);
 					leafChain.add(ImmutablePair.of(exampleKey,
 							children.computeIfAbsent(
 									exampleKey,
-									k -> createLeaf(ItemType.TEST,
-											buildStartExampleRq(example, getCodeRef(leafChain, k, ItemType.TEST), itemDate),
+									k -> createLeaf(ItemType.SUITE,
+											buildStartExampleRq(example, getCodeRef(leafChain, k, ItemType.SUITE), itemDate),
 											parentId
 									)
 							)
 					));
 					break;
 				case STEP:
-					boolean hasExample = ofNullable(previousEntity).map(e -> e.type).orElse(null) == ItemType.TEST;
+					boolean hasExample = ofNullable(previousEntity).map(e -> e.type).orElse(null) == ItemType.SUITE;
 					Map<String, String> stepParams = hasExample ? (Map<String, String>) previousEntity.get() : null;
 					String stepName = (String) entity.get();
 					TestItemTree.ItemTreeKey stepKey = ItemTreeUtils.createKey(stepName);
@@ -373,18 +378,23 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 							parentId
 					))));
 					break;
-				case BEFORE_SUITE:
-					String beforeStoryName = (String) entity.get();
-					TestItemTree.ItemTreeKey beforeStoryKey = ItemTreeUtils.createKey(beforeStoryName);
-					leafChain.add(ImmutablePair.of(beforeStoryKey, children.computeIfAbsent(beforeStoryKey,
-							k -> createLeaf(ItemType.BEFORE_SUITE, buildStartBeforeStoryRq(beforeStoryName, itemDate), parentId)
+				case TEST: // type TEST == a lifecycle SUITE
+					String lifecycleSuiteName = (String) entity.get();
+					TestItemTree.ItemTreeKey lifecycleSuiteKey = ItemTreeUtils.createKey(lifecycleSuiteName);
+					leafChain.add(ImmutablePair.of(lifecycleSuiteKey, children.computeIfAbsent(lifecycleSuiteKey,
+							k -> createLeaf(itemType, buildLifecycleSuiteStartRq(lifecycleSuiteName, itemDate), parentId)
 					)));
 					break;
 				case BEFORE_METHOD:
-					String beforeMethodName = (String) entity.get();
-					TestItemTree.ItemTreeKey beforeMethodKey = ItemTreeUtils.createKey(beforeMethodName);
-					leafChain.add(ImmutablePair.of(beforeMethodKey, children.computeIfAbsent(beforeMethodKey,
-							k -> createLeaf(ItemType.BEFORE_METHOD, buildStartBeforeMethodRq(beforeMethodName, itemDate), parentId)
+				case BEFORE_TEST:
+				case BEFORE_SUITE:
+				case AFTER_SUITE:
+				case AFTER_TEST:
+				case AFTER_METHOD:
+					String lifecycleMethodName = (String) entity.get();
+					TestItemTree.ItemTreeKey lifecycleMethodKey = ItemTreeUtils.createKey(lifecycleMethodName);
+					leafChain.add(ImmutablePair.of(lifecycleMethodKey, children.computeIfAbsent(lifecycleMethodKey,
+							k -> createLeaf(itemType, buildLifecycleMethodStartRq(itemType, lifecycleMethodName, itemDate), parentId)
 					)));
 					break;
 			}
@@ -417,13 +427,11 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 					TestItemTree.ItemTreeKey scenarioKey = ItemTreeUtils.createKey(getScenarioName((Scenario) entity.get()));
 					leafChain.add(ImmutablePair.of(scenarioKey, children.get(scenarioKey)));
 					break;
-				case TEST: // type TEST == an Example
+				case SUITE: // type SUITE == an Example
 					TestItemTree.ItemTreeKey exampleKey = ItemTreeUtils.createKey((Map<String, String>) entity.get());
 					leafChain.add(ImmutablePair.of(exampleKey, children.get(exampleKey)));
 					break;
-				case STEP:
-				case BEFORE_SUITE:
-				case BEFORE_METHOD:
+				default:
 					TestItemTree.ItemTreeKey stepKey = ItemTreeUtils.createKey((String) entity.get());
 					leafChain.add(ImmutablePair.of(stepKey, children.get(stepKey)));
 					break;
@@ -570,6 +578,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void beforeStory(Story story, boolean givenStory) {
+		currentLifecycleItemType = ItemType.BEFORE_SUITE;
 		structure.add(new Entity<>(ItemType.STORY, story));
 	}
 
@@ -578,6 +587,10 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void afterStory(boolean givenStory) {
+		TestItemTree.TestItemLeaf previousItem = getLeaf();
+		if (previousItem != null && previousItem.getType() == ItemType.TEST) {
+			evaluateAndFinishLastItem();
+		}
 		evaluateAndFinishLastItem();
 	}
 
@@ -589,9 +602,10 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	@Override
 	public void beforeScenario(Scenario scenario) {
 		TestItemTree.TestItemLeaf previousItem = getLeaf();
-		if (previousItem != null && previousItem.getType() == ItemType.BEFORE_SUITE) {
+		if (previousItem != null && previousItem.getType() == ItemType.TEST) {
 			evaluateAndFinishLastItem();
 		}
+		currentLifecycleItemType = ItemType.BEFORE_TEST;
 		structure.add(new Entity<>(ItemType.SCENARIO, scenario));
 	}
 
@@ -600,6 +614,11 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void afterScenario() {
+		TestItemTree.TestItemLeaf previousItem = getLeaf();
+		if (previousItem != null && previousItem.getType() == ItemType.TEST) {
+			evaluateAndFinishLastItem();
+		}
+		currentLifecycleItemType = ItemType.AFTER_SUITE;
 		evaluateAndFinishLastItem();
 	}
 
@@ -610,17 +629,13 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void beforeStep(String step) {
-		structure.add(new Entity<>(ItemType.STEP, step));
-		retrieveLeaf();
-	}
-
-	@Override
-	public void example(Map<String, String> tableRow, int exampleIndex) {
-		Entity<?> e = structure.getLast();
-		if (e.type() == ItemType.TEST) {
+		TestItemTree.TestItemLeaf previousItem = getLeaf();
+		if (previousItem != null && previousItem.getType() == ItemType.TEST) {
 			evaluateAndFinishLastItem();
 		}
-		structure.add(new Entity<>(ItemType.TEST, tableRow)); // type TEST is used for Examples
+		currentLifecycleItemType = ItemType.BEFORE_METHOD;
+		structure.add(new Entity<>(ItemType.STEP, step));
+		retrieveLeaf();
 	}
 
 	@Override
@@ -629,7 +644,20 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	}
 
 	@Override
+	public void example(Map<String, String> tableRow, int exampleIndex) {
+		TestItemTree.TestItemLeaf previousItem = getLeaf();
+		if (previousItem != null && (previousItem.getType() == ItemType.TEST || previousItem.getType() == ItemType.SUITE)) {
+			evaluateAndFinishLastItem();
+		}
+		structure.add(new Entity<>(ItemType.SUITE, tableRow)); // type SUITE is used for Examples
+	}
+
+	@Override
 	public void afterExamples() {
+		TestItemTree.TestItemLeaf previousItem = getLeaf();
+		if (previousItem != null && previousItem.getType() == ItemType.TEST) {
+			evaluateAndFinishLastItem();
+		}
 		evaluateAndFinishLastItem();
 	}
 
@@ -638,15 +666,34 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void successful(String step) {
+		currentLifecycleItemType = ItemType.AFTER_TEST;
 		finishLastItem(ItemStatus.PASSED);
+	}
+
+	@Override
+	public void failed(String step, Throwable cause) {
+		TestItemTree.TestItemLeaf item = retrieveLeaf();
+		if (item.getType() != ItemType.STEP) {
+			// failed @BeforeStory, @BeforeScenario, etc. (annotated) methods
+			if (item.getType() == ItemType.STORY) {
+				structure.add(new Entity<>(ItemType.TEST,
+						currentLifecycleItemType == ItemType.BEFORE_SUITE ? BEFORE_STORIES : AFTER_STORIES
+				));
+			}
+			structure.add(new Entity<>(currentLifecycleItemType, step));
+			item = retrieveLeaf();
+		}
+		sendStackTraceToRP(item.getItemId(), cause);
+		finishStep(item, ItemStatus.FAILED);
+		structure.pollLast();
 	}
 
 	@Override
 	public void ignorable(String step) {
 		structure.add(new Entity<>(ItemType.STEP, step));
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
-		structure.pollLast();
 		finishStep(item, ItemStatus.SKIPPED);
+		structure.pollLast();
 	}
 
 	@Override
@@ -658,22 +705,6 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 		);
 		structure.pollLast();
 		finishStep(item, ItemStatus.SKIPPED, Launch.NOT_ISSUE);
-	}
-
-	@Override
-	public void failed(String step, Throwable cause) {
-		TestItemTree.TestItemLeaf item = retrieveLeaf();
-		if (item.getType() != ItemType.STEP) {
-			// failed @BeforeStory, @BeforeScenario, etc. (annotated) methods
-			if (item.getType() == ItemType.STORY) {
-				structure.add(new Entity<>(ItemType.BEFORE_SUITE, BEFORE_STORIES));
-			}
-			structure.add(new Entity<>(ItemType.BEFORE_METHOD, step));
-			item = retrieveLeaf();
-		}
-		sendStackTraceToRP(item.getItemId(), cause);
-		structure.pollLast();
-		finishStep(item, ItemStatus.FAILED);
 	}
 
 	@Override

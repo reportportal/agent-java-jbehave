@@ -30,15 +30,15 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class VerifyBeforeStoryAnnotation extends BaseTest {
+public class VerifyBeforeStoryAnnotationFailed extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
-	private final String beforeScenarioId = CommonUtils.namedId("before_scenario_");
+	private final String beforeStoryId = CommonUtils.namedId("before_scenario_");
 	private final String beforeStepId = CommonUtils.namedId("before_step_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final String stepId = CommonUtils.namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(beforeScenarioId, Collections.singletonList(beforeStepId)),
+	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(beforeStoryId, Collections.singletonList(beforeStepId)),
 			Pair.of(scenarioId, Collections.singletonList(stepId))
 	);
 
@@ -62,7 +62,7 @@ public class VerifyBeforeStoryAnnotation extends BaseTest {
 		verify(client).startTestItem(any());
 		ArgumentCaptor<StartTestItemRQ> startCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
 		verify(client, times(2)).startTestItem(same(storyId), startCaptor.capture());
-		verify(client).startTestItem(same(beforeScenarioId), startCaptor.capture());
+		verify(client).startTestItem(same(beforeStoryId), startCaptor.capture());
 		verify(client).startTestItem(same(scenarioId), startCaptor.capture());
 
 		// Start items verification
@@ -70,7 +70,7 @@ public class VerifyBeforeStoryAnnotation extends BaseTest {
 		StartTestItemRQ beforeStoryStart = startItems.get(0);
 		assertThat(beforeStoryStart.getName(), equalTo("BeforeStories"));
 		assertThat(beforeStoryStart.getCodeRef(), nullValue());
-		assertThat(beforeStoryStart.getType(), equalTo(ItemType.SCENARIO.name()));
+		assertThat(beforeStoryStart.getType(), equalTo(ItemType.TEST.name()));
 
 		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", DEFAULT_SCENARIO_NAME);
 		StartTestItemRQ scenarioStart = startItems.get(1);
@@ -82,7 +82,7 @@ public class VerifyBeforeStoryAnnotation extends BaseTest {
 		String beforeStepCodeRef = BeforeStoryFailedSteps.class.getCanonicalName() + ".beforeStoryFailed()";
 		assertThat(beforeStep.getName(), equalTo(beforeStepCodeRef));
 		assertThat(beforeStep.getCodeRef(), equalTo(beforeStepCodeRef));
-		assertThat(beforeStep.getType(), equalTo(ItemType.STEP.name()));
+		assertThat(beforeStep.getType(), equalTo(ItemType.BEFORE_SUITE.name()));
 
 		StartTestItemRQ step = startItems.get(3);
 		String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAME);
@@ -94,7 +94,7 @@ public class VerifyBeforeStoryAnnotation extends BaseTest {
 		ArgumentCaptor<FinishTestItemRQ> finishStepCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
 		verify(client).finishTestItem(same(beforeStepId), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(stepId), finishStepCaptor.capture());
-		verify(client).finishTestItem(same(beforeScenarioId), finishStepCaptor.capture());
+		verify(client).finishTestItem(same(beforeStoryId), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(scenarioId), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(storyId), finishStepCaptor.capture());
 
