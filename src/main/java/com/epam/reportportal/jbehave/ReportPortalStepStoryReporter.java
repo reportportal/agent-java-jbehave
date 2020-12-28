@@ -340,15 +340,10 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 				case STORY:
 					Story story = (Story) entity.get();
 					TestItemTree.ItemTreeKey storyKey = ItemTreeUtils.createKey(story);
-					leafChain.add(ImmutablePair.of(storyKey,
-							children.computeIfAbsent(
-									storyKey,
-									k -> createLeaf(ItemType.STORY,
-											buildStartStoryRq(story, getCodeRef(leafChain, k, ItemType.STORY), itemDate),
-											parentId
-									)
-							)
-					));
+					leafChain.add(ImmutablePair.of(storyKey, children.computeIfAbsent(storyKey, k -> createLeaf(ItemType.STORY,
+							buildStartStoryRq(story, getCodeRef(leafChain, k, ItemType.STORY), itemDate),
+							parentId
+					))));
 					break;
 				case SCENARIO:
 					Scenario scenario = (Scenario) entity.get();
@@ -361,15 +356,10 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 				case SUITE: // type SUITE == an Example
 					Map<String, String> example = (Map<String, String>) entity.get();
 					TestItemTree.ItemTreeKey exampleKey = ItemTreeUtils.createKey(example);
-					leafChain.add(ImmutablePair.of(exampleKey,
-							children.computeIfAbsent(
-									exampleKey,
-									k -> createLeaf(ItemType.SUITE,
-											buildStartExampleRq(example, getCodeRef(leafChain, k, ItemType.SUITE), itemDate),
-											parentId
-									)
-							)
-					));
+					leafChain.add(ImmutablePair.of(exampleKey, children.computeIfAbsent(exampleKey, k -> createLeaf(ItemType.SUITE,
+							buildStartExampleRq(example, getCodeRef(leafChain, k, ItemType.SUITE), itemDate),
+							parentId
+					))));
 					break;
 				case STEP:
 					boolean hasExample = ofNullable(previousEntity).map(e -> e.type).orElse(null) == ItemType.SUITE;
@@ -584,7 +574,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void beforeStory(Story story, boolean givenStory) {
-		currentLifecycleItemType = ItemType.BEFORE_SUITE;
+		currentLifecycleItemType = AFTER_STORIES.equals(story.getName()) ? ItemType.AFTER_SUITE : ItemType.BEFORE_SUITE;
 		structure.add(new Entity<>(ItemType.STORY, story));
 	}
 
