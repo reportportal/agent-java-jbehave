@@ -66,8 +66,8 @@ import static org.mockito.Mockito.when;
 public class BaseTest {
 	public static final String ROOT_SUITE_PREFIX = "root_";
 
-	public static void run(@Nonnull final Class<?> clazz, @Nonnull final Format format, @Nonnull final List<String> stories, @Nonnull final StoryParser parser,
-			@Nullable final Object... steps) {
+	public static void run(@Nonnull final Class<?> clazz, @Nonnull final Format format, @Nonnull final List<String> stories,
+			@Nonnull final StoryParser parser, @Nullable final Object... steps) {
 		Properties viewResources = new Properties();
 
 		Embedder embedder = new Embedder();
@@ -129,18 +129,32 @@ public class BaseTest {
 		mockStory(client, storyUuid, testSteps);
 	}
 
-	public static <T extends Collection<String>> void mockStory(@Nonnull final ReportPortalClient client,
-			@Nullable final String storyUuid, @Nonnull final Collection<Pair<String, T>> testSteps) {
-		String rootItemId = ofNullable(storyUuid).map(s -> {
-			Maybe<ItemCreatedRS> suiteMaybe = createMaybe(new ItemCreatedRS(s, s));
-			when(client.startTestItem(any())).thenReturn(suiteMaybe);
-			return s;
-		}).orElseGet(() -> CommonUtils.namedId(ROOT_SUITE_PREFIX));
+	public static <T extends Collection<String>> void mockStory(@Nonnull final ReportPortalClient client, @Nullable final String storyUuid,
+			@Nonnull final Collection<Pair<String, T>> testSteps) {
+		String rootItemId = ofNullable(storyUuid).orElseGet(() -> CommonUtils.namedId(ROOT_SUITE_PREFIX));
+		mockStories(client, Collections.singletonList(Pair.of(rootItemId, testSteps)));
+	}
 
-		Maybe<OperationCompletionRS> rootFinishMaybe = createMaybe(new OperationCompletionRS());
-		when(client.finishTestItem(same(rootItemId), any())).thenReturn(rootFinishMaybe);
+	@SuppressWarnings("unchecked")
+	public static <T extends Collection<String>> void mockStories(@Nonnull final ReportPortalClient client,
+			@Nonnull final List<Pair<String, Collection<Pair<String, T>>>> stories) {
+		if (stories.isEmpty()) {
+			return;
+		}
+		String firstStory = stories.get(0).getKey();
+		Maybe<ItemCreatedRS> first = createMaybe(new ItemCreatedRS(firstStory, firstStory));
+		Maybe<ItemCreatedRS>[] other = (Maybe<ItemCreatedRS>[]) stories.subList(1, stories.size())
+				.stream()
+				.map(Pair::getKey)
+				.map(s -> createMaybe(new ItemCreatedRS(s, s)))
+				.toArray(Maybe[]::new);
+		when(client.startTestItem(any())).thenReturn(first, other);
 
-		mockScenario(client, rootItemId, testSteps);
+		stories.forEach(i -> {
+			Maybe<OperationCompletionRS> rootFinishMaybe = createMaybe(new OperationCompletionRS());
+			when(client.finishTestItem(same(i.getKey()), any())).thenReturn(rootFinishMaybe);
+			mockScenario(client, i.getKey(), i.getValue());
+		});
 	}
 
 	@SuppressWarnings("unchecked")

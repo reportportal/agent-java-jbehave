@@ -67,6 +67,8 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	private static final String NO_NAME = "No name";
 	private static final String BEFORE_STORIES = "BeforeStories";
 	private static final String AFTER_STORIES = "AfterStories";
+	private static final String BEFORE_STORY = "BeforeStory";
+	private static final String AFTER_STORY = "AfterStory";
 
 	private final Deque<Entity<?>> structure = new LinkedList<>();
 	private final Supplier<Launch> launch;
@@ -313,6 +315,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	}
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	protected TestItemTree.TestItemLeaf retrieveLeaf() {
 		final List<Pair<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf>> leafChain = new ArrayList<>();
 		Entity<?> previousEntity = null;
@@ -404,6 +407,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	}
 
 	@SuppressWarnings("unchecked")
+	@Nullable
 	protected TestItemTree.TestItemLeaf getLeaf() {
 		final List<Pair<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf>> leafChain = new ArrayList<>();
 		for (Entity<?> entity : structure) {
@@ -437,7 +441,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 					break;
 			}
 		}
-		return leafChain.get(leafChain.size() - 1).getValue();
+		return leafChain.isEmpty() ? null : leafChain.get(leafChain.size() - 1).getValue();
 	}
 
 	/**
@@ -560,8 +564,10 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	protected void simulateStep(String step) {
 		structure.add(new Entity<>(ItemType.STEP, step));
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
-		structure.pollLast();
-		finishStep(item, ItemStatus.SKIPPED);
+		ofNullable(item).ifPresent(i -> {
+			structure.pollLast();
+			finishStep(i, ItemStatus.SKIPPED);
+		});
 	}
 
 	@Override
@@ -673,49 +679,58 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	@Override
 	public void failed(String step, Throwable cause) {
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
-		if (item.getType() != ItemType.STEP) {
-			// failed @BeforeStory, @BeforeScenario, etc. (annotated) methods
-			if (item.getType() == ItemType.STORY) {
-				structure.add(new Entity<>(ItemType.TEST,
-						currentLifecycleItemType == ItemType.BEFORE_SUITE ? BEFORE_STORIES : AFTER_STORIES
-				));
+		if (item == null || item.getType() != ItemType.STEP) {
+			if (item == null) {
+				// failed @BeforeStories (annotated) methods
+				structure.add(new Entity<>(ItemType.TEST, currentLifecycleItemType == null ? BEFORE_STORIES : AFTER_STORIES));
+			} else if (item.getType() == ItemType.STORY) {
+				// failed @BeforeStory, @BeforeScenario (annotated) methods
+				structure.add(new Entity<>(ItemType.TEST, currentLifecycleItemType == ItemType.BEFORE_SUITE ? BEFORE_STORY : AFTER_STORY));
 			}
 			structure.add(new Entity<>(currentLifecycleItemType, step));
 			item = retrieveLeaf();
 		}
-		sendStackTraceToRP(item.getItemId(), cause);
-		finishStep(item, ItemStatus.FAILED);
-		structure.pollLast();
+		ofNullable(item).ifPresent(i -> {
+			sendStackTraceToRP(i.getItemId(), cause);
+			finishStep(i, ItemStatus.FAILED);
+			structure.pollLast();
+		});
 	}
 
 	@Override
 	public void ignorable(String step) {
 		structure.add(new Entity<>(ItemType.STEP, step));
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
-		finishStep(item, ItemStatus.SKIPPED);
-		structure.pollLast();
+		ofNullable(item).ifPresent(i -> {
+			finishStep(i, ItemStatus.SKIPPED);
+			structure.pollLast();
+		});
 	}
 
 	@Override
 	public void notPerformed(String step) {
 		structure.add(new Entity<>(ItemType.STEP, step));
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
-		ReportPortal.emitLog(item.getItemId(),
-				getLogSupplier(LogLevel.WARN, "Step execution was skipped by JBehave, see previous steps for errors.")
-		);
-		structure.pollLast();
-		finishStep(item, ItemStatus.SKIPPED, Launch.NOT_ISSUE);
+		ofNullable(item).ifPresent(i -> {
+			ReportPortal.emitLog(i.getItemId(),
+					getLogSupplier(LogLevel.WARN, "Step execution was skipped by JBehave, see previous steps for errors.")
+			);
+			finishStep(i, ItemStatus.SKIPPED, Launch.NOT_ISSUE);
+			structure.pollLast();
+		});
 	}
 
 	@Override
 	public void pending(String step) {
 		structure.add(new Entity<>(ItemType.STEP, step));
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
-		ReportPortal.emitLog(item.getItemId(),
-				getLogSupplier(LogLevel.WARN, String.format("Unable to locate a step implementation: '%s'", step))
-		);
-		structure.pollLast();
-		finishStep(item, ItemStatus.SKIPPED);
+		ofNullable(item).ifPresent(i -> {
+			ReportPortal.emitLog(item.getItemId(),
+					getLogSupplier(LogLevel.WARN, String.format("Unable to locate a step implementation: '%s'", step))
+			);
+			finishStep(item, ItemStatus.SKIPPED);
+			structure.pollLast();
+		});
 	}
 
 	@Override
