@@ -175,13 +175,13 @@ public class BaseTest {
 					.stream()
 					.map(uuid -> createMaybe(new ItemCreatedRS(uuid, uuid)))
 					.collect(Collectors.toList());
-
-			Maybe<ItemCreatedRS> myFirst = stepResponses.get(0);
-			Maybe<ItemCreatedRS>[] myOther = stepResponses.subList(1, stepResponses.size()).toArray(new Maybe[0]);
-			when(client.startTestItem(same(testClassUuid), any())).thenReturn(myFirst, myOther);
-			new HashSet<>(test.getValue()).forEach(testMethodUuid -> when(client.finishTestItem(same(testMethodUuid), any())).thenReturn(
-					createMaybe(new OperationCompletionRS())));
 			when(client.finishTestItem(same(testClassUuid), any())).thenReturn(createMaybe(new OperationCompletionRS()));
+			if(!stepResponses.isEmpty()) {
+				Maybe<ItemCreatedRS> myFirst = stepResponses.get(0);
+				Maybe<ItemCreatedRS>[] myOther = stepResponses.subList(1, stepResponses.size()).toArray(new Maybe[0]);
+				when(client.startTestItem(same(testClassUuid), any())).thenReturn(myFirst, myOther);
+				new HashSet<>(test.getValue()).forEach(testMethodUuid -> when(client.finishTestItem(same(testMethodUuid), any())).thenReturn(createMaybe(new OperationCompletionRS())));
+			}
 		});
 	}
 
