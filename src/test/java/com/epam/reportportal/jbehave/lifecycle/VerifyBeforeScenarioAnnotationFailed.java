@@ -38,8 +38,7 @@ public class VerifyBeforeScenarioAnnotationFailed extends BaseTest {
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final String stepId = CommonUtils.namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(
-			scenarioId,
+	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(scenarioId,
 			Arrays.asList(beforeStepId, stepId)
 	));
 

@@ -30,7 +30,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
-public class ExamplesTest extends BaseTest{
+public class ExamplesTest extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");

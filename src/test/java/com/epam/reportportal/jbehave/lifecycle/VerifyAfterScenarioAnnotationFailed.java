@@ -8,10 +8,8 @@ import com.epam.reportportal.jbehave.BaseTest;
 import com.epam.reportportal.jbehave.ReportPortalStepFormat;
 import com.epam.reportportal.jbehave.integration.basic.EmptySteps;
 import com.epam.reportportal.jbehave.integration.lifecycle.AfterScenarioFailedSteps;
-import com.epam.reportportal.jbehave.integration.lifecycle.BeforeScenarioFailedSteps;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.ItemType;
-import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.reportportal.util.test.CommonUtils;
@@ -27,9 +25,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
 public class VerifyAfterScenarioAnnotationFailed extends BaseTest {
@@ -39,8 +37,7 @@ public class VerifyAfterScenarioAnnotationFailed extends BaseTest {
 	private final String afterStepId = CommonUtils.namedId("after_scenario_step_");
 	private final String stepId = CommonUtils.namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(
-			scenarioId,
+	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(scenarioId,
 			Arrays.asList(stepId, afterStepId)
 	));
 
