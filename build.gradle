@@ -19,7 +19,7 @@ repositories {
 dependencies {
     api 'com.epam.reportportal:client-java:5.0.18'
     api 'com.github.reportportal:commons-model:5.0.0'
-    api ('org.jbehave:jbehave-core:4.5.1') {
+    api ('org.jbehave:jbehave-core:4.8.1') {
         exclude group: 'org.hamcrest'
         exclude group: 'junit'
     }
