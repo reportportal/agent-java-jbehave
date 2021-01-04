@@ -52,6 +52,7 @@ import static java.util.Optional.ofNullable;
  * JBehave Reporter for reporting results into ReportPortal. Requires using
  */
 public class ReportPortalStepStoryReporter extends NullStoryReporter {
+	private static final String CODE_REF = "CODE_REF";
 	private static final String CODE_REFERENCE_DELIMITER = "/";
 	private static final String CODE_REFERENCE_ITEM_TYPE_DELIMITER = ":";
 	private static final String PARAMETER_ITEMS_DELIMITER = ";";
@@ -69,44 +70,25 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	private static final String AFTER_STORIES = "AfterStories";
 	private static final String BEFORE_STORY = "BeforeStory";
 	private static final String AFTER_STORY = "AfterStory";
+	private static final String PARAMETERS = "PARAMETERS";
 
 	private final Deque<Entity<?>> structure = new LinkedList<>();
 	private final Supplier<Launch> launch;
 	private final TestItemTree itemTree;
 	private volatile ItemType currentLifecycleItemType;
+	private volatile TestItemTree.TestItemLeaf currentStep;
 
 	public ReportPortalStepStoryReporter(final Supplier<Launch> launchSupplier, TestItemTree testItemTree) {
 		launch = launchSupplier;
 		itemTree = testItemTree;
 	}
 
-	private String getBaseCodeRef(@Nonnull final List<Pair<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf>> parents) {
+	private String getCodeRef(@Nullable final String parentCodeRef, @Nonnull final TestItemTree.ItemTreeKey key, ItemType type) {
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < parents.size(); i++) {
-			if (i == 0) {
-				sb.append(parents.get(i).getKey().getName());
-			} else {
-				sb.append(CODE_REFERENCE_DELIMITER);
-				Pair<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf> item = parents.get(i);
-				ItemType entityType = item.getValue().getType();
-				TestItemTree.ItemTreeKey key = item.getKey();
-				sb.append(CODE_REFERENCE_ITEM_START)
-						.append(entityType != ItemType.SUITE ? entityType.name() : EXAMPLE)
-						.append(CODE_REFERENCE_ITEM_TYPE_DELIMITER)
-						.append(key.getName())
-						.append(CODE_REFERENCE_ITEM_END);
-			}
-		}
-		return sb.toString();
-	}
-
-	private String getCodeRef(@Nonnull final List<Pair<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf>> parents,
-			@Nonnull final TestItemTree.ItemTreeKey key, ItemType type) {
-		StringBuilder sb = new StringBuilder();
-		if (parents.isEmpty()) {
+		if (StringUtils.isBlank(parentCodeRef)) {
 			sb.append(key.getName());
 		} else {
-			sb.append(getBaseCodeRef(parents))
+			sb.append(parentCodeRef)
 					.append(CODE_REFERENCE_DELIMITER)
 					.append(CODE_REFERENCE_ITEM_START)
 					.append(type != ItemType.SUITE ? type.name() : EXAMPLE)
@@ -304,21 +286,41 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 		return rq;
 	}
 
+	@Nonnull
+	protected Maybe<String> startTestItem(@Nullable final Maybe<String> parentId, @Nonnull final StartTestItemRQ rq) {
+		Launch myLaunch = launch.get();
+		return ofNullable(parentId).map(p -> myLaunch.startTestItem(p, rq)).orElseGet(() -> myLaunch.startTestItem(rq));
+	}
+
 	protected TestItemTree.TestItemLeaf createLeaf(@Nonnull final ItemType type, @Nonnull final StartTestItemRQ rq,
 			@Nullable final Maybe<String> parentId) {
-		Launch myLaunch = launch.get();
-		TestItemTree.TestItemLeaf l = ofNullable(parentId).map(p -> TestItemTree.createTestItemLeaf(p, myLaunch.startTestItem(p, rq)))
-				.orElseGet(() -> TestItemTree.createTestItemLeaf(myLaunch.startTestItem(rq)));
+		Maybe<String> itemId = startTestItem(parentId, rq);
+		TestItemTree.TestItemLeaf l = ofNullable(parentId).map(p -> TestItemTree.createTestItemLeaf(p, itemId))
+				.orElseGet(() -> TestItemTree.createTestItemLeaf(itemId));
 		l.setType(type);
 		l.setAttribute(START_TIME, rq.getStartTime());
+		ofNullable(rq.getCodeRef()).ifPresent(r -> l.setAttribute(CODE_REF, r));
 		return l;
+	}
+
+	@Nonnull
+	protected Date getItemDate(@Nullable final TestItemTree.TestItemLeaf parent) {
+		final Date previousDate = ofNullable(parent).map(p -> p.<Date>getAttribute(START_TIME))
+				.orElseGet(() -> Calendar.getInstance().getTime());
+		Date currentDate = Calendar.getInstance().getTime();
+		Date itemDate;
+		if (previousDate.compareTo(currentDate) <= 0) {
+			itemDate = currentDate;
+		} else {
+			itemDate = previousDate;
+		}
+		return itemDate;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Nullable
 	protected TestItemTree.TestItemLeaf retrieveLeaf() {
 		final List<Pair<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf>> leafChain = new ArrayList<>();
-		Entity<?> previousEntity = null;
 		for (Entity<?> entity : structure) {
 			final ItemType itemType = entity.type();
 			final Pair<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf> parent = leafChain.isEmpty() ?
@@ -327,49 +329,41 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 			final Map<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf> children = ofNullable(parent).map(p -> p.getValue()
 					.getChildItems()).orElseGet(itemTree::getTestItems);
 			final Maybe<String> parentId = ofNullable(parent).map(p -> p.getValue().getItemId()).orElse(null);
-			final Date previousDate = ofNullable(parent).map(p -> p.getValue().<Date>getAttribute(START_TIME))
-					.orElseGet(() -> Calendar.getInstance().getTime());
-			Date currentDate = Calendar.getInstance().getTime();
-			Date itemDate;
-			if (previousDate.compareTo(currentDate) <= 0) {
-				itemDate = currentDate;
-			} else {
-				itemDate = previousDate;
-			}
+			final String parentCodeRef = ofNullable(parent).map(p -> (String) p.getValue().getAttribute(CODE_REF)).orElse(null);
+			Date itemDate = getItemDate(ofNullable(parent).map(Pair::getValue).orElse(null));
 			switch (itemType) {
 				case STORY:
 					Story story = (Story) entity.get();
 					TestItemTree.ItemTreeKey storyKey = ItemTreeUtils.createKey(story);
-					leafChain.add(ImmutablePair.of(storyKey, children.computeIfAbsent(storyKey, k -> createLeaf(ItemType.STORY,
-							buildStartStoryRq(story, getCodeRef(leafChain, k, ItemType.STORY), itemDate),
-							parentId
-					))));
+					leafChain.add(ImmutablePair.of(storyKey,
+							children.computeIfAbsent(
+									storyKey,
+									k -> createLeaf(ItemType.STORY,
+											buildStartStoryRq(story, getCodeRef(parentCodeRef, k, ItemType.STORY), itemDate),
+											parentId
+									)
+							)
+					));
 					break;
 				case SCENARIO:
 					Scenario scenario = (Scenario) entity.get();
 					TestItemTree.ItemTreeKey scenarioKey = ItemTreeUtils.createKey(getScenarioName(scenario));
 					leafChain.add(ImmutablePair.of(scenarioKey, children.computeIfAbsent(scenarioKey, k -> createLeaf(ItemType.SCENARIO,
-							buildStartScenarioRq(scenario, getCodeRef(leafChain, k, ItemType.SCENARIO), itemDate),
+							buildStartScenarioRq(scenario, getCodeRef(parentCodeRef, k, ItemType.SCENARIO), itemDate),
 							parentId
 					))));
 					break;
 				case SUITE: // type SUITE == an Example
 					Map<String, String> example = (Map<String, String>) entity.get();
 					TestItemTree.ItemTreeKey exampleKey = ItemTreeUtils.createKey(example);
-					leafChain.add(ImmutablePair.of(exampleKey, children.computeIfAbsent(exampleKey, k -> createLeaf(ItemType.SUITE,
-							buildStartExampleRq(example, getCodeRef(leafChain, k, ItemType.SUITE), itemDate),
-							parentId
-					))));
-					break;
-				case STEP:
-					boolean hasExample = ofNullable(previousEntity).map(e -> e.type).orElse(null) == ItemType.SUITE;
-					Map<String, String> stepParams = hasExample ? (Map<String, String>) previousEntity.get() : null;
-					String stepName = (String) entity.get();
-					TestItemTree.ItemTreeKey stepKey = ItemTreeUtils.createKey(stepName);
-					leafChain.add(ImmutablePair.of(stepKey, children.computeIfAbsent(stepKey, k -> createLeaf(ItemType.STEP,
-							buildStartStepRq(stepName, getCodeRef(leafChain, k, ItemType.STEP), stepParams, itemDate),
-							parentId
-					))));
+					leafChain.add(ImmutablePair.of(exampleKey, children.computeIfAbsent(exampleKey, k -> {
+						TestItemTree.TestItemLeaf leaf = createLeaf(ItemType.SUITE,
+								buildStartExampleRq(example, getCodeRef(parentCodeRef, k, ItemType.SUITE), itemDate),
+								parentId
+						);
+						leaf.setAttribute(PARAMETERS, example);
+						return leaf;
+					})));
 					break;
 				case TEST: // type TEST == a lifecycle SUITE
 					String lifecycleSuiteName = (String) entity.get();
@@ -378,22 +372,31 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 							k -> createLeaf(itemType, buildLifecycleSuiteStartRq(lifecycleSuiteName, itemDate), parentId)
 					)));
 					break;
-				case BEFORE_METHOD:
-				case BEFORE_TEST:
-				case BEFORE_SUITE:
-				case AFTER_SUITE:
-				case AFTER_TEST:
-				case AFTER_METHOD:
-					String lifecycleMethodName = (String) entity.get();
-					TestItemTree.ItemTreeKey lifecycleMethodKey = ItemTreeUtils.createKey(lifecycleMethodName);
-					leafChain.add(ImmutablePair.of(lifecycleMethodKey, children.computeIfAbsent(lifecycleMethodKey,
-							k -> createLeaf(itemType, buildLifecycleMethodStartRq(itemType, lifecycleMethodName, itemDate), parentId)
-					)));
-					break;
 			}
-			previousEntity = entity;
 		}
 		return leafChain.get(leafChain.size() - 1).getValue();
+	}
+
+	protected TestItemTree.TestItemLeaf startStep(String name, @Nonnull final TestItemTree.TestItemLeaf parent) {
+		TestItemTree.ItemTreeKey key = ItemTreeUtils.createKey(name);
+		TestItemTree.TestItemLeaf leaf = createLeaf(ItemType.STEP, buildStartStepRq(name,
+				getCodeRef(parent.getAttribute(CODE_REF), key, ItemType.STEP),
+				parent.getAttribute(PARAMETERS),
+				getItemDate(parent)
+		), parent.getItemId());
+		parent.getChildItems().put(key, leaf);
+		return leaf;
+	}
+
+	protected TestItemTree.TestItemLeaf startLifecycleMethod(String name, ItemType itemType,
+			@Nonnull final TestItemTree.TestItemLeaf parent) {
+		TestItemTree.ItemTreeKey key = ItemTreeUtils.createKey(name);
+		TestItemTree.TestItemLeaf leaf = createLeaf(itemType,
+				buildLifecycleMethodStartRq(itemType, name, getItemDate(parent)),
+				parent.getItemId()
+		);
+		parent.getChildItems().put(key, leaf);
+		return leaf;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -538,12 +541,16 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 		ofNullable(thrown).ifPresent(t -> ReportPortal.emitLog(itemId, getLogSupplier(LogLevel.ERROR, ExceptionUtils.getStackTrace(t))));
 	}
 
-	protected void finishStep(final @Nonnull TestItemTree.TestItemLeaf step, final @Nonnull ItemStatus status, @Nullable Issue issue) {
+	protected void finishItem(final @Nonnull Maybe<String> id, final @Nonnull ItemStatus status, @Nullable Issue issue) {
 		FinishTestItemRQ rq = new FinishTestItemRQ();
 		rq.setEndTime(Calendar.getInstance().getTime());
 		rq.setStatus(status.name());
 		rq.setIssue(issue);
-		launch.get().finishTestItem(step.getItemId(), rq);
+		launch.get().finishTestItem(id, rq);
+	}
+
+	protected void finishStep(final @Nonnull TestItemTree.TestItemLeaf step, final @Nonnull ItemStatus status, @Nullable Issue issue) {
+		finishItem(step.getItemId(), status, issue);
 		step.setStatus(status);
 	}
 
@@ -552,17 +559,11 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	}
 
 	protected void simulateStep(String step) {
-		structure.add(new Entity<>(ItemType.STEP, step));
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
 		ofNullable(item).ifPresent(i -> {
-			structure.pollLast();
-			finishStep(i, ItemStatus.SKIPPED);
+			TestItemTree.TestItemLeaf leaf = startStep(step, i);
+			finishStep(leaf, ItemStatus.SKIPPED);
 		});
-	}
-
-	@Override
-	public void storyCancelled(Story story, StoryDuration storyDuration) {
-		finishLastItem(ItemStatus.SKIPPED);
 	}
 
 	/**
@@ -588,6 +589,11 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 			evaluateAndFinishLastItem();
 		}
 		evaluateAndFinishLastItem();
+	}
+
+	@Override
+	public void storyCancelled(Story story, StoryDuration storyDuration) {
+		finishLastItem(ItemStatus.SKIPPED);
 	}
 
 	/**
@@ -630,8 +636,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 			evaluateAndFinishLastItem();
 		}
 		currentLifecycleItemType = ItemType.BEFORE_METHOD;
-		structure.add(new Entity<>(ItemType.STEP, step));
-		retrieveLeaf();
+		currentStep = ofNullable(retrieveLeaf()).map(l -> startStep(step, l)).orElse(null);
 	}
 
 	@Override
@@ -663,13 +668,15 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	@Override
 	public void successful(String step) {
 		currentLifecycleItemType = ItemType.AFTER_TEST;
-		finishLastItem(ItemStatus.PASSED);
+		ofNullable(currentStep).ifPresent(s -> finishStep(s, ItemStatus.PASSED));
+		currentStep = null;
 	}
 
 	@Override
 	public void failed(String step, Throwable cause) {
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
-		if (item == null || item.getType() != ItemType.STEP) {
+		boolean isLifecycleMethod = item == null || currentStep == null;
+		if (isLifecycleMethod) {
 			if (item == null) {
 				// failed @BeforeStories (annotated) methods
 				structure.add(new Entity<>(ItemType.TEST, currentLifecycleItemType == null ? BEFORE_STORIES : AFTER_STORIES));
@@ -677,49 +684,44 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 				// failed @BeforeStory, @BeforeScenario (annotated) methods
 				structure.add(new Entity<>(ItemType.TEST, currentLifecycleItemType == ItemType.BEFORE_SUITE ? BEFORE_STORY : AFTER_STORY));
 			}
-			structure.add(new Entity<>(currentLifecycleItemType, step));
-			item = retrieveLeaf();
+			currentStep = ofNullable(retrieveLeaf()).map(i -> startLifecycleMethod(step, currentLifecycleItemType, i)).orElse(null);
 		}
-		ofNullable(item).ifPresent(i -> {
+		ofNullable(currentStep).ifPresent(i -> {
 			sendStackTraceToRP(i.getItemId(), cause);
 			finishStep(i, ItemStatus.FAILED);
-			structure.pollLast();
 		});
+		currentStep = null;
 	}
 
 	@Override
 	public void ignorable(String step) {
-		structure.add(new Entity<>(ItemType.STEP, step));
-		TestItemTree.TestItemLeaf item = retrieveLeaf();
-		ofNullable(item).ifPresent(i -> {
-			finishStep(i, ItemStatus.SKIPPED);
-			structure.pollLast();
+		ofNullable(retrieveLeaf()).ifPresent(l -> {
+			TestItemTree.TestItemLeaf leaf = startStep(step, l);
+			finishStep(leaf, ItemStatus.SKIPPED);
 		});
 	}
 
 	@Override
 	public void notPerformed(String step) {
-		structure.add(new Entity<>(ItemType.STEP, step));
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
 		ofNullable(item).ifPresent(i -> {
-			ReportPortal.emitLog(i.getItemId(),
+			TestItemTree.TestItemLeaf leaf = startStep(step, i);
+			ReportPortal.emitLog(leaf.getItemId(),
 					getLogSupplier(LogLevel.WARN, "Step execution was skipped by JBehave, see previous steps for errors.")
 			);
-			finishStep(i, ItemStatus.SKIPPED, Launch.NOT_ISSUE);
-			structure.pollLast();
+			finishStep(leaf, ItemStatus.SKIPPED, Launch.NOT_ISSUE);
 		});
 	}
 
 	@Override
 	public void pending(String step) {
-		structure.add(new Entity<>(ItemType.STEP, step));
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
 		ofNullable(item).ifPresent(i -> {
-			ReportPortal.emitLog(item.getItemId(),
+			TestItemTree.TestItemLeaf leaf = startStep(step, i);
+			ReportPortal.emitLog(leaf.getItemId(),
 					getLogSupplier(LogLevel.WARN, String.format("Unable to locate a step implementation: '%s'", step))
 			);
-			finishStep(item, ItemStatus.SKIPPED);
-			structure.pollLast();
+			finishStep(leaf, ItemStatus.SKIPPED);
 		});
 	}
 
