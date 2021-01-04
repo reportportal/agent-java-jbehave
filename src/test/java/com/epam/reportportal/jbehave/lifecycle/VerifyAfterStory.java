@@ -71,10 +71,10 @@ public class VerifyAfterStory extends BaseTest {
 		assertThat(scenarioStart.getCodeRef(), equalTo(scenarioCodeRef));
 		assertThat(scenarioStart.getType(), equalTo(ItemType.SCENARIO.name()));
 
-		StartTestItemRQ beforeStoryStart = startItems.get(1);
-		assertThat(beforeStoryStart.getName(), equalTo(LIFECYCLE_STEP_NAME));
-		assertThat(beforeStoryStart.getCodeRef(), equalTo(STORY_PATH + String.format("/[STEP:%s]", LIFECYCLE_STEP_NAME)));
-		assertThat(beforeStoryStart.getType(), equalTo(ItemType.STEP.name()));
+		StartTestItemRQ afterStoryStart = startItems.get(1);
+		assertThat(afterStoryStart.getName(), equalTo(LIFECYCLE_STEP_NAME));
+		assertThat(afterStoryStart.getCodeRef(), equalTo(STORY_PATH + String.format("/[STEP:%s]", LIFECYCLE_STEP_NAME)));
+		assertThat(afterStoryStart.getType(), equalTo(ItemType.STEP.name()));
 
 		StartTestItemRQ step = startItems.get(2);
 		String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAME);
