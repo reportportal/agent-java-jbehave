@@ -4,7 +4,7 @@
 
 package com.epam.reportportal.jbehave;
 
-import com.epam.reportportal.jbehave.integration.basic.StockExamplesSteps;
+import com.epam.reportportal.jbehave.integration.basic.StockSteps;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.reportportal.util.test.CommonUtils;
@@ -57,7 +57,7 @@ public class ExamplesCodeRefTest extends BaseTest {
 
 	@Test
 	public void verify_story_with_examples() {
-		run(format, EXAMPLES_STORY, new StockExamplesSteps());
+		run(format, EXAMPLES_STORY, new StockSteps());
 
 		verify(client, times(1)).startTestItem(any());
 		verify(client, times(1)).startTestItem(same(storyId), any());

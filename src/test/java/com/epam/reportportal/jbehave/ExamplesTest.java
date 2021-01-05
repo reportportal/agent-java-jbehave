@@ -4,7 +4,7 @@
 
 package com.epam.reportportal.jbehave;
 
-import com.epam.reportportal.jbehave.integration.basic.StockExamplesSteps;
+import com.epam.reportportal.jbehave.integration.basic.StockSteps;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.service.ReportPortal;
@@ -95,7 +95,7 @@ public class ExamplesTest extends BaseTest {
 
 	@Test
 	public void verify_story_with_examples_names_types_and_parameters() {
-		run(format, "stories/Examples.story", new StockExamplesSteps());
+		run(format, "stories/Examples.story", new StockSteps());
 
 		verify(client, times(1)).startTestItem(any());
 		verify(client, times(1)).startTestItem(same(storyId), any());
