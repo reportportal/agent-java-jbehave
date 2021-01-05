@@ -33,7 +33,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class VerifyBeforeScenarioFailed extends BaseTest {
+public class VerifyBeforeStepFailed extends BaseTest {
 
 	public static final String STEP_PATTERN = "/[STEP:%s]";
 	private final String storyId = namedId("story_");
@@ -69,15 +69,15 @@ public class VerifyBeforeScenarioFailed extends BaseTest {
 		mockBatchLogging(client);
 	}
 
-	private static final String STORY_PATH = "stories/lifecycle/BeforeScenarioFailed.story";
+	private static final String STORY_PATH = "stories/lifecycle/BeforeStepFailed.story";
 	private static final String SCENARIO_NAME = "The scenario";
 	private static final String STEP_NAME = "Given I have empty step";
-	private static final String[] LIFECYCLE_STEP_NAMES = new String[] { "When I have one more empty step", "Given I have a failed step",
-			"Given It is test with parameters", "When I have parameter test", "Then I have another empty step",
+	private static final String[] LIFECYCLE_STEP_NAMES = new String[] { "When I have one more empty step", "Then I have another empty step",
+			"Given I have a failed step", "When I have parameter test", "Given It is test with parameters",
 			"Given It is a step with an integer parameter 42" };
 
 	@Test
-	public void verify_before_scenario_lifecycle_step_failure_reporting() {
+	public void verify_before_step_lifecycle_step_failure_reporting() {
 		run(format, STORY_PATH, new EmptySteps(), new ParameterizedSteps(), new FailedSteps());
 
 		verify(client).startTestItem(any());
@@ -143,15 +143,14 @@ public class VerifyBeforeScenarioFailed extends BaseTest {
 		verify(client).finishTestItem(same(storyId), finishStepCaptor.capture());
 
 		List<FinishTestItemRQ> finishItems = finishStepCaptor.getAllValues();
-		List<FinishTestItemRQ> failedItems = Arrays.asList(finishItems.get(1), finishItems.get(7), finishItems.get(8));
+		List<FinishTestItemRQ> failedItems = Arrays.asList(finishItems.get(2), finishItems.get(7), finishItems.get(8));
 		failedItems.forEach(i -> assertThat(i.getStatus(), equalTo(ItemStatus.FAILED.name())));
 
-		List<FinishTestItemRQ> passedItems = new ArrayList<>(finishItems.subList(3, lifecycleStepIds.size()));
-		passedItems.add(finishItems.get(0));
+		List<FinishTestItemRQ> passedItems = new ArrayList<>(finishItems.subList(0, 2));
+		passedItems.addAll(finishItems.subList(3, lifecycleStepIds.size()));
 		passedItems.forEach(i -> assertThat(i.getStatus(), equalTo(ItemStatus.PASSED.name())));
 
 		List<FinishTestItemRQ> skippedItems = new ArrayList<>();
-		skippedItems.add(finishItems.get(2));
 		skippedItems.add(finishItems.get(6));
 		skippedItems.forEach(i -> assertThat(i.getStatus(), equalTo(ItemStatus.SKIPPED.name())));
 	}
