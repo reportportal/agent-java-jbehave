@@ -93,7 +93,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 					.append(CODE_REFERENCE_ITEM_START)
 					.append(type != ItemType.SUITE ? type.name() : EXAMPLE)
 					.append(CODE_REFERENCE_ITEM_TYPE_DELIMITER)
-					.append(key.getName())
+					.append(key.getName().replace("\n", "").replace("\r", ""))
 					.append(CODE_REFERENCE_ITEM_END);
 		}
 		return sb.toString();

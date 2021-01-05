@@ -10,6 +10,7 @@ import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.reportportal.util.test.CommonUtils;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
+import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,6 +23,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class TabularParametersTest extends BaseTest {
+
+	public static final String SCENARIO_PATTERN = "/[SCENARIO:%s]";
+	public static final String STEP_PATTERN = "/[STEP:%s]";
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
@@ -38,14 +42,23 @@ public class TabularParametersTest extends BaseTest {
 
 	private static final String STORY_NAME = "TabularParameters.story";
 	private static final String STORY_PATH = "stories/" + STORY_NAME;
+	private static final String STEP_NAME = "Given the traders:\n|name|rank|\n|Larry|Stooge 3|\n|Moe|Stooge 1|\n|Curly|Stooge 2|";
+	private static final String CODE_REF = STEP_NAME.replace("\n", "");
 
 	@Test
 	public void verify_a_step_with_tabular_parameters() {
 		run(format, STORY_PATH, new StockSteps());
 
+		ArgumentCaptor<StartTestItemRQ> startCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
 		verify(client).startTestItem(any());
 		verify(client).startTestItem(same(storyId), any());
-		verify(client).startTestItem(same(scenarioId), any());
+		verify(client).startTestItem(same(scenarioId), startCaptor.capture());
+
+		assertThat(startCaptor.getValue().getName(), equalTo(STEP_NAME));
+		assertThat(
+				startCaptor.getValue().getCodeRef(),
+				equalTo(STORY_PATH + String.format(SCENARIO_PATTERN, "Tabular parameters") + String.format(STEP_PATTERN, CODE_REF))
+		);
 
 		ArgumentCaptor<FinishTestItemRQ> finishCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
 		verify(client).finishTestItem(same(stepId), finishCaptor.capture());
