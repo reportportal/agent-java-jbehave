@@ -7,9 +7,9 @@ import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReportsTestWithParameters {
+public class ParameterizedSteps {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ReportsTestWithParameters.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ParameterizedSteps.class);
 
 	@Given("It is test with parameters")
 	public void infoLevel() {
