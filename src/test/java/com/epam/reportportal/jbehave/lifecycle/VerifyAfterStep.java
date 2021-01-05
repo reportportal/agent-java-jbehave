@@ -31,12 +31,12 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class VerifyBeforeStep extends BaseTest {
+public class VerifyAfterStep extends BaseTest {
 
 	private static final int STEP_NUMBER = 2;
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
-	private final List<String> beforeStepIds = Stream.generate(() -> CommonUtils.namedId("before_step_"))
+	private final List<String> afterStepIds = Stream.generate(() -> CommonUtils.namedId("after_step_"))
 			.limit(STEP_NUMBER)
 			.collect(Collectors.toList());
 	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("step_"))
@@ -46,7 +46,7 @@ public class VerifyBeforeStep extends BaseTest {
 	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(
 			scenarioId,
 			IntStream.range(0, stepIds.size())
-					.mapToObj(i -> Stream.of(beforeStepIds.get(i), stepIds.get(i)))
+					.mapToObj(i -> Stream.of(stepIds.get(i), afterStepIds.get(i)))
 					.flatMap(i -> i)
 					.collect(Collectors.toList())
 	));
@@ -60,13 +60,13 @@ public class VerifyBeforeStep extends BaseTest {
 		mockBatchLogging(client);
 	}
 
-	private static final String STORY_PATH = "stories/lifecycle/BeforeStep.story";
+	private static final String STORY_PATH = "stories/lifecycle/AfterStep.story";
 	private static final String SCENARIO_NAME = "The scenario";
 	private static final String[] STEP_NAMES = new String[] { "Given I have empty step", "When I have one more empty step" };
 	private static final String LIFECYCLE_STEP_NAME = "Then I have another empty step";
 
 	@Test
-	public void verify_before_step_lifecycle_step_reporting() {
+	public void verify_after_step_lifecycle_step_reporting() {
 		run(format, STORY_PATH, new EmptySteps());
 
 		verify(client).startTestItem(any());
@@ -82,16 +82,7 @@ public class VerifyBeforeStep extends BaseTest {
 		assertThat(scenarioStart.getCodeRef(), equalTo(scenarioCodeRef));
 		assertThat(scenarioStart.getType(), equalTo(ItemType.SCENARIO.name()));
 
-		List<StartTestItemRQ> beforeStarts = Arrays.asList(startItems.get(1), startItems.get(3));
-		IntStream.range(0, beforeStarts.size()).forEach(i -> {
-			StartTestItemRQ beforeStart = beforeStarts.get(i);
-			String lifecycleCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", LIFECYCLE_STEP_NAME);
-			assertThat(beforeStart.getName(), equalTo(LIFECYCLE_STEP_NAME));
-			assertThat(beforeStart.getCodeRef(), equalTo(lifecycleCodeRef));
-			assertThat(beforeStart.getType(), equalTo(ItemType.STEP.name()));
-		});
-
-		List<StartTestItemRQ> steps = Arrays.asList(startItems.get(2), startItems.get(4));
+		List<StartTestItemRQ> steps = Arrays.asList(startItems.get(1), startItems.get(3));
 		IntStream.range(0, steps.size()).forEach(i -> {
 			StartTestItemRQ step = steps.get(i);
 			String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAMES[i]);
@@ -100,12 +91,21 @@ public class VerifyBeforeStep extends BaseTest {
 			assertThat(step.getType(), equalTo(ItemType.STEP.name()));
 		});
 
+		List<StartTestItemRQ> afterStarts = Arrays.asList(startItems.get(2), startItems.get(4));
+		IntStream.range(0, afterStarts.size()).forEach(i -> {
+			StartTestItemRQ beforeStart = afterStarts.get(i);
+			String lifecycleCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", LIFECYCLE_STEP_NAME);
+			assertThat(beforeStart.getName(), equalTo(LIFECYCLE_STEP_NAME));
+			assertThat(beforeStart.getCodeRef(), equalTo(lifecycleCodeRef));
+			assertThat(beforeStart.getType(), equalTo(ItemType.STEP.name()));
+		});
+
 		// Finish items verification
 		ArgumentCaptor<FinishTestItemRQ> finishStepCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
-		verify(client).finishTestItem(same(beforeStepIds.get(0)), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(stepIds.get(0)), finishStepCaptor.capture());
-		verify(client).finishTestItem(same(beforeStepIds.get(1)), finishStepCaptor.capture());
+		verify(client).finishTestItem(same(afterStepIds.get(0)), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(stepIds.get(1)), finishStepCaptor.capture());
+		verify(client).finishTestItem(same(afterStepIds.get(1)), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(scenarioId), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(storyId), finishStepCaptor.capture());
 
