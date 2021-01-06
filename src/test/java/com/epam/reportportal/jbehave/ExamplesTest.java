@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -41,7 +42,10 @@ public class ExamplesTest extends BaseTest {
 			.collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, standardParameters()));
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+			standardParameters(),
+			Executors.newSingleThreadExecutor()
+	));
 
 	@BeforeEach
 	public void setupMock() {
@@ -68,8 +72,7 @@ public class ExamplesTest extends BaseTest {
 		put("status", "ON");
 	}});
 
-	private static final List<String> STEP_NAMES = Arrays.asList(
-			"Given a stock of symbol STK1 and a threshold 10.0",
+	private static final List<String> STEP_NAMES = Arrays.asList("Given a stock of symbol STK1 and a threshold 10.0",
 			"When the stock is traded at price 5.0",
 			"Then the alert status should be status OFF",
 			"Given a stock of symbol STK1 and a threshold 10.0",

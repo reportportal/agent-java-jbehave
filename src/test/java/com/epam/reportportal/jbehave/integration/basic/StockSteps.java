@@ -35,7 +35,7 @@ public class StockSteps {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Parameters table:\n");
 		ranksTable.getRows().forEach(params -> {
-			params.forEach((k,v) -> sb.append(String.format("Got parameter '%s':'%s'\n", k, v)));
+			params.forEach((k, v) -> sb.append(String.format("Got parameter '%s':'%s'\n", k, v)));
 			sb.append("------------------\n");
 		});
 		LOGGER.info(sb.toString());

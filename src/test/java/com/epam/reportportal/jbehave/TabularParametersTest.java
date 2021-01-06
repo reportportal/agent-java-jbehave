@@ -15,6 +15,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.concurrent.Executors;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,7 +34,10 @@ public class TabularParametersTest extends BaseTest {
 	private final String stepId = CommonUtils.namedId("step_");
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, standardParameters()));
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+			standardParameters(),
+			Executors.newSingleThreadExecutor()
+	));
 
 	@BeforeEach
 	public void setupMock() {
@@ -55,8 +60,7 @@ public class TabularParametersTest extends BaseTest {
 		verify(client).startTestItem(same(scenarioId), startCaptor.capture());
 
 		assertThat(startCaptor.getValue().getName(), equalTo(STEP_NAME));
-		assertThat(
-				startCaptor.getValue().getCodeRef(),
+		assertThat(startCaptor.getValue().getCodeRef(),
 				equalTo(STORY_PATH + String.format(SCENARIO_PATTERN, "Tabular parameters") + String.format(STEP_PATTERN, CODE_REF))
 		);
 

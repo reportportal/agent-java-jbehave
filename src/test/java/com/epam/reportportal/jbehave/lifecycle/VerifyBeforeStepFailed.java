@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,8 +38,7 @@ public class VerifyBeforeStepFailed extends BaseTest {
 
 	public static final String STEP_PATTERN = "/[STEP:%s]";
 	private final String storyId = namedId("story_");
-	private final List<String> lifecycleStepIds = Arrays.asList(
-			namedId("before_story_"),
+	private final List<String> lifecycleStepIds = Arrays.asList(namedId("before_story_"),
 			namedId("before_scenario_"),
 			namedId("before_step_"),
 			namedId("after_step_"),
@@ -48,20 +48,18 @@ public class VerifyBeforeStepFailed extends BaseTest {
 	private final String scenarioId = namedId("scenario_");
 	private final String stepId = namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Arrays.asList(
-			Pair.of(lifecycleStepIds.get(0), Collections.emptyList()),
-			Pair.of(
-					scenarioId,
-					Stream.concat(
-							Stream.concat(lifecycleStepIds.subList(1, 3).stream(), Stream.of(stepId)),
-							lifecycleStepIds.subList(3, lifecycleStepIds.size() - 1).stream()
-					).collect(Collectors.toList())
-			),
+	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(lifecycleStepIds.get(0), Collections.emptyList()),
+			Pair.of(scenarioId, Stream.concat(Stream.concat(lifecycleStepIds.subList(1, 3).stream(), Stream.of(stepId)),
+					lifecycleStepIds.subList(3, lifecycleStepIds.size() - 1).stream()
+			).collect(Collectors.toList())),
 			Pair.of(lifecycleStepIds.get(lifecycleStepIds.size() - 1), Collections.emptyList())
 	);
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, standardParameters()));
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+			standardParameters(),
+			Executors.newSingleThreadExecutor()
+	));
 
 	@BeforeEach
 	public void setupMock() {

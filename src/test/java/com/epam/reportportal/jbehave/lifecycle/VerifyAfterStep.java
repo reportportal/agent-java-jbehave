@@ -22,6 +22,7 @@ import org.mockito.ArgumentCaptor;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -43,8 +44,7 @@ public class VerifyAfterStep extends BaseTest {
 			.limit(STEP_NUMBER)
 			.collect(Collectors.toList());
 
-	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(
-			scenarioId,
+	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(scenarioId,
 			IntStream.range(0, stepIds.size())
 					.mapToObj(i -> Stream.of(stepIds.get(i), afterStepIds.get(i)))
 					.flatMap(i -> i)
@@ -52,7 +52,10 @@ public class VerifyAfterStep extends BaseTest {
 	));
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, standardParameters()));
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+			standardParameters(),
+			Executors.newSingleThreadExecutor()
+	));
 
 	@BeforeEach
 	public void setupMock() {

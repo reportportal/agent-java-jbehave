@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,7 +56,10 @@ public class VerifyAfterStoryFailed extends BaseTest {
 	);
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client, standardParameters()));
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+			standardParameters(),
+			Executors.newSingleThreadExecutor()
+	));
 
 	@BeforeEach
 	public void setupMock() {
@@ -137,8 +141,7 @@ public class VerifyAfterStoryFailed extends BaseTest {
 		verify(client).finishTestItem(same(storyId), finishStepCaptor.capture());
 
 		List<FinishTestItemRQ> finishItems = finishStepCaptor.getAllValues();
-		List<FinishTestItemRQ> failedItems = Arrays.asList(
-				finishItems.get(lifecycleStepIds.size() - 1),
+		List<FinishTestItemRQ> failedItems = Arrays.asList(finishItems.get(lifecycleStepIds.size() - 1),
 				finishItems.get(finishItems.size() - 1)
 		);
 		List<FinishTestItemRQ> passedItems = new ArrayList<>();
