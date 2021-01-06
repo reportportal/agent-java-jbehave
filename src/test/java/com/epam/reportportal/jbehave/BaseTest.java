@@ -225,6 +225,7 @@ public class BaseTest {
 		result.setProjectName("test-project");
 		result.setEnable(true);
 		result.setCallbackReportingEnabled(true);
+		result.setBaseUrl("http://localhost:8080");
 		return result;
 	}
 
