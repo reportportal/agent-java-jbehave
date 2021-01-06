@@ -30,7 +30,6 @@ import com.epam.ta.reportportal.ws.model.attribute.ItemAttributesRQ;
 import com.epam.ta.reportportal.ws.model.issue.Issue;
 import com.epam.ta.reportportal.ws.model.log.SaveLogRQ;
 import io.reactivex.Maybe;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -47,6 +46,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * JBehave Reporter for reporting results into ReportPortal. Requires using
@@ -85,7 +85,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 
 	private String getCodeRef(@Nullable final String parentCodeRef, @Nonnull final TestItemTree.ItemTreeKey key, ItemType type) {
 		StringBuilder sb = new StringBuilder();
-		if (StringUtils.isBlank(parentCodeRef)) {
+		if (isBlank(parentCodeRef)) {
 			sb.append(key.getName());
 		} else {
 			sb.append(parentCodeRef)
@@ -104,11 +104,18 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	}
 
 	@Nonnull
-	protected Set<ItemAttributesRQ> getAttributes(@Nonnull final Story story) {
-		Meta meta = story.getMeta();
+	protected Set<ItemAttributesRQ> getAttributes(@Nonnull final Meta meta) {
 		Set<ItemAttributesRQ> items = new HashSet<>();
-		meta.getPropertyNames().forEach(n -> items.add(new ItemAttributesRQ(n, meta.getProperty(n))));
+		meta.getPropertyNames().forEach(name -> {
+			String value = meta.getProperty(name);
+			items.add(isBlank(value) ? new ItemAttributesRQ(name) : new ItemAttributesRQ(name, value));
+		});
 		return items;
+	}
+
+	@Nonnull
+	protected Set<ItemAttributesRQ> getAttributes(@Nonnull final Story story) {
+		return getAttributes(story.getMeta());
 	}
 
 	/**
@@ -133,15 +140,12 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 
 	protected String getScenarioName(Scenario scenario) {
 		String title = scenario.getTitle();
-		return StringUtils.isBlank(title) ? NO_NAME : title;
+		return isBlank(title) ? NO_NAME : title;
 	}
 
 	@Nonnull
 	protected Set<ItemAttributesRQ> getAttributes(@Nonnull final Scenario scenario) {
-		Meta meta = scenario.getMeta();
-		Set<ItemAttributesRQ> items = new HashSet<>();
-		meta.getPropertyNames().forEach(n -> items.add(new ItemAttributesRQ(n, meta.getProperty(n))));
-		return items;
+		return getAttributes(scenario.getMeta());
 	}
 
 	/**
@@ -335,15 +339,10 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 				case STORY:
 					Story story = (Story) entity.get();
 					TestItemTree.ItemTreeKey storyKey = ItemTreeUtils.createKey(story);
-					leafChain.add(ImmutablePair.of(storyKey,
-							children.computeIfAbsent(
-									storyKey,
-									k -> createLeaf(ItemType.STORY,
-											buildStartStoryRq(story, getCodeRef(parentCodeRef, k, ItemType.STORY), itemDate),
-											parentId
-									)
-							)
-					));
+					leafChain.add(ImmutablePair.of(storyKey, children.computeIfAbsent(storyKey, k -> createLeaf(ItemType.STORY,
+							buildStartStoryRq(story, getCodeRef(parentCodeRef, k, ItemType.STORY), itemDate),
+							parentId
+					))));
 					break;
 				case SCENARIO:
 					Scenario scenario = (Scenario) entity.get();
@@ -379,11 +378,15 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 
 	protected TestItemTree.TestItemLeaf startStep(String name, @Nonnull final TestItemTree.TestItemLeaf parent) {
 		TestItemTree.ItemTreeKey key = ItemTreeUtils.createKey(name);
-		TestItemTree.TestItemLeaf leaf = createLeaf(ItemType.STEP, buildStartStepRq(name,
-				getCodeRef(parent.getAttribute(CODE_REF), key, ItemType.STEP),
-				parent.getAttribute(PARAMETERS),
-				getItemDate(parent)
-		), parent.getItemId());
+		TestItemTree.TestItemLeaf leaf = createLeaf(
+				ItemType.STEP,
+				buildStartStepRq(name,
+						getCodeRef(parent.getAttribute(CODE_REF), key, ItemType.STEP),
+						parent.getAttribute(PARAMETERS),
+						getItemDate(parent)
+				),
+				parent.getItemId()
+		);
 		parent.getChildItems().put(key, leaf);
 		return leaf;
 	}
