@@ -119,7 +119,7 @@ public class ExamplesTest extends BaseTest {
 		});
 
 		List<StartTestItemRQ> steps = startItems.subList(2, 2 + 6);
-		IntStream.range(0, examples.size()).forEach(i -> {
+		IntStream.range(0, steps.size()).forEach(i -> {
 			StartTestItemRQ rq = steps.get(i);
 			assertThat(rq.getName(), equalTo(STEP_NAMES.get(i)));
 			assertThat(rq.getType(), equalTo(ItemType.STEP.name()));
