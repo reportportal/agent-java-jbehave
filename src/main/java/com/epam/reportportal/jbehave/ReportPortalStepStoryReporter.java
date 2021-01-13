@@ -21,8 +21,10 @@ import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.listeners.LogLevel;
 import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.ReportPortal;
+import com.epam.reportportal.service.item.TestCaseIdEntry;
 import com.epam.reportportal.service.tree.TestItemTree;
 import com.epam.reportportal.utils.StatusEvaluation;
+import com.epam.reportportal.utils.TestCaseIdUtils;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
@@ -234,6 +236,11 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 		return result;
 	}
 
+	@Nullable
+	protected TestCaseIdEntry getTestCaseId(@Nullable String codeRef, @Nullable final Map<String, String> params) {
+		return TestCaseIdUtils.getTestCaseId(codeRef, ofNullable(params).map(p -> new ArrayList<>(p.values())).orElse(null));
+	}
+
 	/**
 	 * Extension point to customize test creation event/request
 	 *
@@ -250,8 +257,10 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 		rq.setCodeRef(codeRef);
 		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
 		rq.setType(ItemType.STEP.name());
-		ofNullable(params).ifPresent(p -> rq.setParameters(getStepParameters(getUsedParameters(step).stream()
-				.collect(Collectors.toMap(s -> s, p::get)))));
+		Map<String, String> usedParams = ofNullable(params).map(p -> getUsedParameters(step).stream()
+				.collect(Collectors.toMap(s -> s, p::get))).orElse(null);
+		rq.setParameters(getStepParameters(usedParams));
+		rq.setTestCaseId(ofNullable(getTestCaseId(codeRef, usedParams)).map(TestCaseIdEntry::getId).orElse(null));
 		return rq;
 	}
 
