@@ -26,8 +26,8 @@ import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NestedSteps {
-	private static final Logger LOGGER = LoggerFactory.getLogger(NestedSteps.class);
+public class NestedStepsAnnotationSteps {
+	private static final Logger LOGGER = LoggerFactory.getLogger(NestedStepsAnnotationSteps.class);
 
 	public static final long PARAM1 = 7L;
 

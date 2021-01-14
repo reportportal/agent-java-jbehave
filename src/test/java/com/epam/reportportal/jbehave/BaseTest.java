@@ -220,7 +220,6 @@ public class BaseTest {
 	public static ListenerParameters standardParameters() {
 		ListenerParameters result = new ListenerParameters();
 		result.setClientJoin(false);
-		result.setBatchLogsSize(1);
 		result.setLaunchName("My-test-launch" + generateUniqueId());
 		result.setProjectName("test-project");
 		result.setEnable(true);

@@ -54,7 +54,7 @@ test {
         def weaver = configurations.testRuntimeClasspath.find { it.name.contains("aspectjweaver") }
         jvmArgs += "-javaagent:$weaver"
     }
-    testLogging.showStandardStreams = true // remove after debugging
+    testLogging.exceptionFormat = 'full'
 }
 
 wrapper {

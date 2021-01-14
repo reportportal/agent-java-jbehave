@@ -16,7 +16,7 @@
 
 package com.epam.reportportal.jbehave;
 
-import com.epam.reportportal.jbehave.integration.basic.NestedSteps;
+import com.epam.reportportal.jbehave.integration.basic.NestedStepsAnnotationSteps;
 import com.epam.reportportal.listeners.ListenerParameters;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
@@ -41,7 +41,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 
-public class NestedStepsTest extends BaseTest {
+public class NestedStepsAnnotationTest extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
@@ -52,9 +52,8 @@ public class NestedStepsTest extends BaseTest {
 	private final String nestedNestedStepId = CommonUtils.namedId("double_nested_step_");
 	private final List<Pair<String, String>> firstLevelNestedStepIds = Stream.concat(Stream.of(Pair.of(stepIds.get(0),
 			nestedStepIds.get(0)
-			)),
-			nestedStepIds.stream().skip(1).map(i -> Pair.of(stepIds.get(1), i))
-	).collect(Collectors.toList());
+	)), nestedStepIds.stream().skip(1).map(i -> Pair.of(stepIds.get(1), i)))
+			.collect(Collectors.toList());
 
 	private final ListenerParameters params = standardParameters();
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
@@ -69,6 +68,7 @@ public class NestedStepsTest extends BaseTest {
 		mockNestedSteps(client, Pair.of(nestedStepIds.get(0), nestedNestedStepId));
 		mockBatchLogging(client);
 	}
+
 	public static final List<String> FIRST_LEVEL_NAMES = Arrays.asList("A step inside step",
 			"A step with parameters",
 			"A step with attributes"
@@ -78,7 +78,7 @@ public class NestedStepsTest extends BaseTest {
 
 	@Test
 	public void test_annotation_based_nested_steps() {
-		run(format, STORY_PATH, new NestedSteps());
+		run(format, STORY_PATH, new NestedStepsAnnotationSteps());
 
 		ArgumentCaptor<StartTestItemRQ> captor = ArgumentCaptor.forClass(StartTestItemRQ.class);
 		verify(client, times(1)).startTestItem(captor.capture());
