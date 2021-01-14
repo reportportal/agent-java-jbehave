@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package com.epam.reportportal.jbehave;
+package com.epam.reportportal.jbehave.steps;
 
+import com.epam.reportportal.jbehave.BaseTest;
+import com.epam.reportportal.jbehave.ReportPortalStepFormat;
 import com.epam.reportportal.jbehave.integration.basic.NestedStepsStepReporterSteps;
 import com.epam.reportportal.listeners.ListenerParameters;
 import com.epam.reportportal.listeners.LogLevel;
