@@ -2,8 +2,10 @@
  * Copyright (C) 2020 Epic Games, Inc. All Rights Reserved.
  */
 
-package com.epam.reportportal.jbehave;
+package com.epam.reportportal.jbehave.coderef;
 
+import com.epam.reportportal.jbehave.BaseTest;
+import com.epam.reportportal.jbehave.ReportPortalStepFormat;
 import com.epam.reportportal.jbehave.integration.basic.EmptySteps;
 import com.epam.reportportal.jbehave.integration.basic.FailedSteps;
 import com.epam.reportportal.listeners.ItemType;
