@@ -68,4 +68,3 @@ processResources {
 }
 
 afterReleaseBuild.dependsOn bintrayUpload
-
