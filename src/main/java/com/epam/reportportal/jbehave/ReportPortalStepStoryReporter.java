@@ -26,6 +26,7 @@ import com.epam.reportportal.service.tree.TestItemTree;
 import com.epam.reportportal.utils.StatusEvaluation;
 import com.epam.reportportal.utils.TestCaseIdUtils;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
+import com.epam.ta.reportportal.ws.model.OperationCompletionRS;
 import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.epam.ta.reportportal.ws.model.attribute.ItemAttributesRQ;
@@ -54,13 +55,18 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * JBehave Reporter for reporting results into ReportPortal. Requires using
  */
 public class ReportPortalStepStoryReporter extends NullStoryReporter {
-	private static final String CODE_REF = "CODE_REF";
+	public static final String CODE_REF = "CODE_REF";
+	public static final String START_TIME = "START_TIME";
+	public static final String PARAMETERS = "PARAMETERS";
+	public static final String PARENT = "PARENT";
+	public static final String START_REQUEST = "START_REQUEST";
+	public static final String FINISH_REQUEST = "FINISH_REQUEST";
+
 	private static final String CODE_REFERENCE_DELIMITER = "/";
 	private static final String CODE_REFERENCE_ITEM_TYPE_DELIMITER = ":";
 	private static final String PARAMETER_ITEMS_DELIMITER = ";";
 	private static final String CODE_REFERENCE_ITEM_START = "[";
 	private static final String CODE_REFERENCE_ITEM_END = "]";
-	private static final String START_TIME = "START_TIME";
 	private static final String EXAMPLE_PATTERN = "Example: %s";
 	private static final String EXAMPLE_VALUE_PATTERN = "<%s>";
 	private static final Pattern EXAMPLE_VALUE_MATCH = Pattern.compile("<([^>]*)>");
@@ -72,17 +78,22 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	private static final String AFTER_STORIES = "AfterStories";
 	private static final String BEFORE_STORY = "BeforeStory";
 	private static final String AFTER_STORY = "AfterStory";
-	private static final String PARAMETERS = "PARAMETERS";
 
 	private final Deque<Entity<?>> structure = new LinkedList<>();
 	private final Supplier<Launch> launch;
 	private final TestItemTree itemTree;
 	private volatile ItemType currentLifecycleItemType;
 	private volatile TestItemTree.TestItemLeaf currentStep;
+	private volatile TestItemTree.TestItemLeaf lastStep;
 
 	public ReportPortalStepStoryReporter(final Supplier<Launch> launchSupplier, TestItemTree testItemTree) {
 		launch = launchSupplier;
 		itemTree = testItemTree;
+	}
+
+	@Nonnull
+	public Optional<TestItemTree.TestItemLeaf> getLastStep() {
+		return ofNullable(lastStep);
 	}
 
 	private String getCodeRef(@Nullable final String parentCodeRef, @Nonnull final TestItemTree.ItemTreeKey key, ItemType type) {
@@ -306,12 +317,16 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	}
 
 	protected TestItemTree.TestItemLeaf createLeaf(@Nonnull final ItemType type, @Nonnull final StartTestItemRQ rq,
-			@Nullable final Maybe<String> parentId) {
-		Maybe<String> itemId = startTestItem(parentId, rq);
-		TestItemTree.TestItemLeaf l = ofNullable(parentId).map(p -> TestItemTree.createTestItemLeaf(p, itemId))
+			@Nullable final TestItemTree.TestItemLeaf parent) {
+		Optional<TestItemTree.TestItemLeaf> parentOptional = ofNullable(parent);
+		Optional<Maybe<String>> parentId = parentOptional.map(TestItemTree.TestItemLeaf::getItemId);
+		Maybe<String> itemId = startTestItem(parentId.orElse(null), rq);
+		TestItemTree.TestItemLeaf l = parentId.map(p -> TestItemTree.createTestItemLeaf(p, itemId))
 				.orElseGet(() -> TestItemTree.createTestItemLeaf(itemId));
 		l.setType(type);
 		l.setAttribute(START_TIME, rq.getStartTime());
+		l.setAttribute(START_REQUEST, rq);
+		parentOptional.ifPresent(p -> l.setAttribute(PARENT, p));
 		ofNullable(rq.getCodeRef()).ifPresent(r -> l.setAttribute(CODE_REF, r));
 		return l;
 	}
@@ -336,21 +351,21 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 		final List<Pair<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf>> leafChain = new ArrayList<>();
 		for (Entity<?> entity : structure) {
 			final ItemType itemType = entity.type();
-			final Pair<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf> parent = leafChain.isEmpty() ?
-					null :
-					leafChain.get(leafChain.size() - 1);
-			final Map<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf> children = ofNullable(parent).map(p -> p.getValue()
-					.getChildItems()).orElseGet(itemTree::getTestItems);
-			final Maybe<String> parentId = ofNullable(parent).map(p -> p.getValue().getItemId()).orElse(null);
-			final String parentCodeRef = ofNullable(parent).map(p -> (String) p.getValue().getAttribute(CODE_REF)).orElse(null);
-			Date itemDate = getItemDate(ofNullable(parent).map(Pair::getValue).orElse(null));
+			final Optional<Pair<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf>> parent = leafChain.isEmpty() ?
+					Optional.empty() :
+					Optional.of(leafChain.get(leafChain.size() - 1));
+			final TestItemTree.TestItemLeaf parentLeaf = parent.map(Pair::getValue).orElse(null);
+			final Map<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf> children = parent.map(p -> p.getValue().getChildItems())
+					.orElseGet(itemTree::getTestItems);
+			final String parentCodeRef = parent.map(p -> (String) p.getValue().getAttribute(CODE_REF)).orElse(null);
+			Date itemDate = getItemDate(parent.map(Pair::getValue).orElse(null));
 			switch (itemType) {
 				case STORY:
 					Story story = (Story) entity.get();
 					TestItemTree.ItemTreeKey storyKey = ItemTreeUtils.createKey(story);
 					leafChain.add(ImmutablePair.of(storyKey, children.computeIfAbsent(storyKey, k -> createLeaf(ItemType.STORY,
 							buildStartStoryRq(story, getCodeRef(parentCodeRef, k, ItemType.STORY), itemDate),
-							parentId
+							parentLeaf
 					))));
 					break;
 				case SCENARIO:
@@ -358,7 +373,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 					TestItemTree.ItemTreeKey scenarioKey = ItemTreeUtils.createKey(getScenarioName(scenario));
 					leafChain.add(ImmutablePair.of(scenarioKey, children.computeIfAbsent(scenarioKey, k -> createLeaf(ItemType.SCENARIO,
 							buildStartScenarioRq(scenario, getCodeRef(parentCodeRef, k, ItemType.SCENARIO), itemDate),
-							parentId
+							parentLeaf
 					))));
 					break;
 				case SUITE: // type SUITE == an Example
@@ -367,7 +382,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 					leafChain.add(ImmutablePair.of(exampleKey, children.computeIfAbsent(exampleKey, k -> {
 						TestItemTree.TestItemLeaf leaf = createLeaf(ItemType.SUITE,
 								buildStartExampleRq(example, getCodeRef(parentCodeRef, k, ItemType.SUITE), itemDate),
-								parentId
+								parentLeaf
 						);
 						leaf.setAttribute(PARAMETERS, example);
 						return leaf;
@@ -377,7 +392,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 					String lifecycleSuiteName = (String) entity.get();
 					TestItemTree.ItemTreeKey lifecycleSuiteKey = ItemTreeUtils.createKey(lifecycleSuiteName);
 					leafChain.add(ImmutablePair.of(lifecycleSuiteKey, children.computeIfAbsent(lifecycleSuiteKey,
-							k -> createLeaf(itemType, buildLifecycleSuiteStartRq(lifecycleSuiteName, itemDate), parentId)
+							k -> createLeaf(itemType, buildLifecycleSuiteStartRq(lifecycleSuiteName, itemDate), parentLeaf)
 					)));
 					break;
 			}
@@ -394,7 +409,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 						parent.getAttribute(PARAMETERS),
 						getItemDate(parent)
 				),
-				parent.getItemId()
+				parent
 		);
 		parent.getChildItems().put(key, leaf);
 		return leaf;
@@ -403,10 +418,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	protected TestItemTree.TestItemLeaf startLifecycleMethod(String name, ItemType itemType,
 			@Nonnull final TestItemTree.TestItemLeaf parent) {
 		TestItemTree.ItemTreeKey key = ItemTreeUtils.createKey(name);
-		TestItemTree.TestItemLeaf leaf = createLeaf(itemType,
-				buildLifecycleMethodStartRq(itemType, name, getItemDate(parent)),
-				parent.getItemId()
-		);
+		TestItemTree.TestItemLeaf leaf = createLeaf(itemType, buildLifecycleMethodStartRq(itemType, name, getItemDate(parent)), parent);
 		parent.getChildItems().put(key, leaf);
 		return leaf;
 	}
@@ -460,8 +472,10 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 			FinishTestItemRQ rq = new FinishTestItemRQ();
 			rq.setEndTime(Calendar.getInstance().getTime());
 			rq.setStatus(ofNullable(status).map(Enum::name).orElse(null));
-			launch.get().finishTestItem(i.getItemId(), rq);
+			Maybe<OperationCompletionRS> response = launch.get().finishTestItem(i.getItemId(), rq);
 			i.setStatus(status);
+			i.setFinishResponse(response);
+			i.setAttribute(FINISH_REQUEST, rq);
 		});
 	}
 
@@ -649,6 +663,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 		}
 		currentLifecycleItemType = ItemType.BEFORE_METHOD;
 		currentStep = ofNullable(retrieveLeaf()).map(l -> startStep(step, l)).orElse(null);
+		lastStep = currentStep;
 	}
 
 	@Override

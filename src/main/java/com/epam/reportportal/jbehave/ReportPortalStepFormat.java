@@ -29,8 +29,10 @@ import org.jbehave.core.reporters.Format;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 
+import javax.annotation.Nonnull;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static rp.com.google.common.base.Strings.isNullOrEmpty;
@@ -42,21 +44,26 @@ import static rp.com.google.common.base.Strings.isNullOrEmpty;
  */
 public class ReportPortalStepFormat extends Format {
 
+	private static final ThreadLocal<ReportPortalStepFormat> INSTANCES = new InheritableThreadLocal<>();
+	private static final ThreadLocal<ReportPortalStepStoryReporter> STORY_REPORTERS = new InheritableThreadLocal<>();
+	public static final ReportPortalStepFormat INSTANCE = new ReportPortalStepFormat();
+
 	private static final String SKIPPED_ISSUE_KEY = "skippedIssue";
 	private static final String AGENT_PROPERTIES_FILE = "agent.properties";
 
-	public static final Format INSTANCE = new ReportPortalStepFormat();
-
 	private final MemoizingSupplier<Launch> launch;
 	private final TestItemTree itemTree = new TestItemTree();
+	private final ReportPortal rp;
 
 	public ReportPortalStepFormat() {
 		this(ReportPortal.builder().build());
 	}
 
-	public ReportPortalStepFormat(final ReportPortal rp) {
+	public ReportPortalStepFormat(final ReportPortal reportPortal) {
 		super("REPORT_PORTAL");
+		rp = reportPortal;
 		launch = createLaunch(rp);
+		INSTANCES.set(this);
 	}
 
 	protected void finishLaunch(final Launch myLaunch) {
@@ -115,7 +122,28 @@ public class ReportPortalStepFormat extends Format {
 
 	@Override
 	public StoryReporter createStoryReporter(FilePrintStreamFactory factory, StoryReporterBuilder storyReporterBuilder) {
-		return new ReportPortalStepStoryReporter(launch, itemTree);
+		ReportPortalStepStoryReporter reporter = new ReportPortalStepStoryReporter(launch, itemTree);
+		STORY_REPORTERS.set(reporter);
+		return reporter;
 	}
 
+	@Nonnull
+	public ReportPortal getReportPortal() {
+		return rp;
+	}
+
+	@Nonnull
+	public TestItemTree getItemTree() {
+		return itemTree;
+	}
+
+	@Nonnull
+	public static ReportPortalStepFormat getCurrent() {
+		return INSTANCES.get();
+	}
+
+	@Nonnull
+	public static Optional<ReportPortalStepStoryReporter> getCurrentStoryReporter() {
+		return Optional.ofNullable(STORY_REPORTERS.get());
+	}
 }
