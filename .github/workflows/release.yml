@@ -126,4 +126,5 @@ jobs:
       - name: Push changes
         id: changePush
         run: |
-          git push --all origin --tags
+          git push --all origin
+          git push --tags

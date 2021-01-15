@@ -26,6 +26,22 @@ apply from: "https://raw.githubusercontent.com/reportportal/gradle-scripts/$bran
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
+project.ext.githubUserName = project.hasProperty('githubUserName') ? githubUserName : ""
+project.ext.githubToken = project.hasProperty('githubToken') ? githubToken : ""
+
+publishing {
+    repositories {
+        maven {
+            name = "JBehave GitHub Packages"
+            url = uri("https://maven.pkg.github.com/reportportal/agent-java-jbehave")
+            credentials {
+                username = githubUserName
+                password = githubToken
+            }
+        }
+    }
+}
+
 repositories {
     maven { url "http://dl.bintray.com/epam/reportportal" }
     maven { url "https://jitpack.io" }
@@ -83,4 +99,6 @@ processResources {
     }
 }
 
-afterReleaseBuild.dependsOn bintrayUpload
+def releaseDependencies = [bintrayUpload, publish]
+releaseDependencies.addAll(afterReleaseBuild.getDependsOn())
+afterReleaseBuild.setDependsOn(releaseDependencies)
