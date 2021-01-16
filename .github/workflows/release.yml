@@ -88,6 +88,7 @@ jobs:
           mv ${{ env.CHANGE_LOG_TMP_FILE }} ${{ env.CHANGE_LOG_FILE }}
           git add ${{ env.CHANGE_LOG_FILE }}
           git commit -m "Changelog update"
+          git push
 
       - name: Read changelog Entry
         id: readChangelogEntry
@@ -122,9 +123,4 @@ jobs:
           git merge -m 'Merge master branch into develop after a release' origin/master
           git status | (! grep -Fq 'both modified:') || git status | grep -F 'both modified:' \
           | { echo -e 'Unable to merge master into develop, merge conflicts:'; (! grep -Eo '[^ ]+$') }
-
-      - name: Push changes
-        id: changePush
-        run: |
-          git push --all origin
-          git push --tags
+          git push
