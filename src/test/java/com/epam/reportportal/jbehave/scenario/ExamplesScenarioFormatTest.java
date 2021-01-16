@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.epam.reportportal.jbehave.coderef;
+package com.epam.reportportal.jbehave.scenario;
 
 import com.epam.reportportal.jbehave.BaseTest;
+import com.epam.reportportal.jbehave.ReportPortalScenarioFormat;
 import com.epam.reportportal.jbehave.ReportPortalStepFormat;
 import com.epam.reportportal.jbehave.integration.basic.StockSteps;
+import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.reportportal.util.test.CommonUtils;
@@ -37,9 +39,10 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.*;
 
-public class ExamplesCodeRefTest extends BaseTest {
+public class ExamplesScenarioFormatTest extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
@@ -50,7 +53,7 @@ public class ExamplesCodeRefTest extends BaseTest {
 			.collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalScenarioFormat format = new ReportPortalScenarioFormat(ReportPortal.create(client,
 			standardParameters(),
 			Executors.newSingleThreadExecutor()
 	));
@@ -74,7 +77,7 @@ public class ExamplesCodeRefTest extends BaseTest {
 	private static final String EXAMPLES_STORY = "stories/Examples.story";
 
 	@Test
-	public void verify_story_with_examples() {
+	public void verify_story_with_examples_scenario_reporter() {
 		run(format, EXAMPLES_STORY, new StockSteps());
 
 		verify(client, times(1)).startTestItem(any());
@@ -93,12 +96,18 @@ public class ExamplesCodeRefTest extends BaseTest {
 			StartTestItemRQ rq = examples.get(i);
 			String exampleCodeRef = scenarioCodeRef + "/" + EXAMPLE_NODES.get(i);
 			assertThat(rq.getCodeRef(), equalTo(exampleCodeRef));
+			assertThat(rq.getType(), equalTo(ItemType.STEP.name()));
+			assertThat(rq.isHasStats(), equalTo(Boolean.TRUE));
+			assertThat(rq.getTestCaseId(), equalTo(exampleCodeRef));
 
 			List<StartTestItemRQ> exampleSteps = items.subList(i * 3, i * 3 + 3);
 			IntStream.range(0, exampleSteps.size()).forEach(j -> {
 				StartTestItemRQ stepRq = exampleSteps.get(j);
 				String stepCodeRef = exampleCodeRef + "/" + String.format("[STEP:%s]", STEP_NAMES.get(j));
 				assertThat(stepRq.getCodeRef(), equalTo(stepCodeRef));
+				assertThat(stepRq.getType(), equalTo(ItemType.STEP.name()));
+				assertThat(stepRq.isHasStats(), equalTo(Boolean.FALSE));
+				assertThat(stepRq.getTestCaseId(), nullValue());
 			});
 		});
 	}

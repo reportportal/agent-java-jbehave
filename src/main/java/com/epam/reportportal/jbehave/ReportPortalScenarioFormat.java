@@ -30,35 +30,34 @@ import java.util.Optional;
  *
  * @author Vadzim Hushchanskou
  */
-public class ReportPortalStepFormat extends AbstractReportPortalFormat {
+public class ReportPortalScenarioFormat extends AbstractReportPortalFormat {
+	private static final ThreadLocal<ReportPortalScenarioFormat> INSTANCES = new InheritableThreadLocal<>();
+	private static final ThreadLocal<ReportPortalScenarioStoryReporter> STORY_REPORTERS = new InheritableThreadLocal<>();
+	public static final ReportPortalScenarioFormat INSTANCE = new ReportPortalScenarioFormat();
 
-	private static final ThreadLocal<ReportPortalStepFormat> INSTANCES = new InheritableThreadLocal<>();
-	private static final ThreadLocal<ReportPortalStepStoryReporter> STORY_REPORTERS = new InheritableThreadLocal<>();
-	public static final ReportPortalStepFormat INSTANCE = new ReportPortalStepFormat();
-
-	public ReportPortalStepFormat() {
+	public ReportPortalScenarioFormat() {
 		this(ReportPortal.builder().build());
 	}
 
-	public ReportPortalStepFormat(final ReportPortal reportPortal) {
+	public ReportPortalScenarioFormat(final ReportPortal reportPortal) {
 		super(reportPortal);
 		INSTANCES.set(this);
 	}
 
 	@Override
 	public StoryReporter createStoryReporter(FilePrintStreamFactory factory, StoryReporterBuilder storyReporterBuilder) {
-		ReportPortalStepStoryReporter reporter = new ReportPortalStepStoryReporter(launch, itemTree);
+		ReportPortalScenarioStoryReporter reporter = new ReportPortalScenarioStoryReporter(launch, itemTree);
 		STORY_REPORTERS.set(reporter);
 		return reporter;
 	}
 
 	@Nonnull
-	public static ReportPortalStepFormat getCurrent() {
+	public static ReportPortalScenarioFormat getCurrent() {
 		return INSTANCES.get();
 	}
 
 	@Nonnull
-	public static Optional<ReportPortalStepStoryReporter> getCurrentStoryReporter() {
+	public static Optional<ReportPortalScenarioStoryReporter> getCurrentStoryReporter() {
 		return Optional.ofNullable(STORY_REPORTERS.get());
 	}
 }

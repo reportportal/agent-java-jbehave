@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.epam.reportportal.jbehave.coderef;
+package com.epam.reportportal.jbehave.scenario;
 
 import com.epam.reportportal.jbehave.BaseTest;
+import com.epam.reportportal.jbehave.ReportPortalScenarioFormat;
 import com.epam.reportportal.jbehave.ReportPortalStepFormat;
 import com.epam.reportportal.jbehave.integration.basic.EmptySteps;
-import com.epam.reportportal.jbehave.integration.basic.FailedSteps;
 import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
@@ -41,14 +41,14 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class FailedPassedStepCodeRefTest extends BaseTest {
+public class SimpleScenarioFormatTest extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("step_")).limit(2).collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalScenarioFormat format = new ReportPortalScenarioFormat(ReportPortal.create(client,
 			standardParameters(),
 			Executors.newSingleThreadExecutor()
 	));
@@ -59,14 +59,12 @@ public class FailedPassedStepCodeRefTest extends BaseTest {
 		mockBatchLogging(client);
 	}
 
-	private static final String CODE_REFERENCE_STORY = "stories/status/FailedPassedScenario.story";
-	private static final String FAILED_SCENARIO_STEP = "Given I have a failed step";
-	private static final String DUMMY_SCENARIO_STEP = "Given I have empty step";
-	private static final List<String> SCENARIO_STEPS = Arrays.asList(FAILED_SCENARIO_STEP, DUMMY_SCENARIO_STEP);
+	private static final String SIMPLE_STORY = "stories/DummyScenario.story";
+	private static final List<String> DUMMY_SCENARIO_STEPS = Arrays.asList("Given I have empty step", "Then I have another empty step");
 
 	@Test
-	public void verify_code_reference_generation() {
-		run(format, CODE_REFERENCE_STORY, new FailedSteps(), new EmptySteps());
+	public void verify_simple_story_with_scenario_reporter() {
+		run(format, SIMPLE_STORY, new EmptySteps());
 
 		ArgumentCaptor<StartTestItemRQ> captor = ArgumentCaptor.forClass(StartTestItemRQ.class);
 		verify(client, times(1)).startTestItem(captor.capture());
@@ -79,20 +77,25 @@ public class FailedPassedStepCodeRefTest extends BaseTest {
 		StartTestItemRQ storyRq = items.get(0);
 		StartTestItemRQ scenarioRq = items.get(1);
 
-		String storyCodeRef = CODE_REFERENCE_STORY;
+		String storyCodeRef = SIMPLE_STORY;
 		assertThat(storyRq.getCodeRef(), allOf(notNullValue(), equalTo(storyCodeRef)));
 		assertThat(storyRq.getType(), allOf(notNullValue(), equalTo(ItemType.STORY.name())));
+		assertThat(scenarioRq.isHasStats(), equalTo(Boolean.TRUE));
 
 		String scenarioCodeRef = storyCodeRef + "/[SCENARIO:The scenario]";
 		assertThat(scenarioRq.getCodeRef(), allOf(notNullValue(), equalTo(scenarioCodeRef)));
-		assertThat(scenarioRq.getType(), allOf(notNullValue(), equalTo(ItemType.SCENARIO.name())));
+		assertThat(scenarioRq.getTestCaseId(), allOf(notNullValue(), equalTo(scenarioCodeRef)));
+		assertThat(scenarioRq.getType(), allOf(notNullValue(), equalTo(ItemType.STEP.name())));
+		assertThat(scenarioRq.isHasStats(), equalTo(Boolean.TRUE));
 
 		List<StartTestItemRQ> stepRqs = items.subList(2, items.size());
 		IntStream.range(0, stepRqs.size()).forEach(i -> {
 			StartTestItemRQ step = stepRqs.get(i);
-			String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", SCENARIO_STEPS.get(i));
+			String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", DUMMY_SCENARIO_STEPS.get(i));
 			assertThat(step.getCodeRef(), allOf(notNullValue(), equalTo(stepCodeRef)));
 			assertThat(step.getType(), allOf(notNullValue(), equalTo(ItemType.STEP.name())));
+			assertThat(step.isHasStats(), equalTo(Boolean.FALSE));
+			assertThat(step.getTestCaseId(), nullValue());
 		});
 	}
 }
