@@ -56,7 +56,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  *
  * @author Vadzim Hushchanskou
  */
-public class ReportPortalStepStoryReporter extends NullStoryReporter {
+public class ReportPortalScenarioStoryReporter extends NullStoryReporter {
 	public static final String CODE_REF = "CODE_REF";
 	public static final String START_TIME = "START_TIME";
 	public static final String PARAMETERS = "PARAMETERS";
@@ -88,7 +88,7 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 	private volatile TestItemTree.TestItemLeaf currentStep;
 	private volatile TestItemTree.TestItemLeaf lastStep;
 
-	public ReportPortalStepStoryReporter(final Supplier<Launch> launchSupplier, TestItemTree testItemTree) {
+	public ReportPortalScenarioStoryReporter(final Supplier<Launch> launchSupplier, TestItemTree testItemTree) {
 		launch = launchSupplier;
 		itemTree = testItemTree;
 	}
