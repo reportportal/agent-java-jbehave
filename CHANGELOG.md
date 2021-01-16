@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.0.0-BETA-9]
 ### Added
 - `ReportPortalScenarioFormat` class, which is a formatter for reporting scenarios as steps
 
