@@ -25,6 +25,8 @@ import org.jbehave.core.reporters.StoryReporterBuilder;
  * @author Vadzim Hushchanskou
  */
 public class ReportPortalStepFormat extends ReportPortalFormat {
+	public static final ReportPortalStepFormat INSTANCE = new ReportPortalStepFormat();
+
 	public ReportPortalStepFormat() {
 		this(ReportPortal.builder().build());
 	}
