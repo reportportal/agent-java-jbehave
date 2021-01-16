@@ -30,9 +30,10 @@ import java.util.Optional;
  *
  * @author Vadzim Hushchanskou
  */
-public class ReportPortalScenarioFormat extends ReportPortalAbstractFormat {
+public class ReportPortalScenarioFormat extends AbstractReportPortalFormat {
 	private static final ThreadLocal<ReportPortalScenarioFormat> INSTANCES = new InheritableThreadLocal<>();
 	private static final ThreadLocal<ReportPortalScenarioStoryReporter> STORY_REPORTERS = new InheritableThreadLocal<>();
+	public static final ReportPortalScenarioFormat INSTANCE = new ReportPortalScenarioFormat();
 
 	public ReportPortalScenarioFormat() {
 		this(ReportPortal.builder().build());

@@ -30,7 +30,7 @@ import java.util.Optional;
  *
  * @author Vadzim Hushchanskou
  */
-public class ReportPortalStepFormat extends ReportPortalAbstractFormat {
+public class ReportPortalStepFormat extends AbstractReportPortalFormat {
 
 	private static final ThreadLocal<ReportPortalStepFormat> INSTANCES = new InheritableThreadLocal<>();
 	private static final ThreadLocal<ReportPortalStepStoryReporter> STORY_REPORTERS = new InheritableThreadLocal<>();

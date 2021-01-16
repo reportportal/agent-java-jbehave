@@ -1,0 +1,101 @@
+/*
+ * Copyright 2021 EPAM Systems
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.epam.reportportal.jbehave.scenario;
+
+import com.epam.reportportal.jbehave.BaseTest;
+import com.epam.reportportal.jbehave.ReportPortalScenarioFormat;
+import com.epam.reportportal.jbehave.ReportPortalStepFormat;
+import com.epam.reportportal.jbehave.integration.basic.EmptySteps;
+import com.epam.reportportal.listeners.ItemType;
+import com.epam.reportportal.service.ReportPortal;
+import com.epam.reportportal.service.ReportPortalClient;
+import com.epam.reportportal.util.test.CommonUtils;
+import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.*;
+
+public class SimpleScenarioFormatTest extends BaseTest {
+
+	private final String storyId = CommonUtils.namedId("story_");
+	private final String scenarioId = CommonUtils.namedId("scenario_");
+	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("step_")).limit(2).collect(Collectors.toList());
+
+	private final ReportPortalClient client = mock(ReportPortalClient.class);
+	private final ReportPortalScenarioFormat format = new ReportPortalScenarioFormat(ReportPortal.create(client,
+			standardParameters(),
+			Executors.newSingleThreadExecutor()
+	));
+
+	@BeforeEach
+	public void setupMock() {
+		mockLaunch(client, null, storyId, scenarioId, stepIds);
+		mockBatchLogging(client);
+	}
+
+	private static final String SIMPLE_STORY = "stories/DummyScenario.story";
+	private static final List<String> DUMMY_SCENARIO_STEPS = Arrays.asList("Given I have empty step", "Then I have another empty step");
+
+	@Test
+	public void verify_simple_story_with_scenario_reporter() {
+		run(format, SIMPLE_STORY, new EmptySteps());
+
+		ArgumentCaptor<StartTestItemRQ> captor = ArgumentCaptor.forClass(StartTestItemRQ.class);
+		verify(client, times(1)).startTestItem(captor.capture());
+		verify(client, times(1)).startTestItem(same(storyId), captor.capture());
+		verify(client, times(2)).startTestItem(same(scenarioId), captor.capture());
+
+		List<StartTestItemRQ> items = captor.getAllValues();
+		assertThat(items, hasSize(4));
+
+		StartTestItemRQ storyRq = items.get(0);
+		StartTestItemRQ scenarioRq = items.get(1);
+
+		String storyCodeRef = SIMPLE_STORY;
+		assertThat(storyRq.getCodeRef(), allOf(notNullValue(), equalTo(storyCodeRef)));
+		assertThat(storyRq.getType(), allOf(notNullValue(), equalTo(ItemType.STORY.name())));
+		assertThat(scenarioRq.isHasStats(), equalTo(Boolean.TRUE));
+
+		String scenarioCodeRef = storyCodeRef + "/[SCENARIO:The scenario]";
+		assertThat(scenarioRq.getCodeRef(), allOf(notNullValue(), equalTo(scenarioCodeRef)));
+		assertThat(scenarioRq.getTestCaseId(), allOf(notNullValue(), equalTo(scenarioCodeRef)));
+		assertThat(scenarioRq.getType(), allOf(notNullValue(), equalTo(ItemType.STEP.name())));
+		assertThat(scenarioRq.isHasStats(), equalTo(Boolean.TRUE));
+
+		List<StartTestItemRQ> stepRqs = items.subList(2, items.size());
+		IntStream.range(0, stepRqs.size()).forEach(i -> {
+			StartTestItemRQ step = stepRqs.get(i);
+			String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", DUMMY_SCENARIO_STEPS.get(i));
+			assertThat(step.getCodeRef(), allOf(notNullValue(), equalTo(stepCodeRef)));
+			assertThat(step.getType(), allOf(notNullValue(), equalTo(ItemType.STEP.name())));
+			assertThat(step.isHasStats(), equalTo(Boolean.FALSE));
+			assertThat(step.getTestCaseId(), nullValue());
+		});
+	}
+}

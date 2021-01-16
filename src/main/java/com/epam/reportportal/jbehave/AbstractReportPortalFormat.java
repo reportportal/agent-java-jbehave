@@ -40,7 +40,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  *
  * @author Vadzim Hushchanskou
  */
-public abstract class ReportPortalAbstractFormat extends Format {
+public abstract class AbstractReportPortalFormat extends Format {
 
 	private static final String SKIPPED_ISSUE_KEY = "skippedIssue";
 	private static final String AGENT_PROPERTIES_FILE = "agent.properties";
@@ -49,7 +49,7 @@ public abstract class ReportPortalAbstractFormat extends Format {
 	protected final TestItemTree itemTree = new TestItemTree();
 	protected final ReportPortal rp;
 
-	public ReportPortalAbstractFormat(final ReportPortal reportPortal) {
+	public AbstractReportPortalFormat(final ReportPortal reportPortal) {
 		super("REPORT_PORTAL");
 		rp = reportPortal;
 		launch = createLaunch(rp);

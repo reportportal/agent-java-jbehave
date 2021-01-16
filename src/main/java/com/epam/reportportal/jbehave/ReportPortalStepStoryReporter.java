@@ -52,7 +52,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
- * JBehave Reporter for reporting results into ReportPortal. Requires using
+ * JBehave Reporter for reporting results into ReportPortal.
  *
  * @author Vadzim Hushchanskou
  */
@@ -404,15 +404,11 @@ public class ReportPortalStepStoryReporter extends NullStoryReporter {
 
 	protected TestItemTree.TestItemLeaf startStep(String name, @Nonnull final TestItemTree.TestItemLeaf parent) {
 		TestItemTree.ItemTreeKey key = ItemTreeUtils.createKey(name);
-		TestItemTree.TestItemLeaf leaf = createLeaf(
-				ItemType.STEP,
-				buildStartStepRq(name,
-						getCodeRef(parent.getAttribute(CODE_REF), key, ItemType.STEP),
-						parent.getAttribute(PARAMETERS),
-						getItemDate(parent)
-				),
-				parent
-		);
+		TestItemTree.TestItemLeaf leaf = createLeaf(ItemType.STEP, buildStartStepRq(name,
+				getCodeRef(parent.getAttribute(CODE_REF), key, ItemType.STEP),
+				parent.getAttribute(PARAMETERS),
+				getItemDate(parent)
+		), parent);
 		parent.getChildItems().put(key, leaf);
 		return leaf;
 	}
