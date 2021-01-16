@@ -16,8 +16,10 @@
 
 package com.epam.reportportal.jbehave.integration.basic;
 
+import com.epam.reportportal.jbehave.ReportPortalFormat;
 import com.epam.reportportal.jbehave.ReportPortalStepFormat;
 import com.epam.reportportal.jbehave.ReportPortalStepStoryReporter;
+import com.epam.reportportal.jbehave.ReportPortalStoryReporter;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.tree.ItemTreeReporter;
@@ -44,12 +46,12 @@ public class CallbackReportingSteps {
 
 	@AfterScenario
 	public void after() {
-		Optional<ReportPortalStepStoryReporter> reporter = ReportPortalStepFormat.getCurrentStoryReporter();
-		ReportPortalStepFormat currentFormat = ReportPortalStepFormat.getCurrent();
+		Optional<ReportPortalStoryReporter> reporter = ReportPortalStepFormat.getCurrentStoryReporter();
+		ReportPortalFormat currentFormat = ReportPortalStepFormat.getCurrent();
 		ReportPortal rp = currentFormat.getReportPortal();
 		TestItemTree tree = currentFormat.getItemTree();
 
-		reporter.flatMap(ReportPortalStepStoryReporter::getLastStep).ifPresent(itemLeaf -> {
+		reporter.flatMap(ReportPortalStoryReporter::getLastStep).ifPresent(itemLeaf -> {
 			TestItemTree.TestItemLeaf scenario = itemLeaf.getAttribute(ReportPortalStepStoryReporter.PARENT);
 			if (ofNullable(scenario).isPresent()) {
 				String scenarioName = ofNullable((StartTestItemRQ) scenario.getAttribute(ReportPortalStepStoryReporter.START_REQUEST)).map(
@@ -70,6 +72,7 @@ public class CallbackReportingSteps {
 		FinishTestItemRQ finishTestItemRQ = new FinishTestItemRQ();
 		finishTestItemRQ.setStatus(status);
 		finishTestItemRQ.setEndTime(Calendar.getInstance().getTime());
+		//noinspection ResultOfMethodCallIgnored
 		ItemTreeReporter.finishItem(rp.getClient(), finishTestItemRQ, tree.getLaunchId(), testItemLeaf).cache().blockingGet();
 		testItemLeaf.setStatus(ItemStatus.valueOf(status));
 	}

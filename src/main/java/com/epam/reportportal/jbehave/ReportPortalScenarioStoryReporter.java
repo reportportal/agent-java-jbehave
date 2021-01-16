@@ -15,48 +15,28 @@
  */
 package com.epam.reportportal.jbehave;
 
-import com.epam.reportportal.jbehave.util.ItemTreeUtils;
-import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.ItemType;
-import com.epam.reportportal.listeners.LogLevel;
 import com.epam.reportportal.service.Launch;
-import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.item.TestCaseIdEntry;
 import com.epam.reportportal.service.tree.TestItemTree;
-import com.epam.reportportal.utils.StatusEvaluation;
-import com.epam.reportportal.utils.TestCaseIdUtils;
-import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
-import com.epam.ta.reportportal.ws.model.OperationCompletionRS;
-import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
-import com.epam.ta.reportportal.ws.model.attribute.ItemAttributesRQ;
-import com.epam.ta.reportportal.ws.model.issue.Issue;
-import com.epam.ta.reportportal.ws.model.log.SaveLogRQ;
-import io.reactivex.Maybe;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.jbehave.core.model.*;
-import org.jbehave.core.reporters.NullStoryReporter;
+import org.jbehave.core.model.Scenario;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Date;
+import java.util.Map;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
- * JBehave Reporter for reporting results into ReportPortal.
+ * JBehave Reporter for reporting results into ReportPortal. Reports each Story Scenario as a separate test. That means each Scenario
+ * has it's own statistic and each Scenario Step is reported as nested step and does not add test count.
  *
  * @author Vadzim Hushchanskou
  */
-public class ReportPortalScenarioStoryReporter extends ReportPortalStepStoryReporter {
+public class ReportPortalScenarioStoryReporter extends ReportPortalStoryReporter {
 
 	public ReportPortalScenarioStoryReporter(final Supplier<Launch> launchSupplier, TestItemTree testItemTree) {
 		super(launchSupplier, testItemTree);
@@ -81,7 +61,7 @@ public class ReportPortalScenarioStoryReporter extends ReportPortalStepStoryRepo
 	@Nonnull
 	protected StartTestItemRQ buildStartScenarioRq(@Nonnull Scenario scenario, @Nonnull String codeRef, @Nullable final Date startTime) {
 		StartTestItemRQ rq = super.buildStartScenarioRq(scenario, codeRef, startTime);
-		if(!scenario.hasExamplesTable() || scenario.getExamplesTable().getRows().isEmpty()) {
+		if (!scenario.hasExamplesTable() || scenario.getExamplesTable().getRows().isEmpty()) {
 			rq.setTestCaseId(ofNullable(getTestCaseId(codeRef, null)).map(TestCaseIdEntry::getId).orElse(null));
 			rq.setType(ItemType.STEP.name());
 		}

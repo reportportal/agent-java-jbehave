@@ -17,22 +17,14 @@ package com.epam.reportportal.jbehave;
 
 import com.epam.reportportal.service.ReportPortal;
 import org.jbehave.core.reporters.FilePrintStreamFactory;
-import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 
-import javax.annotation.Nonnull;
-import java.util.Optional;
-
 /**
- * ReportPortal format. Adds possibility to report story execution results to
- * ReportPortal. Requires using one of execution decorators to start and finish
- * execution in RP
+ * {@inheritDoc}
  *
  * @author Vadzim Hushchanskou
  */
-public class ReportPortalScenarioFormat extends AbstractReportPortalFormat {
-	private static final ThreadLocal<ReportPortalScenarioFormat> INSTANCES = new InheritableThreadLocal<>();
-	private static final ThreadLocal<ReportPortalScenarioStoryReporter> STORY_REPORTERS = new InheritableThreadLocal<>();
+public class ReportPortalScenarioFormat extends ReportPortalFormat {
 	public static final ReportPortalScenarioFormat INSTANCE = new ReportPortalScenarioFormat();
 
 	public ReportPortalScenarioFormat() {
@@ -41,23 +33,14 @@ public class ReportPortalScenarioFormat extends AbstractReportPortalFormat {
 
 	public ReportPortalScenarioFormat(final ReportPortal reportPortal) {
 		super(reportPortal);
-		INSTANCES.set(this);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public StoryReporter createStoryReporter(FilePrintStreamFactory factory, StoryReporterBuilder storyReporterBuilder) {
-		ReportPortalScenarioStoryReporter reporter = new ReportPortalScenarioStoryReporter(launch, itemTree);
-		STORY_REPORTERS.set(reporter);
-		return reporter;
-	}
-
-	@Nonnull
-	public static ReportPortalScenarioFormat getCurrent() {
-		return INSTANCES.get();
-	}
-
-	@Nonnull
-	public static Optional<ReportPortalScenarioStoryReporter> getCurrentStoryReporter() {
-		return Optional.ofNullable(STORY_REPORTERS.get());
+	protected ReportPortalStoryReporter createReportPortalReporter(FilePrintStreamFactory factory,
+			StoryReporterBuilder storyReporterBuilder) {
+		return new ReportPortalScenarioStoryReporter(launch, itemTree);
 	}
 }
