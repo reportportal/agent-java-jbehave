@@ -82,10 +82,10 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	private static final String AFTER_STORY = "AfterStory";
 
 	private final Deque<Entity<?>> structure = new LinkedList<>();
+	private final Map<String, TestItemTree.TestItemLeaf> currentStep = new HashMap<>();
 	private final Supplier<Launch> launch;
 	private final TestItemTree itemTree;
 	private volatile ItemType currentLifecycleItemType;
-	private volatile TestItemTree.TestItemLeaf currentStep;
 	private volatile TestItemTree.TestItemLeaf lastStep;
 
 	public ReportPortalStoryReporter(final Supplier<Launch> launchSupplier, TestItemTree testItemTree) {
@@ -404,15 +404,11 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 
 	protected TestItemTree.TestItemLeaf startStep(String name, @Nonnull final TestItemTree.TestItemLeaf parent) {
 		TestItemTree.ItemTreeKey key = ItemTreeUtils.createKey(name);
-		TestItemTree.TestItemLeaf leaf = createLeaf(
-				ItemType.STEP,
-				buildStartStepRq(name,
-						getCodeRef(parent.getAttribute(CODE_REF), key, ItemType.STEP),
-						parent.getAttribute(PARAMETERS),
-						getItemDate(parent)
-				),
-				parent
-		);
+		TestItemTree.TestItemLeaf leaf = createLeaf(ItemType.STEP, buildStartStepRq(name,
+				getCodeRef(parent.getAttribute(CODE_REF), key, ItemType.STEP),
+				parent.getAttribute(PARAMETERS),
+				getItemDate(parent)
+		), parent);
 		parent.getChildItems().put(key, leaf);
 		return leaf;
 	}
@@ -664,8 +660,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 			evaluateAndFinishLastItem();
 		}
 		currentLifecycleItemType = ItemType.BEFORE_METHOD;
-		currentStep = ofNullable(retrieveLeaf()).map(l -> startStep(step, l)).orElse(null);
-		lastStep = currentStep;
+		lastStep = currentStep.computeIfAbsent(step, s -> ofNullable(retrieveLeaf()).map(l -> startStep(step, l)).orElse(null));
 	}
 
 	@Override
@@ -698,15 +693,14 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	public void successful(String step) {
 		launch.get().getStepReporter().finishPreviousStep();
 		currentLifecycleItemType = ItemType.AFTER_TEST;
-		ofNullable(currentStep).ifPresent(s -> finishStep(s, ItemStatus.PASSED));
-		currentStep = null;
+		ofNullable(currentStep.remove(step)).ifPresent(s -> finishStep(s, ItemStatus.PASSED));
 	}
 
 	@Override
 	public void failed(String step, Throwable cause) {
 		launch.get().getStepReporter().finishPreviousStep();
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
-		boolean isLifecycleMethod = item == null || currentStep == null;
+		boolean isLifecycleMethod = item == null || !currentStep.containsKey(step);
 		if (isLifecycleMethod) {
 			if (item == null) {
 				// failed @BeforeStories (annotated) methods
@@ -715,13 +709,15 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 				// failed @BeforeStory, @BeforeScenario (annotated) methods
 				structure.add(new Entity<>(ItemType.TEST, currentLifecycleItemType == ItemType.BEFORE_SUITE ? BEFORE_STORY : AFTER_STORY));
 			}
-			currentStep = ofNullable(retrieveLeaf()).map(i -> startLifecycleMethod(step, currentLifecycleItemType, i)).orElse(null);
+			currentStep.computeIfAbsent(
+					step,
+					s -> ofNullable(retrieveLeaf()).map(i -> startLifecycleMethod(s, currentLifecycleItemType, i)).orElse(null)
+			);
 		}
-		ofNullable(currentStep).ifPresent(i -> {
+		ofNullable(currentStep.remove(step)).ifPresent(i -> {
 			sendStackTraceToRP(i.getItemId(), cause);
 			finishStep(i, ItemStatus.FAILED);
 		});
-		currentStep = null;
 	}
 
 	@Override

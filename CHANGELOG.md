@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Added
 - Comprehensive javadocs
+- Composite steps support
 
 ### Changed
 - Formatters class structure to reduce code amount and duplication

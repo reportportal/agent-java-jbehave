@@ -103,7 +103,7 @@ public class NestedStepsStepReporterTest extends BaseTest {
 				.stream()
 				.flatMap(l -> l.getSerializedRQs().stream())
 				.flatMap(l -> ((List<SaveLogRQ>) l.getRequest()).stream())
-				.filter(rq-> !LogLevel.DEBUG.name().equals(rq.getLevel()))
+				.filter(rq -> !LogLevel.DEBUG.name().equals(rq.getLevel()))
 				.collect(Collectors.toList());
 		SaveLogRQ firstStepLog = logs.get(0);
 
