@@ -20,7 +20,8 @@ import org.jbehave.core.reporters.FilePrintStreamFactory;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 
 /**
- * {@inheritDoc}
+ * A format to report JBehave runs into Report Portal application. Each Scenario Step reported with the format will have its own statistics.
+ * Scenarios will not have it.
  *
  * @author Vadzim Hushchanskou
  */

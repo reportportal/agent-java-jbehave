@@ -185,7 +185,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	/**
 	 * Extension point to customize example names
 	 *
-	 * @param example a map of variable name -> variable value
+	 * @param example a map of variable name -&gt; variable value
 	 * @return a name of the given example
 	 */
 	protected String formatExampleName(@Nonnull final Map<String, String> example) {
@@ -259,6 +259,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 *
 	 * @param step      JBehave step name
 	 * @param codeRef   a step code reference
+	 * @param params    Examples parameters for current iteration
 	 * @param startTime a step start time which will be passed to RP
 	 * @return Request to ReportPortal
 	 */
@@ -559,6 +560,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	/**
 	 * Send a message to report portal about appeared failure
 	 *
+	 * @param itemId an ID of an Item to which bypassed stacktrace will be attached
 	 * @param thrown {@link Throwable} object with details of the failure
 	 */
 	protected void sendStackTraceToRP(@Nonnull Maybe<String> itemId, @Nullable final Throwable thrown) {
@@ -709,8 +711,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 				// failed @BeforeStory, @BeforeScenario (annotated) methods
 				structure.add(new Entity<>(ItemType.TEST, currentLifecycleItemType == ItemType.BEFORE_SUITE ? BEFORE_STORY : AFTER_STORY));
 			}
-			currentStep.computeIfAbsent(
-					step,
+			currentStep.computeIfAbsent(step,
 					s -> ofNullable(retrieveLeaf()).map(i -> startLifecycleMethod(s, currentLifecycleItemType, i)).orElse(null)
 			);
 		}

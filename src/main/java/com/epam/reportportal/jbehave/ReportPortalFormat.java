@@ -38,8 +38,7 @@ import java.util.function.Supplier;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * ReportPortal format. Adds possibility to report story execution results to
- * ReportPortal.
+ * A common class for ReportPortal formats, which are for reporting JBehave runs into Report Portal application.
  *
  * @author Vadzim Hushchanskou
  */
@@ -55,6 +54,11 @@ public abstract class ReportPortalFormat extends Format {
 	protected final TestItemTree itemTree = new TestItemTree();
 	protected final ReportPortal rp;
 
+	/**
+	 * Creates an instance of the formatter class using specific {@link ReportPortal} reporter.
+	 *
+	 * @param reportPortal an instance of Report Portal reporter
+	 */
 	public ReportPortalFormat(final ReportPortal reportPortal) {
 		super("REPORT_PORTAL");
 		rp = reportPortal;
@@ -62,16 +66,35 @@ public abstract class ReportPortalFormat extends Format {
 		INSTANCES.set(this);
 	}
 
+	/**
+	 * Finishes a {@link Launch} passed in the method parameters
+	 *
+	 * @param myLaunch a launch to finish
+	 */
 	protected void finishLaunch(final Launch myLaunch) {
 		FinishExecutionRQ rq = new FinishExecutionRQ();
 		rq.setEndTime(Calendar.getInstance().getTime());
 		myLaunch.finish(rq);
 	}
 
+	/**
+	 * Returns a {@link Thread} which is supposed to run on test execution shutdown. By default it finishes the current test execution on
+	 * Report Portal.
+	 *
+	 * @param myLaunch a launch instance
+	 * @return a thread to run on JVM shutdown event
+	 */
 	protected Thread getShutdownHook(final Launch myLaunch) {
 		return new Thread(() -> finishLaunch(myLaunch));
 	}
 
+	/**
+	 * A method for creation a Start Launch request which will be sent to Report Portal. You can customize it by overriding the method.
+	 *
+	 * @param startTime launch start time, which will be set into the result request
+	 * @param parameters Report Portal client parameters
+	 * @return a Start Launch request instance
+	 */
 	protected StartLaunchRQ buildStartLaunchRQ(Date startTime, ListenerParameters parameters) {
 		StartLaunchRQ rq = new StartLaunchRQ();
 		rq.setName(parameters.getLaunchName());
@@ -117,6 +140,13 @@ public abstract class ReportPortalFormat extends Format {
 		});
 	}
 
+	/**
+	 * Creates a {@link StoryReporter} which will be used to report a Story.
+	 *
+	 * @param factory              JBehave's file print stream factory
+	 * @param storyReporterBuilder JBehave's {@link StoryReporter} builder
+	 * @return a Story reporter
+	 */
 	@Override
 	public StoryReporter createStoryReporter(FilePrintStreamFactory factory, StoryReporterBuilder storyReporterBuilder) {
 		ReportPortalStoryReporter reporter = createReportPortalReporter(factory, storyReporterBuilder);
@@ -143,11 +173,21 @@ public abstract class ReportPortalFormat extends Format {
 		return itemTree;
 	}
 
+	/**
+	 * Returns a formatter instance for the current thread.
+	 *
+	 * @return a formatter instance for the current thread
+	 */
 	@Nonnull
 	public static ReportPortalFormat getCurrent() {
 		return INSTANCES.get();
 	}
 
+	/**
+	 * Returns a story reporter for the current thread if any.
+	 *
+	 * @return a story reporter for the current thread if any
+	 */
 	@Nonnull
 	public static Optional<ReportPortalStoryReporter> getCurrentStoryReporter() {
 		return Optional.ofNullable(STORY_REPORTERS.get());
