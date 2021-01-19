@@ -20,14 +20,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Set of useful utils related to JBehave -> ReportPortal integration
+ * Set of useful utils related to JBehave -&gt; ReportPortal integration
  *
  * @author Vadzim Hushchanskou
  */
 public class JBehaveUtils {
 
 	private JBehaveUtils() {
-		// static utilities class
+		throw new AssertionError("No instances should exist for the class!");
 	}
 
 	private static final String PARAMETER_ITEMS_START = "[";
@@ -35,6 +35,12 @@ public class JBehaveUtils {
 	private static final String PARAMETER_ITEMS_DELIMITER = ";";
 	private static final String KEY_VALUE_SEPARATOR = ":";
 
+	/**
+	 * Create a String from a parameter Map to be used as a test key and title
+	 *
+	 * @param example a map of parameters: name-&gt;value
+	 * @return a formatted string of parameters
+	 */
 	public static String formatExampleKey(@Nonnull final Map<String, String> example) {
 		return example.entrySet()
 				.stream()

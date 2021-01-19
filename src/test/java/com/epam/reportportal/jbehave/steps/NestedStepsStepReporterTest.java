@@ -99,13 +99,14 @@ public class NestedStepsStepReporterTest extends BaseTest {
 		ArgumentCaptor<MultiPartRequest> logCaptor = ArgumentCaptor.forClass(MultiPartRequest.class);
 		verify(client, atLeastOnce()).log(logCaptor.capture());
 		StartTestItemRQ firstStep = firstStepCaptor.getValue();
-		List<SaveLogRQ> logs = logCaptor.getAllValues()
+		List<SaveLogRQ> logEntries = logCaptor.getAllValues()
 				.stream()
 				.flatMap(l -> l.getSerializedRQs().stream())
 				.flatMap(l -> ((List<SaveLogRQ>) l.getRequest()).stream())
-				.filter(rq-> !LogLevel.DEBUG.name().equals(rq.getLevel()))
+				.filter(rq -> !LogLevel.DEBUG.name().equals(rq.getLevel()))
 				.collect(Collectors.toList());
-		SaveLogRQ firstStepLog = logs.get(0);
+		SaveLogRQ firstStepLog = logEntries.get(0);
+		assertThat(logEntries, hasSize(5));
 
 		verifyStepStart(firstStep, NestedStepsStepReporterSteps.FIRST_NAME);
 		verifyLogEntry(firstStepLog, stepNestedStepIds.get(0), NestedStepsStepReporterSteps.FIRST_NESTED_STEP_LOG);
@@ -113,7 +114,7 @@ public class NestedStepsStepReporterTest extends BaseTest {
 		ArgumentCaptor<StartTestItemRQ> secondStepCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
 		verify(client, times(2)).startTestItem(same(stepIds.get(1)), secondStepCaptor.capture());
 		List<StartTestItemRQ> secondSteps = secondStepCaptor.getAllValues();
-		List<SaveLogRQ> secondStepLogs = logs.subList(1, logs.size());
+		List<SaveLogRQ> secondStepLogs = logEntries.subList(1, logEntries.size());
 
 		StartTestItemRQ secondStep = secondSteps.get(0);
 		verifyStepStart(secondStep, NestedStepsStepReporterSteps.SECOND_NAME);

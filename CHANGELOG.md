@@ -1,6 +1,13 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Comprehensive javadocs
+- Composite steps support
+- Many extension methods
+
+### Changed
+- Formatters class structure to reduce code amount and duplication
 
 ## [5.0.0-BETA-9]
 ### Added

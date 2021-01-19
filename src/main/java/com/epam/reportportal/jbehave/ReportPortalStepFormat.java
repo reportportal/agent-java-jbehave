@@ -17,23 +17,15 @@ package com.epam.reportportal.jbehave;
 
 import com.epam.reportportal.service.ReportPortal;
 import org.jbehave.core.reporters.FilePrintStreamFactory;
-import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 
-import javax.annotation.Nonnull;
-import java.util.Optional;
-
 /**
- * ReportPortal format. Adds possibility to report story execution results to
- * ReportPortal. Requires using one of execution decorators to start and finish
- * execution in RP
+ * A format to report JBehave runs into Report Portal application. Each Scenario Step reported with the format will have its own statistics.
+ * Scenarios will not have it.
  *
  * @author Vadzim Hushchanskou
  */
-public class ReportPortalStepFormat extends AbstractReportPortalFormat {
-
-	private static final ThreadLocal<ReportPortalStepFormat> INSTANCES = new InheritableThreadLocal<>();
-	private static final ThreadLocal<ReportPortalStepStoryReporter> STORY_REPORTERS = new InheritableThreadLocal<>();
+public class ReportPortalStepFormat extends ReportPortalFormat {
 	public static final ReportPortalStepFormat INSTANCE = new ReportPortalStepFormat();
 
 	public ReportPortalStepFormat() {
@@ -42,23 +34,13 @@ public class ReportPortalStepFormat extends AbstractReportPortalFormat {
 
 	public ReportPortalStepFormat(final ReportPortal reportPortal) {
 		super(reportPortal);
-		INSTANCES.set(this);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public StoryReporter createStoryReporter(FilePrintStreamFactory factory, StoryReporterBuilder storyReporterBuilder) {
-		ReportPortalStepStoryReporter reporter = new ReportPortalStepStoryReporter(launch, itemTree);
-		STORY_REPORTERS.set(reporter);
-		return reporter;
-	}
-
-	@Nonnull
-	public static ReportPortalStepFormat getCurrent() {
-		return INSTANCES.get();
-	}
-
-	@Nonnull
-	public static Optional<ReportPortalStepStoryReporter> getCurrentStoryReporter() {
-		return Optional.ofNullable(STORY_REPORTERS.get());
+	public ReportPortalStoryReporter createReportPortalReporter(FilePrintStreamFactory factory, StoryReporterBuilder storyReporterBuilder) {
+		return new ReportPortalStepStoryReporter(launch, itemTree);
 	}
 }

@@ -44,6 +44,7 @@ public class NestedStepsStepReporterSteps {
 		stepReporter.sendStep(FIRST_NAME);
 		Thread.sleep(CommonUtils.MINIMAL_TEST_PAUSE);
 		LOGGER.info(FIRST_NESTED_STEP_LOG);
+		Thread.sleep(CommonUtils.MINIMAL_TEST_PAUSE);
 	}
 
 	@Then("a step with two manual steps")
@@ -57,6 +58,7 @@ public class NestedStepsStepReporterSteps {
 		stepReporter.sendStep(ItemStatus.FAILED, THIRD_NAME, new File("pug/unlucky.jpg"));
 		Thread.sleep(CommonUtils.MINIMAL_TEST_PAUSE);
 		LOGGER.error(THIRD_NESTED_STEP_LOG);
+		Thread.sleep(CommonUtils.MINIMAL_TEST_PAUSE);
 	}
 
 }
