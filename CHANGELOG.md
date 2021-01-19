@@ -4,6 +4,7 @@
 ### Added
 - Comprehensive javadocs
 - Composite steps support
+- Many extension methods
 
 ### Changed
 - Formatters class structure to reduce code amount and duplication

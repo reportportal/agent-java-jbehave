@@ -93,11 +93,24 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		itemTree = testItemTree;
 	}
 
+	/**
+	 * Returns an item leaf of the last step reported with a reporter instance
+	 *
+	 * @return an item leaf or empty if no steps were reported
+	 */
 	@Nonnull
 	public Optional<TestItemTree.TestItemLeaf> getLastStep() {
 		return ofNullable(lastStep);
 	}
 
+	/**
+	 * Generates code references (path through a story to a step) for JBehave stories.
+	 *
+	 * @param parentCodeRef a basis code reference or null if it's a root item
+	 * @param key an item leaf key
+	 * @param type an item type
+	 * @return a code reference string to identify every element of a story
+	 */
 	private String getCodeRef(@Nullable final String parentCodeRef, @Nonnull final TestItemTree.ItemTreeKey key, ItemType type) {
 		StringBuilder sb = new StringBuilder();
 		if (isBlank(parentCodeRef)) {
@@ -114,10 +127,22 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		return sb.toString();
 	}
 
+	/**
+	 * Extension point to customize story naming. Returns a story name.
+	 *
+	 * @param story JBehave's story object
+	 * @return the story name
+	 */
 	protected String getStoryName(@Nonnull final Story story) {
 		return story.getName();
 	}
 
+	/**
+	 * Converts a JBehave {@link Meta} object into a {@link Set} of {@link ItemAttributesRQ} ready to use in a request to Report Portal
+	 *
+	 * @param meta JBehave's meta object
+	 * @return a set of attributes
+	 */
 	@Nonnull
 	protected Set<ItemAttributesRQ> getAttributes(@Nonnull final Meta meta) {
 		Set<ItemAttributesRQ> items = new HashSet<>();
@@ -128,6 +153,12 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		return items;
 	}
 
+	/**
+	 * Retrieves story metas and converts it into a {@link Set} of {@link ItemAttributesRQ} ready to use in a request to Report Portal
+	 *
+	 * @param story JBehave's story object
+	 * @return a set of attributes
+	 */
 	@Nonnull
 	protected Set<ItemAttributesRQ> getAttributes(@Nonnull final Story story) {
 		return getAttributes(story.getMeta());
@@ -153,11 +184,23 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		return rq;
 	}
 
+	/**
+	 * Extension point to customize scenario naming. Returns a scenario name.
+	 *
+	 * @param scenario JBehave's scenario object
+	 * @return the scenario name
+	 */
 	protected String getScenarioName(Scenario scenario) {
 		String title = scenario.getTitle();
 		return isBlank(title) ? NO_NAME : title;
 	}
 
+	/**
+	 * Retrieves scenario metas and converts it into a {@link Set} of {@link ItemAttributesRQ} ready to use in a request to Report Portal
+	 *
+	 * @param scenario JBehave's scenario object
+	 * @return a set of attributes
+	 */
 	@Nonnull
 	protected Set<ItemAttributesRQ> getAttributes(@Nonnull final Scenario scenario) {
 		return getAttributes(scenario.getMeta());
@@ -197,6 +240,12 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		);
 	}
 
+	/**
+	 * Converts parameters map into Report Portal's {@link ParameterResource} list ready to use in a request to Report Portal
+	 *
+	 * @param params a parameters map
+	 * @return a list of parameters
+	 */
 	@Nullable
 	protected List<ParameterResource> getStepParameters(@Nullable final Map<String, String> params) {
 		return ofNullable(params).map(p -> p.entrySet().stream().map(e -> {
@@ -227,6 +276,12 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		return rq;
 	}
 
+	/**
+	 * Return parameter names used in bypassed step
+	 *
+	 * @param step a step name pattern
+	 * @return a list of parameter names from the step
+	 */
 	@Nonnull
 	protected List<String> getUsedParameters(@Nonnull final String step) {
 		Matcher m = EXAMPLE_VALUE_MATCH.matcher(step);
@@ -237,6 +292,13 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		return result;
 	}
 
+	/**
+	 * Formats an Example test name
+	 *
+	 * @param step a step name pattern
+	 * @param example example parameters map
+	 * @return step name
+	 */
 	@Nonnull
 	protected String formatExampleStep(@Nonnull final String step, @Nullable final Map<String, String> example) {
 		if (example == null) {
@@ -249,6 +311,13 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		return result;
 	}
 
+	/**
+	 * Creates a {@link TestCaseIdEntry} by code reference and parameter map.
+	 *
+	 * @param codeRef a test code reference
+	 * @param params test parameters map (if any)
+	 * @return Test Case ID or null if no coderef nor params were bypassed
+	 */
 	@Nullable
 	protected TestCaseIdEntry getTestCaseId(@Nullable String codeRef, @Nullable final Map<String, String> params) {
 		return TestCaseIdUtils.getTestCaseId(codeRef, ofNullable(params).map(p -> new ArrayList<>(p.values())).orElse(null));
@@ -313,12 +382,27 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		return rq;
 	}
 
+	/**
+	 * Starts a test item on Report Portal
+	 *
+	 * @param parentId an id of a parent item
+	 * @param rq a request to Report Portal
+	 * @return Report Portal item ID
+	 */
 	@Nonnull
 	protected Maybe<String> startTestItem(@Nullable final Maybe<String> parentId, @Nonnull final StartTestItemRQ rq) {
 		Launch myLaunch = launch.get();
 		return ofNullable(parentId).map(p -> myLaunch.startTestItem(p, rq)).orElseGet(() -> myLaunch.startTestItem(rq));
 	}
 
+	/**
+	 * Creates and starts a test item leaf
+	 *
+	 * @param type   the item type
+	 * @param rq     a request to Report Portal
+	 * @param parent a parent test item leaf
+	 * @return a leaf of the item
+	 */
 	protected TestItemTree.TestItemLeaf createLeaf(@Nonnull final ItemType type, @Nonnull final StartTestItemRQ rq,
 			@Nullable final TestItemTree.TestItemLeaf parent) {
 		Optional<TestItemTree.TestItemLeaf> parentOptional = ofNullable(parent);
@@ -334,6 +418,13 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		return l;
 	}
 
+	/**
+	 * Retrieves a test item date from bypassed tree leaf and compares it with the current date. Returns current date if it newer than
+	 * bypassed (parent) date or bypassed date in other case.
+	 *
+	 * @param parent a parent test item leaf
+	 * @return current date or parent date
+	 */
 	@Nonnull
 	protected Date getItemDate(@Nullable final TestItemTree.TestItemLeaf parent) {
 		final Date previousDate = ofNullable(parent).map(p -> p.<Date>getAttribute(START_TIME))
@@ -348,6 +439,11 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		return itemDate;
 	}
 
+	/**
+	 * Returns current test item leaf in Test Tree. Creates Test Item Tree branches and leaves if no such items found.
+	 *
+	 * @return a leaf of an item inside ItemTree or null if not found
+	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
 	protected TestItemTree.TestItemLeaf retrieveLeaf() {
@@ -403,25 +499,11 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		return leafChain.get(leafChain.size() - 1).getValue();
 	}
 
-	protected TestItemTree.TestItemLeaf startStep(String name, @Nonnull final TestItemTree.TestItemLeaf parent) {
-		TestItemTree.ItemTreeKey key = ItemTreeUtils.createKey(name);
-		TestItemTree.TestItemLeaf leaf = createLeaf(ItemType.STEP, buildStartStepRq(name,
-				getCodeRef(parent.getAttribute(CODE_REF), key, ItemType.STEP),
-				parent.getAttribute(PARAMETERS),
-				getItemDate(parent)
-		), parent);
-		parent.getChildItems().put(key, leaf);
-		return leaf;
-	}
-
-	protected TestItemTree.TestItemLeaf startLifecycleMethod(String name, ItemType itemType,
-			@Nonnull final TestItemTree.TestItemLeaf parent) {
-		TestItemTree.ItemTreeKey key = ItemTreeUtils.createKey(name);
-		TestItemTree.TestItemLeaf leaf = createLeaf(itemType, buildLifecycleMethodStartRq(itemType, name, getItemDate(parent)), parent);
-		parent.getChildItems().put(key, leaf);
-		return leaf;
-	}
-
+	/**
+	 * Returns current test item leaf in Test Tree.
+	 *
+	 * @return a leaf of an item inside ItemTree or null if not found
+	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
 	protected TestItemTree.TestItemLeaf getLeaf() {
@@ -461,6 +543,40 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	}
 
 	/**
+	 * Starts a scenario step on Report Portal
+	 *
+	 * @param name   a step name
+	 * @param parent a parent test item leaf
+	 * @return the step leaf
+	 */
+	protected TestItemTree.TestItemLeaf startStep(@Nonnull final String name, @Nonnull final TestItemTree.TestItemLeaf parent) {
+		TestItemTree.ItemTreeKey key = ItemTreeUtils.createKey(name);
+		TestItemTree.TestItemLeaf leaf = createLeaf(ItemType.STEP, buildStartStepRq(name,
+				getCodeRef(parent.getAttribute(CODE_REF), key, ItemType.STEP),
+				parent.getAttribute(PARAMETERS),
+				getItemDate(parent)
+		), parent);
+		parent.getChildItems().put(key, leaf);
+		return leaf;
+	}
+
+	/**
+	 * Starts a lifecycle step on Report Portal
+	 *
+	 * @param name     a step name
+	 * @param itemType lifecycle item type
+	 * @param parent   a parent test item leaf
+	 * @return the step leaf
+	 */
+	protected TestItemTree.TestItemLeaf startLifecycleMethod(@Nonnull final String name, @Nonnull final ItemType itemType,
+			@Nonnull final TestItemTree.TestItemLeaf parent) {
+		TestItemTree.ItemTreeKey key = ItemTreeUtils.createKey(name);
+		TestItemTree.TestItemLeaf leaf = createLeaf(itemType, buildLifecycleMethodStartRq(itemType, name, getItemDate(parent)), parent);
+		parent.getChildItems().put(key, leaf);
+		return leaf;
+	}
+
+	/**
 	 * Finishes an item in the structure
 	 *
 	 * @param item   an item to finish
@@ -491,36 +607,20 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 
 	/**
 	 * Calculate an Item status according to its child item status and current status. E.G.: SUITE-TEST or TEST-STEP.
-	 * <p>
-	 * Example 1:
-	 * - Current status: {@link ItemStatus#FAILED}
-	 * - Child item status: {@link ItemStatus#SKIPPED}
-	 * Result: {@link ItemStatus#FAILED}
-	 * <p>
-	 * Example 2:
-	 * - Current status: {@link ItemStatus#PASSED}
-	 * - Child item status: {@link ItemStatus#SKIPPED}
-	 * Result: {@link ItemStatus#PASSED}
-	 * <p>
-	 * Example 3:
-	 * - Current status: {@link ItemStatus#PASSED}
-	 * - Child item status: {@link ItemStatus#FAILED}
-	 * Result: {@link ItemStatus#FAILED}
-	 * <p>
-	 * Example 4:
-	 * - Current status: {@link ItemStatus#SKIPPED}
-	 * - Child item status: {@link ItemStatus#FAILED}
-	 * Result: {@link ItemStatus#FAILED}
 	 *
 	 * @param currentStatus an Item status
 	 * @param childStatus   a status of its child element
 	 * @return new status
+	 * @see StatusEvaluation#evaluateStatus(ItemStatus, ItemStatus)
 	 */
 	@Nullable
 	protected ItemStatus evaluateStatus(@Nullable final ItemStatus currentStatus, @Nullable final ItemStatus childStatus) {
 		return StatusEvaluation.evaluateStatus(currentStatus, childStatus);
 	}
 
+	/**
+	 * Pulls the last item in the structure stack, evaluates it status by child element statuses and finish it
+	 */
 	protected void evaluateAndFinishLastItem() {
 		TestItemTree.TestItemLeaf item = getLeaf();
 		ofNullable(item).ifPresent(i -> {
@@ -567,6 +667,13 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		ofNullable(thrown).ifPresent(t -> ReportPortal.emitLog(itemId, getLogSupplier(LogLevel.ERROR, ExceptionUtils.getStackTrace(t))));
 	}
 
+	/**
+	 * Finishes a test item on Report Portal
+	 *
+	 * @param id     an ID of an Item
+	 * @param status a status of the item which will be set
+	 * @param issue  an optional issue which will be set
+	 */
 	protected void finishItem(final @Nonnull Maybe<String> id, final @Nonnull ItemStatus status, @Nullable Issue issue) {
 		FinishTestItemRQ rq = new FinishTestItemRQ();
 		rq.setEndTime(Calendar.getInstance().getTime());
@@ -575,13 +682,49 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		launch.get().finishTestItem(id, rq);
 	}
 
-	protected void finishStep(final @Nonnull TestItemTree.TestItemLeaf step, final @Nonnull ItemStatus status, @Nullable Issue issue) {
+	private void finishStep(final @Nonnull TestItemTree.TestItemLeaf step, final @Nonnull ItemStatus status, @Nullable Issue issue) {
 		finishItem(step.getItemId(), status, issue);
 		step.setStatus(status);
 	}
 
-	protected void finishStep(final @Nonnull TestItemTree.TestItemLeaf step, final @Nonnull ItemStatus status) {
+	private void finishStep(final @Nonnull TestItemTree.TestItemLeaf step, final @Nonnull ItemStatus status) {
 		finishStep(step, status, null);
+	}
+
+	/**
+	 * Extension point to customize ignored steps insides
+	 *
+	 * @param step a step name
+	 * @param leaf the step test item leaf
+	 */
+	@SuppressWarnings("unused")
+	protected void createIgnoredSteps(String step, TestItemTree.TestItemLeaf leaf) {
+	}
+
+	/**
+	 * Extension point to customize a not performed step insides
+	 *
+	 * @param step a step name
+	 * @param leaf the step test item leaf
+	 */
+	@SuppressWarnings("unused")
+	protected void createNotPerformedSteps(String step, TestItemTree.TestItemLeaf leaf) {
+		ReportPortal.emitLog(leaf.getItemId(),
+				getLogSupplier(LogLevel.WARN, "Step execution was skipped by JBehave, see previous steps for errors.")
+		);
+	}
+
+	/**
+	 * Extension point to customize pending steps insides
+	 *
+	 * @param step a step name
+	 * @param leaf the step test item leaf
+	 */
+	@SuppressWarnings("unused")
+	protected void createPendingSteps(String step, TestItemTree.TestItemLeaf leaf) {
+		ReportPortal.emitLog(leaf.getItemId(),
+				getLogSupplier(LogLevel.WARN, String.format("Unable to locate a step implementation: '%s'", step))
+		);
 	}
 
 	protected void simulateStep(String step) {
@@ -683,6 +826,9 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		structure.add(new Entity<>(ItemType.SUITE, tableRow)); // type SUITE is used for Examples
 	}
 
+	/**
+	 * Finishes the last examples item
+	 */
 	@Override
 	public void afterExamples() {
 		TestItemTree.TestItemLeaf previousItem = getLeaf();
@@ -702,6 +848,12 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		ofNullable(stepStack.remove()).ifPresent(s -> finishStep(s, ItemStatus.PASSED));
 	}
 
+	/**
+	 * Finishes a test step with a failed status
+	 *
+	 * @param step  a step name
+	 * @param cause a reason of a failure
+	 */
 	@Override
 	public void failed(String step, Throwable cause) {
 		launch.get().getStepReporter().finishPreviousStep();
@@ -723,22 +875,31 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		});
 	}
 
+	/**
+	 * Report ignored step
+	 *
+	 * @param step a step name
+	 */
 	@Override
 	public void ignorable(String step) {
 		ofNullable(retrieveLeaf()).ifPresent(l -> {
 			TestItemTree.TestItemLeaf leaf = startStep(step, l);
+			createIgnoredSteps(step, leaf);
 			finishStep(leaf, ItemStatus.SKIPPED);
 		});
 	}
 
+	/**
+	 * Report a not performed step
+	 *
+	 * @param step a step name
+	 */
 	@Override
 	public void notPerformed(String step) {
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
 		ofNullable(item).ifPresent(i -> {
 			TestItemTree.TestItemLeaf leaf = startStep(step, i);
-			ReportPortal.emitLog(leaf.getItemId(),
-					getLogSupplier(LogLevel.WARN, "Step execution was skipped by JBehave, see previous steps for errors.")
-			);
+			createNotPerformedSteps(step, leaf);
 			finishStep(leaf, ItemStatus.SKIPPED, Launch.NOT_ISSUE);
 		});
 	}
@@ -748,9 +909,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
 		ofNullable(item).ifPresent(i -> {
 			TestItemTree.TestItemLeaf leaf = startStep(step, i);
-			ReportPortal.emitLog(leaf.getItemId(),
-					getLogSupplier(LogLevel.WARN, String.format("Unable to locate a step implementation: '%s'", step))
-			);
+			createPendingSteps(step, leaf);
 			finishStep(leaf, ItemStatus.SKIPPED);
 		});
 	}
