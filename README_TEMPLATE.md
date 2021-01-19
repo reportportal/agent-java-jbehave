@@ -1,6 +1,8 @@
 # Report Portal Java reporter for JBehave tests
 
-> **DISCLAIMER**: We use Google Analytics for sending anonymous usage information as agent's name andversion and the java client's name and version after the successful launch start. This information might help us to improve both ReportPortal backend and client sides. Used by the ReportPortal team only and not for sharing with 3rd parties.
+> **DISCLAIMER**: We use Google Analytics for sending anonymous usage information as agent's and client's names, and their versions after a
+> successful launch start. This information might help us to improve both ReportPortal backend and client sides. It is used by the
+> ReportPortal team only and is not supposed for sharing with 3rd parties.
 
 ![CI Build](https://github.com/reportportal/agent-java-jbehave/workflows/CI%20Build/badge.svg?branch=develop)
 [ ![Download](https://api.bintray.com/packages/epam/reportportal/agent-java-jbehave/images/download.svg) ](https://bintray.com/epam/reportportal/agent-java-jbehave/_latestVersion)
