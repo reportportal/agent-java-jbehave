@@ -45,7 +45,6 @@ publishing {
 
 repositories {
     maven { url "http://dl.bintray.com/epam/reportportal" }
-    maven { url "https://jitpack.io" }
     jcenter()
 }
 
