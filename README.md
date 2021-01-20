@@ -139,12 +139,26 @@ rp.project = default_personal
 #### Gradle
 TBD
 ```groovy
-// project declaration omitted
 
-// Add Report Portal repository to get dependencies
+plugins {
+   id 'java'
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
 repositories {
+   mavenCentral()
    maven { url "http://dl.bintray.com/epam/reportportal" }
-   jcenter()
+}
+
+dependencies {
+   testCompile 'org.jbehave:jbehave-core:4.8.1'
+   testCompile 'com.epam.reportportal:agent-java-jbehave:5.0.0-RC-2'
+}
+
+test {
+   outputs.upToDateWhen { return false }
 }
 
 
