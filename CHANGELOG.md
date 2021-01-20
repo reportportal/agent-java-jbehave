@@ -3,17 +3,14 @@
 ## [Unreleased]
 
 ## [5.0.0-RC-2]
-### Fixed
-- Domain model dependency now switched on release version
-
-## [5.0.0-RC-1]
 ### Added
 - Comprehensive javadocs
 - Composite steps support
 - Many extension methods
-
 ### Changed
 - Formatters class structure to reduce code amount and duplication
+### Fixed
+- Domain model dependency now switched on release version
 
 ## [5.0.0-BETA-9]
 ### Added
