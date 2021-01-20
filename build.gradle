@@ -17,6 +17,7 @@
 plugins {
     id 'java-library'
 }
+
 project.ext.releaseMode = project.hasProperty('releaseMode')
 
 def branch = releaseMode ? '5.0.0' : 'develop'
@@ -50,7 +51,7 @@ repositories {
 
 dependencies {
     api 'com.epam.reportportal:client-java:5.0.18'
-    api 'com.github.reportportal:commons-model:5.0.0'
+    api 'com.epam.reportportal:commons-model:5.0.0'
     api ("org.jbehave:jbehave-core:${project.jbehave_version}") {
         exclude group: 'org.hamcrest'
         exclude group: 'junit'
