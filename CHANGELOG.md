@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.0.0-RC-2]
 ### Fixed
 - Domain model dependency now switched on release version
 
