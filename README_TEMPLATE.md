@@ -15,6 +15,8 @@ The latest version: $LATEST_VERSION. Please use `Download` link above to get the
 
 ## Overview: How to Add ReportPortal Logging to Your JBehave Java Project
 
+To start using Report Portal with JBehave framework please do the following steps:
+
 1. [Configuration](#configuration)
     * Create/update the `reportportal.properties` configuration file
     * Build system configuration
@@ -22,11 +24,9 @@ The latest version: $LATEST_VERSION. Please use `Download` link above to get the
     * [Logback Framework](#logback-framework)
         * Create/update the `logback.xml` file
         * Add Logback dependencies
-    * [Log4J Framework](#log4j-framework)
-        * Create/update the `log4j2.xml` file
-        * Add Log4J dependencies
-4. [Running tests](#test-run)
-    * via JUnit 4 test runner and Maven plugin
+3. [Running tests](#test-run)
+    * Add test runner class
+    * Build system commands
 
 ## Configuration
 
@@ -70,7 +70,7 @@ rp.project = default_personal
             <url>http://dl.bintray.com/epam/reportportal</url>
         </repository>
     </repositories>
-    
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -137,15 +137,256 @@ rp.project = default_personal
 ```
 
 #### Gradle
-TBD
-```groovy
-// project declaration omitted
 
-// Add Report Portal repository to get dependencies
-repositories {
-   maven { url "http://dl.bintray.com/epam/reportportal" }
-   jcenter()
+`build.gradle`
+
+```groovy
+
+plugins {
+    id 'java'
 }
 
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
+repositories {
+    mavenCentral()
+    maven { url "http://dl.bintray.com/epam/reportportal" }
+}
+
+def jbehaveVersion = '4.8.1'
+dependencies {
+    testCompile "org.jbehave:jbehave-core:${jbehaveVersion}"
+    testCompile "org.jbehave:jbehave-navigator:${jbehaveVersion}"
+    testCompile 'com.epam.reportportal:agent-java-jbehave:$LATEST_VERSION'
+    testCompile 'com.epam.reportportal:logger-java-logback:5.0.3'
+}
+
+test {
+    outputs.upToDateWhen { return false }
+    testLogging.showStandardStreams = true
+
+    // Setup execution filters, ignore scenarios with '@skip' tag
+    systemProperty "metaFilters", System.getProperty("filter", "-skip")
+    systemProperty "story", System.getProperty("story", "*.story")
+
+    doFirst {
+        file('target').mkdirs() // JBehave doesn't work without this folder
+    }
+    doLast {
+        // copy all style and javascript files to get fancy report
+        def jbehave = "${classpath.find { it.name.contains('jbehave-core') }}"
+        def jbehaveStyle = "${classpath.find { it.name.contains('jbehave-navigator') }}"
+        copy {
+            from(zipTree(jbehave)) {
+                include "style/*"
+            }
+            into("build/classes/java/jbehave/view")
+        }
+        copy {
+            from(zipTree(jbehaveStyle)) {
+                include "js/**/*"
+                include "style/**/*"
+                include "images/*"
+            }
+            into("build/classes/java/jbehave/view")
+        }
+
+        // the folder will be empty folder, so remove it
+        file('target').delete()
+    }
+}
 ```
+
+## Logging configuration
+
+### Logback Framework
+
+#### 'logback.xml' file
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Send debug messages to System.out -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- By default, encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{5} - %thread - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="RP" class="com.epam.reportportal.logback.appender.ReportPortalAppender">
+        <encoder>
+            <!--Best practice: don't put time and logging level to the final message. Appender do this for you-->
+            <pattern>%d{HH:mm:ss.SSS} [%t] %-5level - %msg%n</pattern>
+            <pattern>[%t] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--'additivity' flag is important! Without it logback will double-log log messages-->
+    <logger name="binary_data_logger" level="TRACE" additivity="false">
+        <appender-ref ref="RP"/>
+    </logger>
+
+    <!-- Mute Report Portal messages -->
+    <logger name="com.epam.reportportal.service" level="WARN"/>
+    <logger name="com.epam.reportportal.utils" level="WARN"/>
+
+    <!-- By default, the level of the root level is set to DEBUG -->
+    <root level="DEBUG">
+        <appender-ref ref="RP"/>
+        <!-- Uncomment if you want to see console logs -->
+        <!-- <appender-ref ref="STDOUT"/> -->
+    </root>
+</configuration>
+```
+
+#### Add Logback dependencies
+
+##### Gradle
+
+To route your logs into Report Portal you should add `logger-java-logback` dependency into the corresponding section:
+
+```build.gradle```
+
+```groovy
+// inside 'dependencies' section
+testCompile 'com.epam.reportportal:logger-java-logback:5.0.3'
+```
+
+It should be already here if you used gradle configuration listed above.
+
+## Test run
+
+### Test runner class
+
+JBehave requires runtime configuration, to do this place the following class into your `src/main/java` (for Maven) or `src/test/java`
+(for Gradle) folders. Notice that you need replace step initialization in `stepsFactory` method with your own:
+
+`MyStories.java`
+
+```java
+
+import com.epam.reportportal.example.jbehave.steps.*;
+import com.epam.reportportal.jbehave.ReportPortalStepFormat;
+import com.epam.reportportal.utils.properties.PropertiesLoader;
+import org.apache.commons.lang3.StringUtils;
+import org.jbehave.core.Embeddable;
+import org.jbehave.core.configuration.Configuration;
+import org.jbehave.core.configuration.MostUsefulConfiguration;
+import org.jbehave.core.embedder.Embedder;
+import org.jbehave.core.i18n.LocalizedKeywords;
+import org.jbehave.core.io.CodeLocations;
+import org.jbehave.core.io.LoadFromClasspath;
+import org.jbehave.core.io.StoryFinder;
+import org.jbehave.core.junit.JUnitStories;
+import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.model.TableParsers;
+import org.jbehave.core.model.TableTransformers;
+import org.jbehave.core.parsers.RegexStoryParser;
+import org.jbehave.core.reporters.StoryReporterBuilder;
+import org.jbehave.core.steps.InjectableStepsFactory;
+import org.jbehave.core.steps.InstanceStepsFactory;
+import org.jbehave.core.steps.ParameterConverters;
+import org.jbehave.core.steps.ParameterConverters.DateConverter;
+import org.jbehave.core.steps.ParameterConverters.ExamplesTableConverter;
+
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
+import static org.jbehave.core.io.CodeLocations.codeLocationFromClass;
+import static org.jbehave.core.reporters.Format.*;
+
+/**
+ * <p>
+ * {@link Embeddable} class to run multiple textual stories via JUnit.
+ * </p>
+ * <p>
+ * Stories are specified in classpath and correspondingly the {@link LoadFromClasspath} story loader is configured.
+ * </p>
+ */
+public class MyStories extends JUnitStories {
+
+	private static final String META_FILTERS_PROPERTY = "metaFilters";
+    private static final String STORY_FILTER_PROPERTY = "story";
+
+	public MyStories() {
+		Embedder embedder = configuredEmbedder();
+		embedder.embedderControls()
+				.doGenerateViewAfterStories(true)
+				.doIgnoreFailureInStories(true)
+				.doIgnoreFailureInView(true)
+				.useThreads(1)
+				.useStoryTimeouts("60");
+		ofNullable(System.getProperty(META_FILTERS_PROPERTY)).ifPresent(p -> embedder.useMetaFilters(Arrays.asList(p.split(","))));
+	}
+
+	@Override
+	public Configuration configuration() {
+		Class<? extends Embeddable> embeddableClass = this.getClass();
+		// Start from default ParameterConverters instance
+		ParameterConverters parameterConverters = new ParameterConverters();
+
+		TableTransformers tableTransformers = new TableTransformers();
+		TableParsers tableParsers = new TableParsers();
+		// factory to allow parameter conversion and loading from external resources (used by StoryParser too)
+		ExamplesTableFactory examplesTableFactory = new ExamplesTableFactory(new LocalizedKeywords(),
+				new LoadFromClasspath(embeddableClass),
+				tableParsers,
+				tableTransformers
+		);
+		// add custom converters
+		parameterConverters.addConverters(new DateConverter(new SimpleDateFormat("yyyy-MM-dd")),
+				new ExamplesTableConverter(examplesTableFactory)
+		);
+		return new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(embeddableClass))
+				.useStoryParser(new RegexStoryParser(examplesTableFactory))
+				.useStoryReporterBuilder(new StoryReporterBuilder().withCodeLocation(CodeLocations.codeLocationFromClass(embeddableClass))
+						.withDefaultFormats()
+						.withFormats(CONSOLE, TXT, HTML, XML, ReportPortalStepFormat.INSTANCE))
+				.useParameterConverters(parameterConverters);
+	}
+
+	@Override
+	public InjectableStepsFactory stepsFactory() {
+		return new InstanceStepsFactory(configuration(),
+				// Your steps instantiation go here
+				new LogLevelTest(),
+				new ReportAttachmentsTest(),
+				new ReportsStepWithDefectTest(),
+				new ReportsTestWithParameters(),
+				new ApiSteps()
+		);
+	}
+
+	@Override
+	protected List<String> storyPaths() {
+		String storyPatternToRun = ofNullable(System.getProperty(STORY_FILTER_PROPERTY)).filter(s -> !s.isEmpty())
+				.map(s -> "**/" + s)
+				.orElse("**/*.story");
+		List<URL> resourceFolders = new ArrayList<>();
+		ofNullable(getClass().getClassLoader().getResource(PropertiesLoader.INNER_PATH)).map(p -> {
+			String filePath = CodeLocations.getPathFromURL(p);
+			String rootPath = StringUtils.removeEnd(filePath, "/" + PropertiesLoader.INNER_PATH);
+			return CodeLocations.codeLocationFromPath(rootPath);
+		}).ifPresent(resourceFolders::add);
+		resourceFolders.add(codeLocationFromClass(this.getClass()));
+
+		return resourceFolders.stream()
+				.flatMap(u -> new StoryFinder().findPaths(u, storyPatternToRun, "**/excluded*.story").stream())
+				.distinct()
+				.collect(Collectors.toList());
+	}
+}
+```
+### Build system commands
+We are set. To run set we just need to execute corresponding command in our build system.
+#### Maven
+`mvn test` or `mvnw test` if you are using Maven wrapper
+#### Gradle
+`gradle test` or `gradlew test` if you are using Gradle wrapper
