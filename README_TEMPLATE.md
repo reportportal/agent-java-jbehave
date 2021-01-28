@@ -413,7 +413,9 @@ Examples:
 Step reporter posts statistics per test step. On example above Report Portal display 6 test units. Each example row will be a suite,
 as on screenshots below and each test step will be marked as a test.
 
-
+![Story](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-01.png)
+![Examples](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-02.png)
+![Steps](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-03.png)
 
 To use Step reporter you need to set `ReportPortalStepFormat.INSTANCE` constant as your story reporter format in configuration:
 ```java
@@ -430,7 +432,9 @@ new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(embeddableCla
 Scenario reporter posts statistics per a scenario. On example above Report Portal display 2 test units. Each example row will be a test,
 as on screenshots below and each test step will be a nested step. 
 
-
+![Story](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-04.png)
+![Examples](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-05.png)
+![Steps](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-06.png)
 
 To use Scenario reporter you need to set `ReportPortalScenarioFormat.INSTANCE` constant as your story reporter format in configuration:
 ```java

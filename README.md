@@ -28,6 +28,10 @@ To start using Report Portal with JBehave framework please do the following step
    * Add test runner class
    * Build system commands
 
+Additionally, you may want to configure [Step reporter or Scenario reporter](#steps-vs-scenarios). They are regulate how Report Portal count
+your tests. Step reporter posts statistics per a test step (each test step is counted in 'total' column). Scenario reporter posts statistics
+per a scenario.
+
 ## Configuration
 
 ### 'reportportal.properties' configuration file
@@ -390,3 +394,55 @@ We are set. To run set we just need to execute corresponding command in our buil
 `mvn test` or `mvnw test` if you are using Maven wrapper
 #### Gradle
 `gradle test` or `gradlew test` if you are using Gradle wrapper
+
+## Steps vs scenarios
+Let's take a look on a simple example:
+```
+Scenario: Stock trade alert
+
+Given a stock of symbol <symbol> and a threshold <threshold>
+When the stock is traded at price <price>
+Then the alert status should be status <status>
+
+Examples:
+|symbol|threshold|price|status|
+|STK1|10.0|5.0|OFF|
+|STK1|10.0|11.0|ON|
+```
+### Step reporter
+Step reporter posts statistics per test step. On example above Report Portal display 6 test units. Each example row will be a suite,
+as on screenshots below and each test step will be marked as a test.
+
+![Story](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-01.png)
+![Examples](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-02.png)
+![Steps](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-03.png)
+
+To use Step reporter you need to set `ReportPortalStepFormat.INSTANCE` constant as your story reporter format in configuration:
+```java
+new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(embeddableClass))
+        .useStoryParser(new RegexStoryParser(examplesTableFactory))
+        .useStoryReporterBuilder(new StoryReporterBuilder()
+        .withCodeLocation(CodeLocations.codeLocationFromClass(embeddableClass))
+        .withDefaultFormats()
+        .withFormats(ReportPortalStepFormat.INSTANCE))
+        .useParameterConverters(parameterConverters);
+```
+
+### Scenario reporter
+Scenario reporter posts statistics per a scenario. On example above Report Portal display 2 test units. Each example row will be a test,
+as on screenshots below and each test step will be a nested step.
+
+![Story](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-04.png)
+![Examples](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-05.png)
+![Steps](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-06.png)
+
+To use Scenario reporter you need to set `ReportPortalScenarioFormat.INSTANCE` constant as your story reporter format in configuration:
+```java
+new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(embeddableClass))
+        .useStoryParser(new RegexStoryParser(examplesTableFactory))
+        .useStoryReporterBuilder(new StoryReporterBuilder()
+        .withCodeLocation(CodeLocations.codeLocationFromClass(embeddableClass))
+        .withDefaultFormats()
+        .withFormats(ReportPortalScenarioFormat.INSTANCE))
+        .useParameterConverters(parameterConverters);
+```
