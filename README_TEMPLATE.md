@@ -4,9 +4,8 @@
 > after a successful launch start. This information might help us to improve both ReportPortal backend and client sides. It is used by the
 > ReportPortal team only and is not supposed for sharing with 3rd parties.
 
+[![Maven Central](https://img.shields.io/maven-central/v/com.epam.reportportal/agent-java-jbehave.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.epam.reportportal%22%20AND%20a:%22agent-java-jbehave%22)
 ![CI Build](https://github.com/reportportal/agent-java-jbehave/workflows/CI%20Build/badge.svg?branch=develop)
-[ ![Download](https://api.bintray.com/packages/epam/reportportal/agent-java-jbehave/images/download.svg) ](https://bintray.com/epam/reportportal/agent-java-jbehave/_latestVersion)
-
 [![Join Slack chat!](https://reportportal-slack-auto.herokuapp.com/badge.svg)](https://reportportal-slack-auto.herokuapp.com)
 [![stackoverflow](https://img.shields.io/badge/reportportal-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/reportportal)
 [![Build with Love](https://img.shields.io/badge/build%20with-❤%EF%B8%8F%E2%80%8D-lightgrey.svg)](http://reportportal.io?style=flat)
@@ -66,14 +65,6 @@ rp.project = default_personal
 
 <project>
     <!-- project declaration omitted -->
-
-    <!-- Add Report Portal repository to get dependencies -->
-    <repositories>
-        <repository>
-            <id>bintray</id>
-            <url>http://dl.bintray.com/epam/reportportal</url>
-        </repository>
-    </repositories>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -155,7 +146,6 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
     mavenCentral()
-    maven { url "http://dl.bintray.com/epam/reportportal" }
 }
 
 def jbehaveVersion = '4.8.1'
