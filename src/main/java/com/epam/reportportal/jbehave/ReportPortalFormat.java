@@ -30,9 +30,7 @@ import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 
 import javax.annotation.Nonnull;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -97,7 +95,7 @@ public abstract class ReportPortalFormat extends Format {
 		rq.setName(parameters.getLaunchName());
 		rq.setStartTime(startTime);
 		rq.setMode(parameters.getLaunchRunningMode());
-		rq.setAttributes(parameters.getAttributes());
+		rq.setAttributes(new HashSet<>(parameters.getAttributes()));
 		rq.setDescription(parameters.getDescription());
 		rq.setRerun(parameters.isRerun());
 		if (isNotBlank(parameters.getRerunOf())) {
