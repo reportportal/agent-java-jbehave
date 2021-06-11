@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.0.0-RC-3]
 ### Fixed
 - Unsupported Operation exception on launch start
 ### Changed
