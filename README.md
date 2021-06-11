@@ -10,23 +10,23 @@
 [![stackoverflow](https://img.shields.io/badge/reportportal-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/reportportal)
 [![Build with Love](https://img.shields.io/badge/build%20with-❤%EF%B8%8F%E2%80%8D-lightgrey.svg)](http://reportportal.io?style=flat)
 
-The latest version: 5.0.0-RC-2. Please use `Maven Central` link above to get the agent. Minimal supported JBehave version: 4.8
+The latest version: 5.0.0-RC-3. Please use `Download` link above to get the agent. Minimal supported JBehave version: 4.8
 
 ## Overview: How to Add ReportPortal Logging to Your JBehave Java Project
 
 To start using Report Portal with JBehave framework please do the following steps:
 
 1. [Configuration](#configuration)
-   * Create/update the `reportportal.properties` configuration file
-   * Build system configuration
+    * Create/update the `reportportal.properties` configuration file
+    * Build system configuration
 2. Logging configuration
-   * [Logback Framework](#logback-framework)
-      * Create/update the `logback.xml` file
-      * Add Logback dependencies
+    * [Logback Framework](#logback-framework)
+        * Create/update the `logback.xml` file
+        * Add Logback dependencies
 3. [Running tests](#test-run)
-   * Add test runner class
-   * Build system commands
-
+    * Add test runner class
+    * Build system commands
+   
 Additionally, you may want to configure [Step reporter or Scenario reporter](#steps-vs-scenarios). They are regulate how Report Portal count
 your tests. Step reporter posts statistics per a test step (each test step is counted in 'total' column). Scenario reporter posts statistics
 per a scenario.
@@ -79,7 +79,7 @@ rp.project = default_personal
         <dependency>
             <groupId>com.epam.reportportal</groupId>
             <artifactId>agent-java-jbehave</artifactId>
-            <version>5.0.0-RC-2</version>
+            <version>5.0.0-RC-3</version>
         </dependency>
 
         <dependency>
@@ -152,7 +152,7 @@ def jbehaveVersion = '4.8.1'
 dependencies {
     testCompile "org.jbehave:jbehave-core:${jbehaveVersion}"
     testCompile "org.jbehave:jbehave-navigator:${jbehaveVersion}"
-    testCompile 'com.epam.reportportal:agent-java-jbehave:5.0.0-RC-2'
+    testCompile 'com.epam.reportportal:agent-java-jbehave:5.0.0-RC-3'
     testCompile 'com.epam.reportportal:logger-java-logback:5.0.3'
 }
 
@@ -420,7 +420,7 @@ new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(embeddableCla
 
 ### Scenario reporter
 Scenario reporter posts statistics per a scenario. On example above Report Portal display 2 test units. Each example row will be a test,
-as on screenshots below and each test step will be a nested step.
+as on screenshots below and each test step will be a nested step. 
 
 ![Story](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-04.png)
 ![Examples](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-05.png)
