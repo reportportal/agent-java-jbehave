@@ -4,14 +4,13 @@
 > after a successful launch start. This information might help us to improve both ReportPortal backend and client sides. It is used by the
 > ReportPortal team only and is not supposed for sharing with 3rd parties.
 
+[![Maven Central](https://img.shields.io/maven-central/v/com.epam.reportportal/agent-java-jbehave.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.epam.reportportal%22%20AND%20a:%22agent-java-jbehave%22)
 ![CI Build](https://github.com/reportportal/agent-java-jbehave/workflows/CI%20Build/badge.svg?branch=develop)
-[ ![Download](https://api.bintray.com/packages/epam/reportportal/agent-java-jbehave/images/download.svg) ](https://bintray.com/epam/reportportal/agent-java-jbehave/_latestVersion)
-
 [![Join Slack chat!](https://reportportal-slack-auto.herokuapp.com/badge.svg)](https://reportportal-slack-auto.herokuapp.com)
 [![stackoverflow](https://img.shields.io/badge/reportportal-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/reportportal)
 [![Build with Love](https://img.shields.io/badge/build%20with-❤%EF%B8%8F%E2%80%8D-lightgrey.svg)](http://reportportal.io?style=flat)
 
-The latest version: 5.0.0-RC-2. Please use `Download` link above to get the agent. Minimal supported JBehave version: 4.8
+The latest version: 5.0.0-RC-2. Please use `Maven Central` link above to get the agent. Minimal supported JBehave version: 4.8
 
 ## Overview: How to Add ReportPortal Logging to Your JBehave Java Project
 
@@ -27,6 +26,10 @@ To start using Report Portal with JBehave framework please do the following step
 3. [Running tests](#test-run)
    * Add test runner class
    * Build system commands
+
+Additionally, you may want to configure [Step reporter or Scenario reporter](#steps-vs-scenarios). They are regulate how Report Portal count
+your tests. Step reporter posts statistics per a test step (each test step is counted in 'total' column). Scenario reporter posts statistics
+per a scenario.
 
 ## Configuration
 
@@ -62,14 +65,6 @@ rp.project = default_personal
 
 <project>
     <!-- project declaration omitted -->
-
-    <!-- Add Report Portal repository to get dependencies -->
-    <repositories>
-        <repository>
-            <id>bintray</id>
-            <url>http://dl.bintray.com/epam/reportportal</url>
-        </repository>
-    </repositories>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -151,7 +146,6 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
     mavenCentral()
-    maven { url "http://dl.bintray.com/epam/reportportal" }
 }
 
 def jbehaveVersion = '4.8.1'
@@ -390,3 +384,55 @@ We are set. To run set we just need to execute corresponding command in our buil
 `mvn test` or `mvnw test` if you are using Maven wrapper
 #### Gradle
 `gradle test` or `gradlew test` if you are using Gradle wrapper
+
+## Steps vs scenarios
+Let's take a look on a simple example:
+```
+Scenario: Stock trade alert
+
+Given a stock of symbol <symbol> and a threshold <threshold>
+When the stock is traded at price <price>
+Then the alert status should be status <status>
+
+Examples:
+|symbol|threshold|price|status|
+|STK1|10.0|5.0|OFF|
+|STK1|10.0|11.0|ON|
+```
+### Step reporter
+Step reporter posts statistics per test step. On example above Report Portal display 6 test units. Each example row will be a suite,
+as on screenshots below and each test step will be marked as a test.
+
+![Story](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-01.png)
+![Examples](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-02.png)
+![Steps](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-03.png)
+
+To use Step reporter you need to set `ReportPortalStepFormat.INSTANCE` constant as your story reporter format in configuration:
+```java
+new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(embeddableClass))
+        .useStoryParser(new RegexStoryParser(examplesTableFactory))
+        .useStoryReporterBuilder(new StoryReporterBuilder()
+        .withCodeLocation(CodeLocations.codeLocationFromClass(embeddableClass))
+        .withDefaultFormats()
+        .withFormats(ReportPortalStepFormat.INSTANCE))
+        .useParameterConverters(parameterConverters);
+```
+
+### Scenario reporter
+Scenario reporter posts statistics per a scenario. On example above Report Portal display 2 test units. Each example row will be a test,
+as on screenshots below and each test step will be a nested step.
+
+![Story](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-04.png)
+![Examples](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-05.png)
+![Steps](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-06.png)
+
+To use Scenario reporter you need to set `ReportPortalScenarioFormat.INSTANCE` constant as your story reporter format in configuration:
+```java
+new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(embeddableClass))
+        .useStoryParser(new RegexStoryParser(examplesTableFactory))
+        .useStoryReporterBuilder(new StoryReporterBuilder()
+        .withCodeLocation(CodeLocations.codeLocationFromClass(embeddableClass))
+        .withDefaultFormats()
+        .withFormats(ReportPortalScenarioFormat.INSTANCE))
+        .useParameterConverters(parameterConverters);
+```

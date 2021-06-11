@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+- Unsupported Operation exception on launch start
+### Changed
+- Client version updated on [5.0.21](https://github.com/reportportal/client-java/releases/tag/5.0.21)
 
 ## [5.0.0-RC-2]
 ### Added

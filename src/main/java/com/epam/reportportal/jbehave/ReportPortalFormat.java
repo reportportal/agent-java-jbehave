@@ -30,9 +30,7 @@ import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 
 import javax.annotation.Nonnull;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -68,30 +66,27 @@ public abstract class ReportPortalFormat extends Format {
 
 	/**
 	 * Finishes a {@link Launch} passed in the method parameters
-	 *
-	 * @param myLaunch a launch to finish
 	 */
-	protected void finishLaunch(final Launch myLaunch) {
+	protected void finishLaunch() {
 		FinishExecutionRQ rq = new FinishExecutionRQ();
 		rq.setEndTime(Calendar.getInstance().getTime());
-		myLaunch.finish(rq);
+		launch.get().finish(rq);
 	}
 
 	/**
 	 * Returns a {@link Thread} which is supposed to run on test execution shutdown. By default it finishes the current test execution on
 	 * Report Portal.
 	 *
-	 * @param myLaunch a launch instance
 	 * @return a thread to run on JVM shutdown event
 	 */
-	protected Thread getShutdownHook(final Launch myLaunch) {
-		return new Thread(() -> finishLaunch(myLaunch));
+	protected Thread getShutdownHook() {
+		return new Thread(this::finishLaunch);
 	}
 
 	/**
 	 * A method for creation a Start Launch request which will be sent to Report Portal. You can customize it by overriding the method.
 	 *
-	 * @param startTime launch start time, which will be set into the result request
+	 * @param startTime  launch start time, which will be set into the result request
 	 * @param parameters Report Portal client parameters
 	 * @return a Start Launch request instance
 	 */
@@ -100,7 +95,7 @@ public abstract class ReportPortalFormat extends Format {
 		rq.setName(parameters.getLaunchName());
 		rq.setStartTime(startTime);
 		rq.setMode(parameters.getLaunchRunningMode());
-		rq.setAttributes(parameters.getAttributes());
+		rq.setAttributes(new HashSet<>(parameters.getAttributes()));
 		rq.setDescription(parameters.getDescription());
 		rq.setRerun(parameters.isRerun());
 		if (isNotBlank(parameters.getRerunOf())) {
@@ -133,7 +128,7 @@ public abstract class ReportPortalFormat extends Format {
 				ListenerParameters parameters = rp.getParameters();
 				StartLaunchRQ rq = buildStartLaunchRQ(startTime, parameters);
 				Launch myLaunch = rp.newLaunch(rq);
-				Runtime.getRuntime().addShutdownHook(getShutdownHook(myLaunch));
+				Runtime.getRuntime().addShutdownHook(getShutdownHook());
 				itemTree.setLaunchId(myLaunch.start());
 				return myLaunch;
 			}
