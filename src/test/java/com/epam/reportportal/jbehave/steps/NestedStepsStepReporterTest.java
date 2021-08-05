@@ -21,13 +21,13 @@ import com.epam.reportportal.jbehave.ReportPortalStepFormat;
 import com.epam.reportportal.jbehave.integration.basic.NestedStepsStepReporterSteps;
 import com.epam.reportportal.listeners.ListenerParameters;
 import com.epam.reportportal.listeners.LogLevel;
-import com.epam.reportportal.restendpoint.http.MultiPartRequest;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.reportportal.util.test.CommonUtils;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import com.epam.ta.reportportal.ws.model.log.SaveLogRQ;
+import okhttp3.MultipartBody;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -96,15 +96,10 @@ public class NestedStepsStepReporterTest extends BaseTest {
 		verify(client, times(2)).startTestItem(same(testId), any());
 		ArgumentCaptor<StartTestItemRQ> firstStepCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
 		verify(client, times(1)).startTestItem(same(stepIds.get(0)), firstStepCaptor.capture());
-		ArgumentCaptor<MultiPartRequest> logCaptor = ArgumentCaptor.forClass(MultiPartRequest.class);
+		ArgumentCaptor<List<MultipartBody.Part>> logCaptor = ArgumentCaptor.forClass(List.class);
 		verify(client, atLeastOnce()).log(logCaptor.capture());
 		StartTestItemRQ firstStep = firstStepCaptor.getValue();
-		List<SaveLogRQ> logEntries = logCaptor.getAllValues()
-				.stream()
-				.flatMap(l -> l.getSerializedRQs().stream())
-				.flatMap(l -> ((List<SaveLogRQ>) l.getRequest()).stream())
-				.filter(rq -> !LogLevel.DEBUG.name().equals(rq.getLevel()))
-				.collect(Collectors.toList());
+		List<SaveLogRQ> logEntries = filterLogs(logCaptor, rq -> !LogLevel.DEBUG.name().equals(rq.getLevel()));
 		SaveLogRQ firstStepLog = logEntries.get(0);
 		assertThat(logEntries, hasSize(5));
 

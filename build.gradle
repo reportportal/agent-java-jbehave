@@ -39,13 +39,14 @@ repositories {
 }
 
 dependencies {
-    api 'com.epam.reportportal:client-java:5.0.21'
+    api 'com.epam.reportportal:client-java:5.1.0-RC-6'
     api 'com.epam.reportportal:commons-model:5.0.0'
     api ("org.jbehave:jbehave-core:${project.jbehave_version}") {
         exclude group: 'org.hamcrest'
         exclude group: 'junit'
     }
     api 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'org.slf4j:slf4j-api:1.7.25'
 
     testImplementation 'com.github.reportportal:agent-java-test-utils:ddcf50ee20'
     testImplementation 'org.aspectj:aspectjweaver:1.9.2'

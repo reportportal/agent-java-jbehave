@@ -21,11 +21,11 @@ import com.epam.reportportal.jbehave.ReportPortalStepFormat;
 import com.epam.reportportal.jbehave.integration.basic.EmptySteps;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.LogLevel;
-import com.epam.reportportal.restendpoint.http.MultiPartRequest;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.reportportal.util.test.CommonUtils;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
+import okhttp3.MultipartBody;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -63,6 +63,7 @@ public class ItemStatusPassedSkippedTest extends BaseTest {
 	private static final String PASSED_SKIPPED_SCENARIO_PATH = "stories/status/PassedSkippedScenario.story";
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void verify_a_step_passed_and_a_step_skipped_parent_status_calculated() {
 		run(format, PASSED_SKIPPED_SCENARIO_PATH, new EmptySteps());
 
@@ -76,7 +77,7 @@ public class ItemStatusPassedSkippedTest extends BaseTest {
 		verify(client).finishTestItem(same(scenarioId), finishCaptor.capture());
 		verify(client).finishTestItem(same(storyId), finishCaptor.capture());
 
-		ArgumentCaptor<MultiPartRequest> logCaptor = ArgumentCaptor.forClass(MultiPartRequest.class);
+		ArgumentCaptor<List<MultipartBody.Part>> logCaptor = ArgumentCaptor.forClass(List.class);
 		verify(client, atLeast(1)).log(logCaptor.capture());
 
 		List<FinishTestItemRQ> finishItems = finishCaptor.getAllValues();
