@@ -18,16 +18,19 @@ package com.epam.reportportal.jbehave;
 
 import com.epam.reportportal.listeners.ListenerParameters;
 import com.epam.reportportal.listeners.LogLevel;
-import com.epam.reportportal.restendpoint.http.MultiPartRequest;
 import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.reportportal.util.test.CommonUtils;
+import com.epam.reportportal.utils.http.HttpRequestUtils;
 import com.epam.ta.reportportal.ws.model.BatchSaveOperatingRS;
-import com.epam.ta.reportportal.ws.model.EntryCreatedAsyncRS;
+import com.epam.ta.reportportal.ws.model.Constants;
 import com.epam.ta.reportportal.ws.model.OperationCompletionRS;
 import com.epam.ta.reportportal.ws.model.item.ItemCreatedRS;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRS;
 import com.epam.ta.reportportal.ws.model.log.SaveLogRQ;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.reactivex.Maybe;
+import okhttp3.MultipartBody;
+import okio.Buffer;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
 import org.jbehave.core.embedder.Embedder;
@@ -47,7 +50,9 @@ import org.mockito.stubbing.Answer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.epam.reportportal.util.test.CommonUtils.createMaybe;
@@ -187,12 +192,9 @@ public class BaseTest {
 		});
 	}
 
+	@SuppressWarnings("unchecked")
 	public static void mockBatchLogging(final ReportPortalClient client) {
-		when(client.log(any(MultiPartRequest.class))).thenReturn(createMaybe(new BatchSaveOperatingRS()));
-	}
-
-	public static void mockSingleLogging(final ReportPortalClient client) {
-		when(client.log(any(SaveLogRQ.class))).thenReturn(createMaybe(new EntryCreatedAsyncRS()));
+		when(client.log(any(List.class))).thenReturn(createMaybe(new BatchSaveOperatingRS()));
 	}
 
 	public static void mockNestedSteps(final ReportPortalClient client, final Pair<String, String> parentNestedPair) {
@@ -228,19 +230,41 @@ public class BaseTest {
 		return result;
 	}
 
-	public static void verifyLogged(@Nonnull final ArgumentCaptor<MultiPartRequest> logCaptor, @Nullable final String itemId,
-			@Nonnull final LogLevel level, @Nonnull final String message) {
-		List<SaveLogRQ> expectedErrorList = logCaptor.getAllValues()
-				.stream()
-				.flatMap(l -> l.getSerializedRQs().stream())
-				.map(MultiPartRequest.MultiPartSerialized::getRequest)
-				.filter(l -> l instanceof List)
-				.flatMap(l -> ((List<?>) l).stream())
-				.filter(l -> l instanceof SaveLogRQ)
-				.map(l -> (SaveLogRQ) l)
-				.filter(l -> level.name().equals(l.getLevel()))
-				.filter(l -> l.getMessage() != null && l.getMessage().contains(message))
+	public static List<SaveLogRQ> extractJsonParts(List<MultipartBody.Part> parts) {
+		return parts.stream()
+				.filter(p -> ofNullable(p.headers()).map(headers -> headers.get("Content-Disposition"))
+						.map(h -> h.contains(Constants.LOG_REQUEST_JSON_PART))
+						.orElse(false))
+				.map(MultipartBody.Part::body)
+				.map(b -> {
+					Buffer buf = new Buffer();
+					try {
+						b.writeTo(buf);
+					} catch (IOException ignore) {
+					}
+					return buf.readByteArray();
+				})
+				.map(b -> {
+					try {
+						return HttpRequestUtils.MAPPER.readValue(b, new TypeReference<List<SaveLogRQ>>() {
+						});
+					} catch (IOException e) {
+						return Collections.<SaveLogRQ>emptyList();
+					}
+				})
+				.flatMap(Collection::stream)
 				.collect(Collectors.toList());
+	}
+
+	public static List<SaveLogRQ> filterLogs(ArgumentCaptor<List<MultipartBody.Part>> logCaptor, Predicate<SaveLogRQ> filter) {
+		return logCaptor.getAllValues().stream().flatMap(l -> extractJsonParts(l).stream()).filter(filter).collect(Collectors.toList());
+	}
+
+	public static void verifyLogged(@Nonnull final ArgumentCaptor<List<MultipartBody.Part>> logCaptor, @Nullable final String itemId,
+			@Nonnull final LogLevel level, @Nonnull final String message) {
+		List<SaveLogRQ> expectedErrorList = filterLogs(logCaptor,
+				l -> level.name().equals(l.getLevel()) && l.getMessage() != null && l.getMessage().contains(message)
+		);
 		assertThat(expectedErrorList, hasSize(1));
 		SaveLogRQ expectedError = expectedErrorList.get(0);
 		assertThat(expectedError.getItemUuid(), equalTo(itemId));
