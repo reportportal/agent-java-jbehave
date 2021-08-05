@@ -6,12 +6,11 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.epam.reportportal/agent-java-jbehave.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.epam.reportportal%22%20AND%20a:%22agent-java-jbehave%22)
 ![CI Build](https://github.com/reportportal/agent-java-jbehave/workflows/CI%20Build/badge.svg?branch=develop)
-[![codecov](https://codecov.io/gh/reportportal/agent-java-jbehave/branch/develop/graph/badge.svg?token=BCglguEcoR)](https://codecov.io/gh/reportportal/agent-java-jbehave)
 [![Join Slack chat!](https://reportportal-slack-auto.herokuapp.com/badge.svg)](https://reportportal-slack-auto.herokuapp.com)
 [![stackoverflow](https://img.shields.io/badge/reportportal-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/reportportal)
 [![Build with Love](https://img.shields.io/badge/build%20with-❤%EF%B8%8F%E2%80%8D-lightgrey.svg)](http://reportportal.io?style=flat)
 
-The latest version: 5.0.0-RC-3. Please use `Download` link above to get the agent. Minimal supported JBehave version: 4.8
+The latest version: 5.1.0-RC-1. Please use `Download` link above to get the agent. Minimal supported JBehave version: 4.8
 
 ## Overview: How to Add ReportPortal Logging to Your JBehave Java Project
 
@@ -80,7 +79,7 @@ rp.project = default_personal
         <dependency>
             <groupId>com.epam.reportportal</groupId>
             <artifactId>agent-java-jbehave</artifactId>
-            <version>5.0.0-RC-3</version>
+            <version>5.1.0-RC-1</version>
         </dependency>
 
         <dependency>
@@ -153,7 +152,7 @@ def jbehaveVersion = '4.8.1'
 dependencies {
     testCompile "org.jbehave:jbehave-core:${jbehaveVersion}"
     testCompile "org.jbehave:jbehave-navigator:${jbehaveVersion}"
-    testCompile 'com.epam.reportportal:agent-java-jbehave:5.0.0-RC-3'
+    testCompile 'com.epam.reportportal:agent-java-jbehave:5.1.0-RC-1'
     testCompile 'com.epam.reportportal:logger-java-logback:5.0.3'
 }
 
