@@ -20,10 +20,12 @@ import com.epam.reportportal.jbehave.BaseTest;
 import com.epam.reportportal.jbehave.ReportPortalStepFormat;
 import com.epam.reportportal.jbehave.integration.basic.FailedSteps;
 import com.epam.reportportal.listeners.ItemStatus;
+import com.epam.reportportal.listeners.LogLevel;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.reportportal.util.test.CommonUtils;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
+import okhttp3.MultipartBody;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -36,8 +38,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class ItemStatusFailedTest extends BaseTest {
 
@@ -60,6 +61,7 @@ public class ItemStatusFailedTest extends BaseTest {
 	private static final String FAILED_SCENARIO_PATH = "stories/status/FailedScenario.story";
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void verify_a_step_failed_and_parent_status_calculated() {
 		run(format, FAILED_SCENARIO_PATH, new FailedSteps());
 
@@ -81,5 +83,10 @@ public class ItemStatusFailedTest extends BaseTest {
 
 		FinishTestItemRQ storyFinish = finishItems.get(2);
 		assertThat(storyFinish.getStatus(), equalTo(ItemStatus.FAILED.name()));
+
+		ArgumentCaptor<List<MultipartBody.Part>> logCaptor = ArgumentCaptor.forClass(List.class);
+		verify(client, atLeast(1)).log(logCaptor.capture());
+
+		verifyLogged(logCaptor, stepIds.get(0), LogLevel.ERROR, "java.lang.IllegalStateException: A failed step");
 	}
 }
