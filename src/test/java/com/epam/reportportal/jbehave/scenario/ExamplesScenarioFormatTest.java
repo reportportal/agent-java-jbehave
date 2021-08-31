@@ -18,7 +18,6 @@ package com.epam.reportportal.jbehave.scenario;
 
 import com.epam.reportportal.jbehave.BaseTest;
 import com.epam.reportportal.jbehave.ReportPortalScenarioFormat;
-import com.epam.reportportal.jbehave.ReportPortalStepFormat;
 import com.epam.reportportal.jbehave.integration.basic.StockSteps;
 import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.service.ReportPortal;
@@ -32,7 +31,6 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -55,7 +53,7 @@ public class ExamplesScenarioFormatTest extends BaseTest {
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
 	private final ReportPortalScenarioFormat format = new ReportPortalScenarioFormat(ReportPortal.create(client,
 			standardParameters(),
-			Executors.newSingleThreadExecutor()
+			testExecutor()
 	));
 
 	@BeforeEach

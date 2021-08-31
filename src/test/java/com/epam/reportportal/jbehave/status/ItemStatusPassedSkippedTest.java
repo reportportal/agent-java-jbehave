@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,7 +50,7 @@ public class ItemStatusPassedSkippedTest extends BaseTest {
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
 	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
 			standardParameters(),
-			Executors.newSingleThreadExecutor()
+			testExecutor()
 	));
 
 	@BeforeEach

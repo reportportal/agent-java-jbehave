@@ -33,7 +33,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -49,13 +48,14 @@ public class CallbackReportingTest extends BaseTest {
 	private final List<String> scenarioIds = Stream.generate(() -> CommonUtils.namedId("scenario_")).limit(2).collect(Collectors.toList());
 	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("test_")).limit(2).collect(Collectors.toList());
 
-	private final List<Pair<String, List<String>>> tests = Arrays.asList(Pair.of(scenarioIds.get(0), Collections.singletonList(stepIds.get(0))),
+	private final List<Pair<String, List<String>>> tests = Arrays.asList(
+			Pair.of(scenarioIds.get(0), Collections.singletonList(stepIds.get(0))),
 			Pair.of(scenarioIds.get(1), Collections.singletonList(stepIds.get(1)))
 	);
 
 	private final ListenerParameters params = standardParameters();
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+	private final ExecutorService executorService = testExecutor();
 	private final ReportPortal reportPortal = ReportPortal.create(client, params, executorService);
 	private final ReportPortalStepFormat format = new ReportPortalStepFormat(reportPortal);
 

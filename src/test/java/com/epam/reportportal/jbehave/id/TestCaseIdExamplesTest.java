@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.*;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -53,7 +52,7 @@ public class TestCaseIdExamplesTest extends BaseTest {
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
 	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
 			standardParameters(),
-			Executors.newSingleThreadExecutor()
+			testExecutor()
 	));
 
 	@BeforeEach
@@ -65,7 +64,7 @@ public class TestCaseIdExamplesTest extends BaseTest {
 	}
 
 	private static final List<String> EXAMPLE_NODES = Stream.concat(Collections.nCopies(3,
-			"[EXAMPLE:[symbol:STK1;threshold:10.0;price:5.0;status:OFF]]"
+					"[EXAMPLE:[symbol:STK1;threshold:10.0;price:5.0;status:OFF]]"
 			).stream(),
 			Collections.nCopies(3, "[EXAMPLE:[symbol:STK1;threshold:10.0;price:11.0;status:ON]]").stream()
 	).collect(Collectors.toList());
