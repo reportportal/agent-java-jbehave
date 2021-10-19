@@ -34,7 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -53,13 +52,13 @@ public class NestedStepsAnnotationTest extends BaseTest {
 			.collect(Collectors.toList());
 	private final String nestedNestedStepId = CommonUtils.namedId("double_nested_step_");
 	private final List<Pair<String, String>> firstLevelNestedStepIds = Stream.concat(Stream.of(Pair.of(stepIds.get(0),
-			nestedStepIds.get(0)
-	)), nestedStepIds.stream().skip(1).map(i -> Pair.of(stepIds.get(1), i)))
+					nestedStepIds.get(0)
+			)), nestedStepIds.stream().skip(1).map(i -> Pair.of(stepIds.get(1), i)))
 			.collect(Collectors.toList());
 
 	private final ListenerParameters params = standardParameters();
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+	private final ExecutorService executorService = testExecutor();
 	private final ReportPortal reportPortal = ReportPortal.create(client, params, executorService);
 	private final ReportPortalStepFormat format = new ReportPortalStepFormat(reportPortal);
 

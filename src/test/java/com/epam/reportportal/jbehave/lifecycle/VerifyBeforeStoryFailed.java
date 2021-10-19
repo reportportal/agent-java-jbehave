@@ -35,7 +35,6 @@ import org.mockito.ArgumentCaptor;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -69,7 +68,7 @@ public class VerifyBeforeStoryFailed extends BaseTest {
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
 	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
 			standardParameters(),
-			Executors.newSingleThreadExecutor()
+			testExecutor()
 	));
 
 	@BeforeEach

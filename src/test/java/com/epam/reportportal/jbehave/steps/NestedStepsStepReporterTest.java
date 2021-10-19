@@ -35,7 +35,6 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -63,7 +62,7 @@ public class NestedStepsStepReporterTest extends BaseTest {
 
 	private final ListenerParameters params = standardParameters();
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+	private final ExecutorService executorService = testExecutor();
 	private final ReportPortal reportPortal = ReportPortal.create(client, params, executorService);
 	private final ReportPortalStepFormat format = new ReportPortalStepFormat(reportPortal);
 

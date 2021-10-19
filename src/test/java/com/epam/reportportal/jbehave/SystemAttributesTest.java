@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -44,7 +43,7 @@ public class SystemAttributesTest extends BaseTest {
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
 	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
 			standardParameters(),
-			Executors.newSingleThreadExecutor()
+			testExecutor()
 	));
 
 	@BeforeEach

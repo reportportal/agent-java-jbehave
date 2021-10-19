@@ -34,7 +34,6 @@ import org.mockito.ArgumentCaptor;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -55,7 +54,7 @@ public class VerifyAfterStory extends BaseTest {
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
 	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
 			standardParameters(),
-			Executors.newSingleThreadExecutor()
+			testExecutor()
 	));
 
 	@BeforeEach

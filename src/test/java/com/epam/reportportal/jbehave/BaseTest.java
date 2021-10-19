@@ -52,6 +52,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -70,6 +72,14 @@ import static org.mockito.Mockito.when;
  */
 public class BaseTest {
 	public static final String ROOT_SUITE_PREFIX = "root_";
+
+	public static ExecutorService testExecutor() {
+		return Executors.newSingleThreadExecutor(r -> {
+			Thread t = new Thread(r);
+			t.setDaemon(true);
+			return t;
+		});
+	}
 
 	public static void run(@Nonnull final Class<?> clazz, @Nonnull final Format format, @Nonnull final List<String> stories,
 			@Nonnull final StoryParser parser, @Nullable final Object... steps) {
