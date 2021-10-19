@@ -843,7 +843,6 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void successful(String step) {
-		launch.get().getStepReporter().finishPreviousStep();
 		currentLifecycleItemType = ItemType.AFTER_TEST;
 		ofNullable(stepStack.remove()).ifPresent(s -> finishStep(s, ItemStatus.PASSED));
 	}
@@ -856,7 +855,6 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void failed(String step, Throwable cause) {
-		launch.get().getStepReporter().finishPreviousStep();
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
 		boolean isLifecycleMethod = item == null || stepStack.isEmpty();
 		if (isLifecycleMethod) {
