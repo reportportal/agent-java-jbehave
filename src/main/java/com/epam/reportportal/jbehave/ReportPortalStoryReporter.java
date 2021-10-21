@@ -569,6 +569,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @param parent   a parent test item leaf
 	 * @return the step leaf
 	 */
+	@Nonnull
 	protected TestItemTree.TestItemLeaf startLifecycleMethod(@Nonnull final String name, @Nonnull final ItemType itemType,
 			@Nonnull final TestItemTree.TestItemLeaf parent) {
 		TestItemTree.ItemTreeKey key = ItemTreeUtils.createKey(name);
@@ -578,6 +579,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	}
 
 	@SuppressWarnings("unused")
+	@Nonnull
 	protected FinishTestItemRQ buildFinishTestItemRequest(@Nonnull final Maybe<String> id, @Nullable final ItemStatus status,
 			@Nullable Issue issue) {
 		FinishTestItemRQ rq = new FinishTestItemRQ();
