@@ -403,6 +403,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @param parent a parent test item leaf
 	 * @return a leaf of the item
 	 */
+	@Nonnull
 	protected TestItemTree.TestItemLeaf createLeaf(@Nonnull final ItemType type, @Nonnull final StartTestItemRQ rq,
 			@Nullable final TestItemTree.TestItemLeaf parent) {
 		Optional<TestItemTree.TestItemLeaf> parentOptional = ofNullable(parent);
@@ -576,6 +577,16 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		return leaf;
 	}
 
+	@SuppressWarnings("unused")
+	protected FinishTestItemRQ buildFinishTestItemRequest(@Nonnull final Maybe<String> id, @Nullable final ItemStatus status,
+			@Nullable Issue issue) {
+		FinishTestItemRQ rq = new FinishTestItemRQ();
+		rq.setEndTime(Calendar.getInstance().getTime());
+		rq.setStatus(ofNullable(status).map(Enum::name).orElse(null));
+		rq.setIssue(issue);
+		return rq;
+	}
+
 	/**
 	 * Finishes an item in the structure
 	 *
@@ -584,9 +595,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	protected void finishItem(@Nullable final TestItemTree.TestItemLeaf item, @Nullable final ItemStatus status) {
 		ofNullable(item).ifPresent(i -> {
-			FinishTestItemRQ rq = new FinishTestItemRQ();
-			rq.setEndTime(Calendar.getInstance().getTime());
-			rq.setStatus(ofNullable(status).map(Enum::name).orElse(null));
+			FinishTestItemRQ rq = buildFinishTestItemRequest(i.getItemId(), status, null);
 			Maybe<OperationCompletionRS> response = launch.get().finishTestItem(i.getItemId(), rq);
 			i.setStatus(status);
 			i.setFinishResponse(response);
@@ -599,6 +608,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 *
 	 * @param status a status to set on finish
 	 */
+	@SuppressWarnings("SameParameterValue")
 	protected void finishLastItem(@Nullable final ItemStatus status) {
 		TestItemTree.TestItemLeaf item = getLeaf();
 		finishItem(item, status);
@@ -675,10 +685,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @param issue  an optional issue which will be set
 	 */
 	protected void finishItem(final @Nonnull Maybe<String> id, final @Nonnull ItemStatus status, @Nullable Issue issue) {
-		FinishTestItemRQ rq = new FinishTestItemRQ();
-		rq.setEndTime(Calendar.getInstance().getTime());
-		rq.setStatus(status.name());
-		rq.setIssue(issue);
+		FinishTestItemRQ rq = buildFinishTestItemRequest(id, status, issue);
 		launch.get().finishTestItem(id, rq);
 	}
 
@@ -698,7 +705,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @param leaf the step test item leaf
 	 */
 	@SuppressWarnings("unused")
-	protected void createIgnoredSteps(String step, TestItemTree.TestItemLeaf leaf) {
+	protected void createIgnoredSteps(@Nullable String step, @Nonnull TestItemTree.TestItemLeaf leaf) {
 	}
 
 	/**
@@ -708,7 +715,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @param leaf the step test item leaf
 	 */
 	@SuppressWarnings("unused")
-	protected void createNotPerformedSteps(String step, TestItemTree.TestItemLeaf leaf) {
+	protected void createNotPerformedSteps(@Nullable String step, @Nonnull TestItemTree.TestItemLeaf leaf) {
 		ReportPortal.emitLog(leaf.getItemId(),
 				getLogSupplier(LogLevel.WARN, "Step execution was skipped by JBehave, see previous steps for errors.")
 		);
@@ -721,13 +728,13 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @param leaf the step test item leaf
 	 */
 	@SuppressWarnings("unused")
-	protected void createPendingSteps(String step, TestItemTree.TestItemLeaf leaf) {
+	protected void createPendingSteps(@Nullable String step, @Nonnull TestItemTree.TestItemLeaf leaf) {
 		ReportPortal.emitLog(leaf.getItemId(),
 				getLogSupplier(LogLevel.WARN, String.format("Unable to locate a step implementation: '%s'", step))
 		);
 	}
 
-	protected void simulateStep(String step) {
+	protected void simulateStep(@Nonnull String step) {
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
 		ofNullable(item).ifPresent(i -> {
 			TestItemTree.TestItemLeaf leaf = startStep(step, i);
@@ -743,7 +750,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @see <a href="https://jbehave.org/reference/latest/given-stories.html">Given Stories</a>
 	 */
 	@Override
-	public void beforeStory(Story story, boolean givenStory) {
+	public void beforeStory(@Nonnull Story story, boolean givenStory) {
 		currentLifecycleItemType = AFTER_STORIES.equals(story.getName()) ? ItemType.AFTER_SUITE : ItemType.BEFORE_SUITE;
 		structure.add(new Entity<>(ItemType.STORY, story));
 	}
@@ -771,7 +778,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @param scenario JBehave scenario object
 	 */
 	@Override
-	public void beforeScenario(Scenario scenario) {
+	public void beforeScenario(@Nonnull Scenario scenario) {
 		TestItemTree.TestItemLeaf previousItem = getLeaf();
 		if (previousItem != null && previousItem.getType() == ItemType.TEST) {
 			evaluateAndFinishLastItem();
@@ -799,7 +806,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @param step Step to be reported
 	 */
 	@Override
-	public void beforeStep(String step) {
+	public void beforeStep(@Nonnull String step) {
 		TestItemTree.TestItemLeaf previousItem = getLeaf();
 		if (previousItem != null && previousItem.getType() == ItemType.TEST) {
 			evaluateAndFinishLastItem();
