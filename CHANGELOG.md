@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.1.0-RC-3]
 ### Added
 - ReportPortalStoryReporter#buildFinishTestItemRequest method
 - JSR-305 annotations
