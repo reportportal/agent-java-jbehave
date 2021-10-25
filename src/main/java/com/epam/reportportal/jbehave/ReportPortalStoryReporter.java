@@ -107,8 +107,8 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * Generates code references (path through a story to a step) for JBehave stories.
 	 *
 	 * @param parentCodeRef a basis code reference or null if it's a root item
-	 * @param key an item leaf key
-	 * @param type an item type
+	 * @param key           an item leaf key
+	 * @param type          an item type
 	 * @return a code reference string to identify every element of a story
 	 */
 	private String getCodeRef(@Nullable final String parentCodeRef, @Nonnull final TestItemTree.ItemTreeKey key, ItemType type) {
@@ -295,7 +295,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	/**
 	 * Formats an Example test name
 	 *
-	 * @param step a step name pattern
+	 * @param step    a step name pattern
 	 * @param example example parameters map
 	 * @return step name
 	 */
@@ -315,7 +315,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * Creates a {@link TestCaseIdEntry} by code reference and parameter map.
 	 *
 	 * @param codeRef a test code reference
-	 * @param params test parameters map (if any)
+	 * @param params  test parameters map (if any)
 	 * @return Test Case ID or null if no coderef nor params were bypassed
 	 */
 	@Nullable
@@ -386,7 +386,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * Starts a test item on Report Portal
 	 *
 	 * @param parentId an id of a parent item
-	 * @param rq a request to Report Portal
+	 * @param rq       a request to Report Portal
 	 * @return Report Portal item ID
 	 */
 	@Nonnull
@@ -552,11 +552,15 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	protected TestItemTree.TestItemLeaf startStep(@Nonnull final String name, @Nonnull final TestItemTree.TestItemLeaf parent) {
 		TestItemTree.ItemTreeKey key = ItemTreeUtils.createKey(name);
-		TestItemTree.TestItemLeaf leaf = createLeaf(ItemType.STEP, buildStartStepRq(name,
-				getCodeRef(parent.getAttribute(CODE_REF), key, ItemType.STEP),
-				parent.getAttribute(PARAMETERS),
-				getItemDate(parent)
-		), parent);
+		TestItemTree.TestItemLeaf leaf = createLeaf(
+				ItemType.STEP,
+				buildStartStepRq(name,
+						getCodeRef(parent.getAttribute(CODE_REF), key, ItemType.STEP),
+						parent.getAttribute(PARAMETERS),
+						getItemDate(parent)
+				),
+				parent
+		);
 		parent.getChildItems().put(key, leaf);
 		return leaf;
 	}
@@ -578,6 +582,14 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		return leaf;
 	}
 
+	/**
+	 * Build finish test item request object
+	 *
+	 * @param id     item ID reference
+	 * @param status item result status
+	 * @param issue  test item issue to set (if any)
+	 * @return finish request
+	 */
 	@SuppressWarnings("unused")
 	@Nonnull
 	protected FinishTestItemRQ buildFinishTestItemRequest(@Nonnull final Maybe<String> id, @Nullable final ItemStatus status,
