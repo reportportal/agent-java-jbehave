@@ -154,7 +154,7 @@ dependencies {
     testCompile "org.jbehave:jbehave-core:${jbehaveVersion}"
     testCompile "org.jbehave:jbehave-navigator:${jbehaveVersion}"
     testCompile 'com.epam.reportportal:agent-java-jbehave:$LATEST_VERSION'
-    testCompile 'com.epam.reportportal:logger-java-logback:5.0.3'
+    testCompile 'com.epam.reportportal:logger-java-logback:5.1.0'
 }
 
 test {
@@ -246,7 +246,7 @@ To route your logs into Report Portal you should add `logger-java-logback` depen
 
 ```groovy
 // inside 'dependencies' section
-testCompile 'com.epam.reportportal:logger-java-logback:5.0.3'
+testCompile 'com.epam.reportportal:logger-java-logback:5.1.0'
 ```
 
 It should be already here if you used gradle configuration listed above.
