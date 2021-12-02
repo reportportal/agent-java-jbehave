@@ -18,6 +18,7 @@ package com.epam.reportportal.jbehave.integration.basic;
 
 import org.jbehave.core.annotations.Composite;
 import org.jbehave.core.annotations.Given;
+import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,5 +35,12 @@ public class CompositeSteps {
 	@Composite(steps = { "Given I have a failed step", "Then I have another empty step" })
 	public void failureCompositeStep() {
 		LOGGER.info("Inside 'compositeStep' method");
+	}
+
+	@When("parametrized with $parameter step")
+	@Composite(steps = { "When I have parameter <parameter>",
+			             "When I have a step with a string parameter <parameter>"})
+	public void parametrizedCompositeStep(String parameter) {
+		LOGGER.info("Inside 'parametrizedCompositeStep' method parametrized with {}", parameter);
 	}
 }

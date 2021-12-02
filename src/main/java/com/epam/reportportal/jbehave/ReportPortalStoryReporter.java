@@ -341,7 +341,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
 		rq.setType(ItemType.STEP.name());
 		Map<String, String> usedParams = ofNullable(params).map(p -> getUsedParameters(step).stream()
-				.collect(Collectors.toMap(s -> s, p::get))).orElse(null);
+				.filter(params::containsKey).collect(Collectors.toMap(Function.identity(), p::get))).orElse(null);
 		rq.setParameters(getStepParameters(usedParams));
 		rq.setTestCaseId(ofNullable(getTestCaseId(codeRef, usedParams)).map(TestCaseIdEntry::getId).orElse(null));
 		return rq;
