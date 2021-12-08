@@ -24,6 +24,7 @@ import com.epam.reportportal.utils.http.HttpRequestUtils;
 import com.epam.ta.reportportal.ws.model.BatchSaveOperatingRS;
 import com.epam.ta.reportportal.ws.model.Constants;
 import com.epam.ta.reportportal.ws.model.OperationCompletionRS;
+import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.item.ItemCreatedRS;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRS;
 import com.epam.ta.reportportal.ws.model.log.SaveLogRQ;
@@ -278,5 +279,13 @@ public class BaseTest {
 		assertThat(expectedErrorList, hasSize(1));
 		SaveLogRQ expectedError = expectedErrorList.get(0);
 		assertThat(expectedError.getItemUuid(), equalTo(itemId));
+	}
+
+
+	protected static ParameterResource parameterOf(String key, String value) {
+		ParameterResource parameterResource = new ParameterResource();
+		parameterResource.setKey(key);
+		parameterResource.setValue(value);
+		return  parameterResource;
 	}
 }

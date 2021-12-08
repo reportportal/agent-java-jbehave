@@ -3,6 +3,7 @@ Scenario: Stock trade alert
 Given a stock of symbol <symbol> and a threshold <threshold>
 When the stock is traded at price <price>
 Then the alert status should be status <status>
+When I have first parameter <symbol> and second parameter <symbol>
 
 Examples:
 |symbol|threshold|price|status|

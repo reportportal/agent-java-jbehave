@@ -56,4 +56,9 @@ public class ParameterizedSteps {
 	public void iHaveAnStrInlineParameter(@Named("str_param") String str) {
 		LOGGER.info("String parameter {}", str);
 	}
+
+	@When("I have first parameter $str_param1 and second parameter $str_param2")
+	public void iHaveTWOStrInlineParameter(@Named("str_param1") String str1, @Named("str_param2") String str2) {
+		LOGGER.info("String parameters: {},{}", str1, str2);
+	}
 }
