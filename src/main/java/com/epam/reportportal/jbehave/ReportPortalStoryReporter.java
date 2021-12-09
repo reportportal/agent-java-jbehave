@@ -311,7 +311,8 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		}
 		String result = step;
 		for (Map.Entry<String, String> e : example.entrySet()) {
-			result = result.replaceAll(String.format(EXAMPLE_VALUE_PATTERN, e.getKey()), e.getValue());
+			result = result.replaceAll(String.format(EXAMPLE_VALUE_PATTERN, e.getKey()),
+					Matcher.quoteReplacement(e.getValue()));
 		}
 		return result;
 	}

@@ -7,5 +7,5 @@ When I have first parameter <symbol> and second parameter <symbol>
 
 Examples:
 |symbol|threshold|price|status|
-|STK1|10.0|5.0|OFF|
-|STK1|10.0|11.0|ON|
+|STK1$|10.0|5.0|OFF|
+|STK1$|10.0|11.0|ON|

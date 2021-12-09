@@ -64,8 +64,8 @@ public class ExamplesScenarioFormatTest extends BaseTest {
 		mockBatchLogging(client);
 	}
 
-	private static final List<String> EXAMPLE_NODES = Arrays.asList("[EXAMPLE:[symbol:STK1;threshold:10.0;price:5.0;status:OFF]]",
-			"[EXAMPLE:[symbol:STK1;threshold:10.0;price:11.0;status:ON]]"
+	private static final List<String> EXAMPLE_NODES = Arrays.asList("[EXAMPLE:[symbol:STK1$;threshold:10.0;price:5.0;status:OFF]]",
+			"[EXAMPLE:[symbol:STK1$;threshold:10.0;price:11.0;status:ON]]"
 	);
 
 	private static final List<String> STEP_NAMES = Arrays.asList("Given a stock of symbol <symbol> and a threshold <threshold>",

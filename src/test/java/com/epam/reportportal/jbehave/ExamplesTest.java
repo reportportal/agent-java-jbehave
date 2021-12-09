@@ -73,42 +73,42 @@ public class ExamplesTest extends BaseTest {
 	}
 
 	private static final List<String> EXAMPLE_NAMES = asList(
-			"Example: [symbol: STK1; threshold: 10.0; price: 5.0; status: OFF]",
-			"Example: [symbol: STK1; threshold: 10.0; price: 11.0; status: ON]"
+			"Example: [symbol: STK1$; threshold: 10.0; price: 5.0; status: OFF]",
+			"Example: [symbol: STK1$; threshold: 10.0; price: 11.0; status: ON]"
 	);
 
 	private static final List<Map<String, String>> EXAMPLE_PARAMETERS = asList(new HashMap<String, String>() {{
-		put("symbol", "STK1");
+		put("symbol", "STK1$");
 		put("threshold", "10.0");
 		put("price", "5.0");
 		put("status", "OFF");
 	}}, new HashMap<String, String>() {{
-		put("symbol", "STK1");
+		put("symbol", "STK1$");
 		put("threshold", "10.0");
 		put("price", "11.0");
 		put("status", "ON");
 	}});
 
 	private static final List<String> STEP_NAMES = asList(
-			"Given a stock of symbol STK1 and a threshold 10.0",
+			"Given a stock of symbol STK1$ and a threshold 10.0",
 			"When the stock is traded at price 5.0",
 			"Then the alert status should be status OFF",
-			"When I have first parameter STK1 and second parameter STK1",
-			"Given a stock of symbol STK1 and a threshold 10.0",
+			"When I have first parameter STK1$ and second parameter STK1$",
+			"Given a stock of symbol STK1$ and a threshold 10.0",
 			"When the stock is traded at price 11.0",
 			"Then the alert status should be status ON",
-			"When I have first parameter STK1 and second parameter STK1"
+			"When I have first parameter STK1$ and second parameter STK1$"
 	);
 
 	private static final List<List<ParameterResource>> STEP_PARAMETERS = asList(
-		asList(parameterOf("symbol", "STK1"), parameterOf("threshold", "10.0")),
+		asList(parameterOf("symbol", "STK1$"), parameterOf("threshold", "10.0")),
 		asList(parameterOf("price", "5.0")),
 		asList(parameterOf("status", "OFF")),
-		asList(parameterOf("symbol", "STK1"), parameterOf("symbol", "STK1")),
-		asList(parameterOf("symbol", "STK1"), parameterOf("threshold", "10.0")),
+		asList(parameterOf("symbol", "STK1$"), parameterOf("symbol", "STK1$")),
+		asList(parameterOf("symbol", "STK1$"), parameterOf("threshold", "10.0")),
 		asList(parameterOf("price", "11.0")),
 		asList(parameterOf("status", "ON")),
-		asList(parameterOf("symbol", "STK1"), parameterOf("symbol", "STK1"))
+		asList(parameterOf("symbol", "STK1$"), parameterOf("symbol", "STK1$"))
 	);
 
 

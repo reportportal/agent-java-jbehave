@@ -67,9 +67,9 @@ public class TestCaseIdExamplesTest extends BaseTest {
 	}
 
 	private static final List<String> EXAMPLE_NODES = Stream.concat(Collections.nCopies(STEPS_QUANTITY,
-					"[EXAMPLE:[symbol:STK1;threshold:10.0;price:5.0;status:OFF]]"
+					"[EXAMPLE:[symbol:STK1$;threshold:10.0;price:5.0;status:OFF]]"
 			).stream(),
-			Collections.nCopies(STEPS_QUANTITY, "[EXAMPLE:[symbol:STK1;threshold:10.0;price:11.0;status:ON]]").stream()
+			Collections.nCopies(STEPS_QUANTITY, "[EXAMPLE:[symbol:STK1$;threshold:10.0;price:11.0;status:ON]]").stream()
 	).collect(Collectors.toList());
 
 	private static final List<String> STEP_NAMES = Arrays.asList("Given a stock of symbol <symbol> and a threshold <threshold>",
@@ -83,14 +83,14 @@ public class TestCaseIdExamplesTest extends BaseTest {
 	);
 
 	private static final List<List<ParameterResource>> STEP_PARAMETERS = asList(
-			asList(parameterOf("symbol", "STK1"), parameterOf("threshold", "10.0")),
+			asList(parameterOf("symbol", "STK1$"), parameterOf("threshold", "10.0")),
 			asList(parameterOf("price", "5.0")),
 			asList(parameterOf("status", "OFF")),
-			asList(parameterOf("symbol", "STK1"), parameterOf("symbol", "STK1")),
-			asList(parameterOf("symbol", "STK1"), parameterOf("threshold", "10.0")),
+			asList(parameterOf("symbol", "STK1$"), parameterOf("symbol", "STK1$")),
+			asList(parameterOf("symbol", "STK1$"), parameterOf("threshold", "10.0")),
 			asList(parameterOf("price", "11.0")),
 			asList(parameterOf("status", "ON")),
-			asList(parameterOf("symbol", "STK1"), parameterOf("symbol", "STK1"))
+			asList(parameterOf("symbol", "STK1$"), parameterOf("symbol", "STK1$"))
 	);
 
 	private static final String EXAMPLES_STORY = "stories/Examples.story";
