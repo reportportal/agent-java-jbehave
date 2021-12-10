@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+- [Issue #59](https://github.com/reportportal/agent-java-jbehave/issues/59): IAE when examples table parameter has $ character
+- [Issue #57](https://github.com/reportportal/agent-java-jbehave/issues/57): Steps using the same Examples table parameter twice break reporting
+- [Issue #56](https://github.com/reportportal/agent-java-jbehave/issues/56): Parameterised composite steps brake reporting
 
 ## [5.1.0]
 ### Changed
