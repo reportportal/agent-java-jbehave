@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.1.1]
 ### Fixed
 - [Issue #59](https://github.com/reportportal/agent-java-jbehave/issues/59): IAE when examples table parameter has $ character
 - [Issue #57](https://github.com/reportportal/agent-java-jbehave/issues/57): Steps using the same Examples table parameter twice break reporting
