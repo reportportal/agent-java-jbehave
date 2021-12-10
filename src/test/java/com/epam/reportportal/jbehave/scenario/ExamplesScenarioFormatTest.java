@@ -42,6 +42,7 @@ import static org.mockito.Mockito.*;
 
 public class ExamplesScenarioFormatTest extends BaseTest {
 
+	public static final int STEPS_QUANTITY = 4;
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final List<String> exampleIds = Stream.generate(() -> CommonUtils.namedId("example_")).limit(2).collect(Collectors.toList());
@@ -63,13 +64,14 @@ public class ExamplesScenarioFormatTest extends BaseTest {
 		mockBatchLogging(client);
 	}
 
-	private static final List<String> EXAMPLE_NODES = Arrays.asList("[EXAMPLE:[symbol:STK1;threshold:10.0;price:5.0;status:OFF]]",
-			"[EXAMPLE:[symbol:STK1;threshold:10.0;price:11.0;status:ON]]"
+	private static final List<String> EXAMPLE_NODES = Arrays.asList("[EXAMPLE:[symbol:STK1$;threshold:10.0;price:5.0;status:OFF]]",
+			"[EXAMPLE:[symbol:STK1$;threshold:10.0;price:11.0;status:ON]]"
 	);
 
 	private static final List<String> STEP_NAMES = Arrays.asList("Given a stock of symbol <symbol> and a threshold <threshold>",
 			"When the stock is traded at price <price>",
-			"Then the alert status should be status <status>"
+			"Then the alert status should be status <status>",
+			"When I have first parameter <symbol> and second parameter <symbol>"
 	);
 
 	private static final String EXAMPLES_STORY = "stories/Examples.story";
@@ -83,8 +85,8 @@ public class ExamplesScenarioFormatTest extends BaseTest {
 		ArgumentCaptor<StartTestItemRQ> exampleCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
 		verify(client, times(2)).startTestItem(same(scenarioId), exampleCaptor.capture());
 		ArgumentCaptor<StartTestItemRQ> startCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
-		verify(client, times(3)).startTestItem(same(exampleIds.get(0)), startCaptor.capture());
-		verify(client, times(3)).startTestItem(same(exampleIds.get(1)), startCaptor.capture());
+		verify(client, times(STEPS_QUANTITY)).startTestItem(same(exampleIds.get(0)), startCaptor.capture());
+		verify(client, times(STEPS_QUANTITY)).startTestItem(same(exampleIds.get(1)), startCaptor.capture());
 
 		String scenarioCodeRef = EXAMPLES_STORY + "/[SCENARIO:Stock trade alert]";
 
@@ -98,7 +100,7 @@ public class ExamplesScenarioFormatTest extends BaseTest {
 			assertThat(rq.isHasStats(), equalTo(Boolean.TRUE));
 			assertThat(rq.getTestCaseId(), equalTo(exampleCodeRef));
 
-			List<StartTestItemRQ> exampleSteps = items.subList(i * 3, i * 3 + 3);
+			List<StartTestItemRQ> exampleSteps = items.subList(i * STEPS_QUANTITY, i * STEPS_QUANTITY + STEPS_QUANTITY);
 			IntStream.range(0, exampleSteps.size()).forEach(j -> {
 				StartTestItemRQ stepRq = exampleSteps.get(j);
 				String stepCodeRef = exampleCodeRef + "/" + String.format("[STEP:%s]", STEP_NAMES.get(j));

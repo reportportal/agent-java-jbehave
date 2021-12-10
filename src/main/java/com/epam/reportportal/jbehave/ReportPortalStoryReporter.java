@@ -42,6 +42,7 @@ import org.jbehave.core.reporters.NullStoryReporter;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -247,13 +248,17 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @return a list of parameters
 	 */
 	@Nullable
-	protected List<ParameterResource> getStepParameters(@Nullable final Map<String, String> params) {
-		return ofNullable(params).map(p -> p.entrySet().stream().map(e -> {
-			ParameterResource param = new ParameterResource();
-			param.setKey(e.getKey());
-			param.setValue(e.getValue());
-			return param;
-		}).collect(Collectors.toList())).orElse(null);
+	protected List<ParameterResource> getStepParameters(@Nullable final Map<String, String> params)	{
+		return ofNullable(params).map(
+						p -> p.entrySet().stream().map(e -> parameterOf(e.getKey(), e.getValue())).collect(Collectors.toList()))
+				.orElse(null);
+	}
+
+	private ParameterResource parameterOf(String key, String value) {
+		ParameterResource param = new ParameterResource();
+		param.setKey(key);
+		param.setValue(value);
+		return param;
 	}
 
 	/**
@@ -306,7 +311,8 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		}
 		String result = step;
 		for (Map.Entry<String, String> e : example.entrySet()) {
-			result = result.replaceAll(String.format(EXAMPLE_VALUE_PATTERN, e.getKey()), e.getValue());
+			result = result.replaceAll(String.format(EXAMPLE_VALUE_PATTERN, e.getKey()),
+					Matcher.quoteReplacement(e.getValue()));
 		}
 		return result;
 	}
@@ -319,8 +325,8 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @return Test Case ID or null if no coderef nor params were bypassed
 	 */
 	@Nullable
-	protected TestCaseIdEntry getTestCaseId(@Nullable String codeRef, @Nullable final Map<String, String> params) {
-		return TestCaseIdUtils.getTestCaseId(codeRef, ofNullable(params).map(p -> new ArrayList<>(p.values())).orElse(null));
+	protected TestCaseIdEntry getTestCaseId(@Nullable String codeRef, @Nullable final List<String> params) {
+		return TestCaseIdUtils.getTestCaseId(codeRef, params);
 	}
 
 	/**
@@ -340,10 +346,12 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		rq.setCodeRef(codeRef);
 		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
 		rq.setType(ItemType.STEP.name());
-		Map<String, String> usedParams = ofNullable(params).map(p -> getUsedParameters(step).stream()
-				.collect(Collectors.toMap(s -> s, p::get))).orElse(null);
-		rq.setParameters(getStepParameters(usedParams));
-		rq.setTestCaseId(ofNullable(getTestCaseId(codeRef, usedParams)).map(TestCaseIdEntry::getId).orElse(null));
+		Optional<List<ParameterResource>> usedParams = ofNullable(params).map(p -> getUsedParameters(step).stream()
+				.filter(params::containsKey).map(pk -> parameterOf(pk, params.get(pk))).collect(Collectors.toList()));
+		usedParams.ifPresent(rq::setParameters);
+		rq.setTestCaseId(ofNullable(getTestCaseId(codeRef,
+				usedParams.map(p -> p.stream().map(ParameterResource::getValue).collect(Collectors.toList()))
+						.orElse(null))).map(TestCaseIdEntry::getId).orElse(null));
 		return rq;
 	}
 
