@@ -5,7 +5,7 @@
 > ReportPortal team only and is not supposed for sharing with 3rd parties.
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.epam.reportportal/agent-java-jbehave.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.epam.reportportal%22%20AND%20a:%22agent-java-jbehave%22)
-![CI Build](https://github.com/reportportal/agent-java-jbehave/workflows/CI%20Build/badge.svg?branch=develop)
+[![CI Build](https://github.com/reportportal/agent-java-jbehave/actions/workflows/ci.yml/badge.svg)](https://github.com/reportportal/agent-java-jbehave/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/reportportal/agent-java-jbehave/branch/develop/graph/badge.svg?token=BCglguEcoR)](https://codecov.io/gh/reportportal/agent-java-jbehave)
 [![Join Slack chat!](https://reportportal-slack-auto.herokuapp.com/badge.svg)](https://reportportal-slack-auto.herokuapp.com)
 [![stackoverflow](https://img.shields.io/badge/reportportal-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/reportportal)
