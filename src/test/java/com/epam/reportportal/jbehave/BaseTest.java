@@ -58,7 +58,6 @@ import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static com.epam.reportportal.util.test.CommonUtils.createMaybe;
 import static com.epam.reportportal.util.test.CommonUtils.generateUniqueId;
 import static java.util.Optional.ofNullable;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -139,8 +138,8 @@ public class BaseTest {
 	public static <T extends Collection<String>> void mockLaunch(@Nonnull final ReportPortalClient client,
 			@Nullable final String launchUuid, @Nullable final String storyUuid, @Nonnull final Collection<Pair<String, T>> testSteps) {
 		String launch = ofNullable(launchUuid).orElse(CommonUtils.namedId("launch_"));
-		when(client.startLaunch(any())).thenReturn(createMaybe(new StartLaunchRS(launch, 1L)));
-		when(client.finishLaunch(eq(launch), any())).thenReturn(createMaybe(new OperationCompletionRS()));
+		when(client.startLaunch(any())).thenReturn(Maybe.just(new StartLaunchRS(launch, 1L)));
+		when(client.finishLaunch(eq(launch), any())).thenReturn(Maybe.just(new OperationCompletionRS()));
 
 		mockStory(client, storyUuid, testSteps);
 	}
@@ -158,16 +157,16 @@ public class BaseTest {
 			return;
 		}
 		String firstStory = stories.get(0).getKey();
-		Maybe<ItemCreatedRS> first = createMaybe(new ItemCreatedRS(firstStory, firstStory));
+		Maybe<ItemCreatedRS> first = Maybe.just(new ItemCreatedRS(firstStory, firstStory));
 		Maybe<ItemCreatedRS>[] other = (Maybe<ItemCreatedRS>[]) stories.subList(1, stories.size())
 				.stream()
 				.map(Pair::getKey)
-				.map(s -> createMaybe(new ItemCreatedRS(s, s)))
+				.map(s -> Maybe.just(new ItemCreatedRS(s, s)))
 				.toArray(Maybe[]::new);
 		when(client.startTestItem(any())).thenReturn(first, other);
 
 		stories.forEach(i -> {
-			Maybe<OperationCompletionRS> rootFinishMaybe = createMaybe(new OperationCompletionRS());
+			Maybe<OperationCompletionRS> rootFinishMaybe = Maybe.just(new OperationCompletionRS());
 			when(client.finishTestItem(same(i.getKey()), any())).thenReturn(rootFinishMaybe);
 			mockScenario(client, i.getKey(), i.getValue());
 		});
@@ -178,7 +177,7 @@ public class BaseTest {
 			@Nonnull final String storyUuid, @Nonnull final Collection<Pair<String, T>> testSteps) {
 		List<Maybe<ItemCreatedRS>> testResponses = testSteps.stream()
 				.map(Pair::getKey)
-				.map(uuid -> createMaybe(new ItemCreatedRS(uuid, uuid)))
+				.map(uuid -> Maybe.just(new ItemCreatedRS(uuid, uuid)))
 				.collect(Collectors.toList());
 
 		Maybe<ItemCreatedRS> first = testResponses.get(0);
@@ -189,23 +188,23 @@ public class BaseTest {
 			String testClassUuid = test.getKey();
 			List<Maybe<ItemCreatedRS>> stepResponses = test.getValue()
 					.stream()
-					.map(uuid -> createMaybe(new ItemCreatedRS(uuid, uuid)))
+					.map(uuid -> Maybe.just(new ItemCreatedRS(uuid, uuid)))
 					.collect(Collectors.toList());
-			when(client.finishTestItem(same(testClassUuid), any())).thenReturn(createMaybe(new OperationCompletionRS()));
+			when(client.finishTestItem(same(testClassUuid), any())).thenReturn(Maybe.just(new OperationCompletionRS()));
 			if (!stepResponses.isEmpty()) {
 				Maybe<ItemCreatedRS> myFirst = stepResponses.get(0);
 				Maybe<ItemCreatedRS>[] myOther = stepResponses.subList(1, stepResponses.size()).toArray(new Maybe[0]);
 				when(client.startTestItem(same(testClassUuid), any())).thenReturn(myFirst, myOther);
 				new HashSet<>(test.getValue()).forEach(testMethodUuid -> when(client.finishTestItem(same(testMethodUuid),
 						any()
-				)).thenReturn(createMaybe(new OperationCompletionRS())));
+				)).thenReturn(Maybe.just(new OperationCompletionRS())));
 			}
 		});
 	}
 
 	@SuppressWarnings("unchecked")
 	public static void mockBatchLogging(final ReportPortalClient client) {
-		when(client.log(any(List.class))).thenReturn(createMaybe(new BatchSaveOperatingRS()));
+		when(client.log(any(List.class))).thenReturn(Maybe.just(new BatchSaveOperatingRS()));
 	}
 
 	public static void mockNestedSteps(final ReportPortalClient client, final Pair<String, String> parentNestedPair) {
@@ -218,7 +217,7 @@ public class BaseTest {
 				.collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue, Collectors.toList())));
 		responseOrders.forEach((k, v) -> {
 			List<Maybe<ItemCreatedRS>> responses = v.stream()
-					.map(uuid -> createMaybe(new ItemCreatedRS(uuid, uuid)))
+					.map(uuid -> Maybe.just(new ItemCreatedRS(uuid, uuid)))
 					.collect(Collectors.toList());
 
 			Maybe<ItemCreatedRS> first = responses.get(0);
@@ -227,7 +226,7 @@ public class BaseTest {
 		});
 		parentNestedPairs.forEach(p -> when(client.finishTestItem(same(p.getValue()),
 				any()
-		)).thenAnswer((Answer<Maybe<OperationCompletionRS>>) invocation -> createMaybe(new OperationCompletionRS())));
+		)).thenAnswer((Answer<Maybe<OperationCompletionRS>>) invocation -> Maybe.just(new OperationCompletionRS())));
 	}
 
 	public static ListenerParameters standardParameters() {

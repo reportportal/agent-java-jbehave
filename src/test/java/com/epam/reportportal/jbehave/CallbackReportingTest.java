@@ -24,6 +24,7 @@ import com.epam.reportportal.util.test.CommonUtils;
 import com.epam.ta.reportportal.ws.model.EntryCreatedAsyncRS;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.log.SaveLogRQ;
+import io.reactivex.Maybe;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,7 +63,7 @@ public class CallbackReportingTest extends BaseTest {
 	@BeforeEach
 	public void setup() {
 		mockLaunch(client, launchId, suiteId, tests);
-		when(client.log(any(SaveLogRQ.class))).thenReturn(CommonUtils.createMaybe(new EntryCreatedAsyncRS()));
+		when(client.log(any(SaveLogRQ.class))).thenReturn(Maybe.just(new EntryCreatedAsyncRS()));
 	}
 
 	private static final String STORY_PATH = "stories/CallbackReportingScenario.story";
