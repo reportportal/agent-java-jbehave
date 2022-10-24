@@ -852,6 +852,11 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		structure.add(new Entity<>(ItemType.SUITE, tableRow)); // type SUITE is used for Examples
 	}
 
+	@Override
+	public void example(Map<String, String> tableRow) {
+		example(tableRow, 0);
+	}
+
 	/**
 	 * Finishes the last examples item
 	 */
@@ -943,7 +948,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		if (null != scenario.getExamplesTable() && scenario.getExamplesTable().getRowCount() > 0) {
 			beforeExamples(scenario.getSteps(), scenario.getExamplesTable());
 			for (int i = 0; i < scenario.getExamplesTable().getRowCount(); i++) {
-				example(scenario.getExamplesTable().getRow(i));
+				example(scenario.getExamplesTable().getRow(i), i);
 				for (String step : scenario.getSteps()) {
 					simulateStep(step);
 				}

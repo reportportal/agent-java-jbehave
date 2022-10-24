@@ -2,7 +2,9 @@
 
 ## [Unreleased]
 ### Changed
-- Client version updated on [5.1.11](https://github.com/reportportal/client-java/releases/tag/5.1.11), by @HardNorth
+- Client version updated on [5.1.12](https://github.com/reportportal/client-java/releases/tag/5.1.12), by @HardNorth
+### Fixed
+- Skipped scenario handling, by @HardNorth
 
 ## [5.1.2]
 ### Added
