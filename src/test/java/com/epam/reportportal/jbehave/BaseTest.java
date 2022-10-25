@@ -108,7 +108,7 @@ public class BaseTest {
 		final InjectableStepsFactory stepsFactory = new InstanceStepsFactory(embedder.configuration(),
 				steps == null ? Collections.emptyList() : Arrays.asList(steps)
 		);
-		embedder.useCandidateSteps(stepsFactory.createCandidateSteps());
+		embedder.useStepsFactory(stepsFactory);
 		embedder.runStoriesAsPaths(stories);
 	}
 
