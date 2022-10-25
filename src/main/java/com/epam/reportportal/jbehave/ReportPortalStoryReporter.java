@@ -852,11 +852,6 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		structure.add(new Entity<>(ItemType.SUITE, tableRow)); // type SUITE is used for Examples
 	}
 
-	@Override
-	public void example(Map<String, String> tableRow) {
-		example(tableRow, 0);
-	}
-
 	/**
 	 * Finishes the last examples item
 	 */
