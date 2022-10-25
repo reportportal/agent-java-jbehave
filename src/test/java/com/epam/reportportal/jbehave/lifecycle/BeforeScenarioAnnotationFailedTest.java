@@ -43,7 +43,7 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
-public class VerifyBeforeScenarioAnnotationFailed extends BaseTest {
+public class BeforeScenarioAnnotationFailedTest extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String beforeStepId = CommonUtils.namedId("before_scenario_step_");
@@ -113,7 +113,8 @@ public class VerifyBeforeScenarioAnnotationFailed extends BaseTest {
 
 		FinishTestItemRQ stepFinish = finishItems.get(1);
 		assertThat(stepFinish.getStatus(), equalTo(ItemStatus.SKIPPED.name()));
-		assertThat(stepFinish.getIssue(), sameInstance(Launch.NOT_ISSUE));
+		assertThat(stepFinish.getIssue(), notNullValue());
+		assertThat(stepFinish.getIssue().getIssueType(), equalTo(Launch.NOT_ISSUE.getIssueType()));
 
 		FinishTestItemRQ scenarioFinish = finishItems.get(2);
 		assertThat(scenarioFinish.getStatus(), equalTo(ItemStatus.FAILED.name()));
