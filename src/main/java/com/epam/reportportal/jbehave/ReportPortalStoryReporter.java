@@ -943,7 +943,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		if (null != scenario.getExamplesTable() && scenario.getExamplesTable().getRowCount() > 0) {
 			beforeExamples(scenario.getSteps(), scenario.getExamplesTable());
 			for (int i = 0; i < scenario.getExamplesTable().getRowCount(); i++) {
-				example(scenario.getExamplesTable().getRow(i));
+				example(scenario.getExamplesTable().getRow(i), i);
 				for (String step : scenario.getSteps()) {
 					simulateStep(step);
 				}

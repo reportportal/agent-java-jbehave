@@ -36,8 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
@@ -86,7 +85,8 @@ public class ItemStatusSkippedFailedTest extends BaseTest {
 
 		FinishTestItemRQ stepTwoFinish = finishItems.get(1);
 		assertThat(stepTwoFinish.getStatus(), equalTo(ItemStatus.SKIPPED.name()));
-		assertThat(stepTwoFinish.getIssue(), sameInstance(Launch.NOT_ISSUE));
+		assertThat(stepTwoFinish.getIssue(), notNullValue());
+		assertThat(stepTwoFinish.getIssue().getIssueType(), equalTo(Launch.NOT_ISSUE.getIssueType()));
 
 		verifyLogged(logCaptor, stepIds.get(1), LogLevel.WARN, "Step execution was skipped by JBehave, see previous steps for errors.");
 
