@@ -97,7 +97,9 @@ jobs:
         uses: mindsers/changelog-reader-action@v2
         with:
           version: ${{ env.RELEASE_VERSION }}
-          path: ./${{ env.CHANGE_LOG_FILE }}
+          path: ${{ env.CHANGE_LOG_FILE }}
+
+      - run: 'echo "${{ steps.readChangelogEntry.outputs.log_entry }}"'
 
       - name: Create Release
         id: createRelease
