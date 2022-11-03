@@ -19,13 +19,14 @@ package com.epam.reportportal.jbehave.integration.basic;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.step.StepReporter;
-import com.epam.reportportal.util.test.CommonUtils;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+
+import static java.util.Optional.ofNullable;
 
 public class NestedStepsStepReporterSteps {
 	private static final Logger LOGGER = LoggerFactory.getLogger(NestedStepsStepReporterSteps.class);
@@ -37,28 +38,29 @@ public class NestedStepsStepReporterSteps {
 	public static final String THIRD_NESTED_STEP_LOG = "Third error log of the second step";
 	public static final String DURING_SECOND_NESTED_STEP_LOG = "A log entry during the first nested step report";
 
+	private static final IllegalStateException NO_LAUNCH_EXCEPTION = new IllegalStateException("Unable to get Launch");
+
+	@SuppressWarnings("unused")
 	@Given("a step with a manual step")
-	public void i_have_a_step_with_a_manual_step() throws InterruptedException {
-		StepReporter stepReporter = Launch.currentLaunch().getStepReporter();
+	public void i_have_a_step_with_a_manual_step() {
+		StepReporter stepReporter = ofNullable(Launch.currentLaunch()).map(Launch::getStepReporter)
+				.orElseThrow(() -> NO_LAUNCH_EXCEPTION);
 
 		stepReporter.sendStep(FIRST_NAME);
-		Thread.sleep(CommonUtils.MINIMAL_TEST_PAUSE);
 		LOGGER.info(FIRST_NESTED_STEP_LOG);
-		Thread.sleep(CommonUtils.MINIMAL_TEST_PAUSE);
 	}
 
+	@SuppressWarnings("unused")
 	@Then("a step with two manual steps")
-	public void i_have_a_step_with_two_manual_steps() throws InterruptedException {
-		StepReporter stepReporter = Launch.currentLaunch().getStepReporter();
+	public void i_have_a_step_with_two_manual_steps() {
+		StepReporter stepReporter = ofNullable(Launch.currentLaunch()).map(Launch::getStepReporter)
+				.orElseThrow(() -> NO_LAUNCH_EXCEPTION);
 
 		stepReporter.sendStep(SECOND_NAME, DURING_SECOND_NESTED_STEP_LOG);
-		Thread.sleep(CommonUtils.MINIMAL_TEST_PAUSE);
 		LOGGER.info(SECOND_NESTED_STEP_LOG);
 
 		stepReporter.sendStep(ItemStatus.FAILED, THIRD_NAME, new File("pug/unlucky.jpg"));
-		Thread.sleep(CommonUtils.MINIMAL_TEST_PAUSE);
 		LOGGER.error(THIRD_NESTED_STEP_LOG);
-		Thread.sleep(CommonUtils.MINIMAL_TEST_PAUSE);
 	}
 
 }
