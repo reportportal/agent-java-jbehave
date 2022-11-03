@@ -1,8 +1,6 @@
 # Changelog
 
 ## [Unreleased]
-
-## [5.1.4]
 ### Changed
 - Test new actions
 
