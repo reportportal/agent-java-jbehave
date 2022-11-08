@@ -68,6 +68,7 @@ public class BeforeScenarioAnnotationFailedTest extends BaseTest {
 
 	private static final String STORY_PATH = "stories/NoScenario.story";
 	private static final String DEFAULT_SCENARIO_NAME = "No name";
+	private static final String BEFORE_SCENARIO_METHOD_NAME = "beforeScenarioFailed";
 	private static final String STEP_NAME = "Given I have empty step";
 
 	@Test
@@ -88,10 +89,19 @@ public class BeforeScenarioAnnotationFailedTest extends BaseTest {
 		assertThat(scenarioStart.getType(), equalTo(ItemType.SCENARIO.name()));
 
 		StartTestItemRQ beforeStep = startItems.get(1);
-		String beforeStepCodeRef = BeforeScenarioFailedSteps.class.getCanonicalName() + ".beforeScenarioFailed()";
-		assertThat(beforeStep.getName(), equalTo(beforeStepCodeRef));
-		assertThat(beforeStep.getCodeRef(), equalTo(beforeStepCodeRef));
-		assertThat(beforeStep.getType(), equalTo(ItemType.BEFORE_TEST.name()));
+
+		if (IS_JBEHAVE_5) {
+			String beforeStepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", BEFORE_SCENARIO_METHOD_NAME);
+			assertThat("BeforeScenario name invalid", beforeStep.getName(), equalTo(BEFORE_SCENARIO_METHOD_NAME));
+			assertThat("BeforeScenario code reference invalid", beforeStep.getCodeRef(), equalTo(beforeStepCodeRef));
+			assertThat(beforeStep.getType(), equalTo(ItemType.STEP.name()));
+		} else {
+			String beforeStepCodeRef =
+					BeforeScenarioFailedSteps.class.getCanonicalName() + "." + BEFORE_SCENARIO_METHOD_NAME + "()";
+			assertThat("BeforeScenario name invalid", beforeStep.getName(), equalTo(beforeStepCodeRef));
+			assertThat("BeforeScenario code reference invalid", beforeStep.getCodeRef(), equalTo(beforeStepCodeRef));
+			assertThat(beforeStep.getType(), equalTo(ItemType.BEFORE_TEST.name()));
+		}
 
 		StartTestItemRQ step = startItems.get(2);
 		String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAME);

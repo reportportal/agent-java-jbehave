@@ -36,6 +36,7 @@ import io.reactivex.Maybe;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jbehave.core.model.*;
 import org.jbehave.core.reporters.NullStoryReporter;
 import org.jbehave.core.steps.Timing;
@@ -514,7 +515,8 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 					String lifecycleSuiteName = (String) entity.get();
 					TestItemTree.ItemTreeKey lifecycleSuiteKey = ItemTreeUtils.createKey(lifecycleSuiteName);
 					leafChain.add(ImmutablePair.of(lifecycleSuiteKey,
-							children.computeIfAbsent(lifecycleSuiteKey,
+							children.computeIfAbsent(
+									lifecycleSuiteKey,
 									k -> createLeaf(itemType,
 											buildLifecycleSuiteStartRq(lifecycleSuiteName, itemDate),
 											parentLeaf
@@ -777,7 +779,8 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	@SuppressWarnings("unused")
 	protected void createPendingSteps(@Nullable String step, @Nonnull TestItemTree.TestItemLeaf leaf) {
 		ReportPortal.emitLog(leaf.getItemId(),
-				getLogSupplier(LogLevel.WARN, String.format("Unable to locate a step implementation: '%s'", step))
+				getLogSupplier(LogLevel.WARN, String.format("Unable to locate a step implementation: '%s'",
+						StringEscapeUtils.escapeHtml4(step)))
 		);
 	}
 
@@ -930,6 +933,8 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	@Override
 	public void failed(String step, Throwable cause) {
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
+
+		// The next if is legacy code for JBehave versions < 5.0, where startStep wasn't called for Lifecycle methods
 		boolean isLifecycleMethod = item == null || stepStack.isEmpty();
 		if (isLifecycleMethod) {
 			if (item == null) {
@@ -943,7 +948,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 						currentLifecycleItemType == ItemType.BEFORE_SUITE ? BEFORE_STORY : AFTER_STORY
 				));
 			}
-			stepStack.add(ofNullable(retrieveLeaf()).map(i -> startLifecycleMethod(step, currentLifecycleItemType, i))
+			stepStack.add(ofNullable(item).map(i -> startLifecycleMethod(step, currentLifecycleItemType, i))
 					.orElse(null));
 		}
 		ofNullable(stepStack.pollLast()).ifPresent(i -> {
@@ -966,6 +971,20 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		});
 	}
 
+	private TestItemTree.TestItemLeaf getOrCreateStepLeaf(@Nonnull String step,
+			@Nonnull TestItemTree.TestItemLeaf parentLeaf) {
+		Maybe<String> parent = parentLeaf.getItemId();
+		TestItemTree.TestItemLeaf lastStepLeaf = stepStack.pollLast();
+		Maybe<String> lastStepParent = ofNullable(lastStepLeaf).map(TestItemTree.TestItemLeaf::getParentId)
+				.orElse(null);
+		boolean stepStarted = lastStepLeaf != null && lastStepParent == parent && parentLeaf.getChildItems()
+				.containsKey(ItemTreeUtils.createKey(step));
+		if (!stepStarted) {
+			return startStep(step, parentLeaf);
+		}
+		return lastStepLeaf;
+	}
+
 	/**
 	 * Report a not performed step
 	 *
@@ -975,7 +994,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	public void notPerformed(String step) {
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
 		ofNullable(item).ifPresent(i -> {
-			TestItemTree.TestItemLeaf leaf = startStep(step, i);
+			TestItemTree.TestItemLeaf leaf = getOrCreateStepLeaf(step, i);
 			createNotPerformedSteps(step, leaf);
 			finishStep(leaf, ItemStatus.SKIPPED, Launch.NOT_ISSUE);
 		});
@@ -985,7 +1004,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	public void pending(String step) {
 		TestItemTree.TestItemLeaf item = retrieveLeaf();
 		ofNullable(item).ifPresent(i -> {
-			TestItemTree.TestItemLeaf leaf = startStep(step, i);
+			TestItemTree.TestItemLeaf leaf = getOrCreateStepLeaf(step, i);
 			createPendingSteps(step, leaf);
 			finishStep(leaf, ItemStatus.SKIPPED);
 		});
@@ -1009,6 +1028,8 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	}
 
 	/**
+	 * @param scenario - JBehave's Scenario Object
+	 * @param filter - Scenario filter
 	 * @deprecated use {@link #scenarioExcluded(Scenario, String)}
 	 */
 	@Deprecated

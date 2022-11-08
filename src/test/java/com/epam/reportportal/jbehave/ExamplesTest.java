@@ -27,12 +27,10 @@ import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.ParameterResource;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jbehave.core.annotations.When;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,7 +108,6 @@ public class ExamplesTest extends BaseTest {
 		asList(parameterOf("status", "ON")),
 		asList(parameterOf("symbol", "STK1$"), parameterOf("symbol", "STK1$"))
 	);
-
 
 	@Test
 	public void verify_story_with_examples_names_types_and_parameters() {
