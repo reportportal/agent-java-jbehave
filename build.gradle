@@ -45,9 +45,11 @@ dependencies {
         exclude group: 'org.hamcrest'
         exclude group: 'junit'
         exclude group: 'org.junit.vintage'
+        exclude group: 'org.apache.commons', module: 'commons-text'
     }
     api 'com.google.code.findbugs:jsr305:3.0.2'
     implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'org.apache.commons:commons-text:1.10.0'
 
     testImplementation 'com.github.reportportal:agent-java-test-utils:236a68c'
     testImplementation 'org.aspectj:aspectjweaver:1.9.2'
