@@ -515,13 +515,10 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 					String lifecycleSuiteName = (String) entity.get();
 					TestItemTree.ItemTreeKey lifecycleSuiteKey = ItemTreeUtils.createKey(lifecycleSuiteName);
 					leafChain.add(ImmutablePair.of(lifecycleSuiteKey,
-							children.computeIfAbsent(
-									lifecycleSuiteKey,
-									k -> createLeaf(itemType,
-											buildLifecycleSuiteStartRq(lifecycleSuiteName, itemDate),
-											parentLeaf
-									)
-							)
+							children.computeIfAbsent(lifecycleSuiteKey, k -> createLeaf(itemType,
+									buildLifecycleSuiteStartRq(lifecycleSuiteName, itemDate),
+									parentLeaf
+							))
 					));
 					break;
 			}
@@ -582,11 +579,17 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	protected TestItemTree.TestItemLeaf startStep(@Nonnull final String name,
 			@Nonnull final TestItemTree.TestItemLeaf parent) {
 		TestItemTree.ItemTreeKey key = ItemTreeUtils.createKey(name);
-		TestItemTree.TestItemLeaf leaf = createLeaf(ItemType.STEP, buildStartStepRq(name,
+		StartTestItemRQ rq = buildStartStepRq(name,
 				getCodeRef(parent.getAttribute(CODE_REF), key, ItemType.STEP),
 				parent.getAttribute(PARAMETERS),
 				getItemDate(parent)
-		), parent);
+		);
+		// Workaround for JBehave 5 to report Lifecycle methods correctly
+		rq.setHasStats(ItemType.STORY.name()
+				.equals((ofNullable(parent.getAttribute(START_REQUEST)).map(r -> (StartTestItemRQ) r)
+						.map(StartTestItemRQ::getType)
+						.orElse(null))));
+		TestItemTree.TestItemLeaf leaf = createLeaf(ItemType.STEP, rq, parent);
 		parent.getChildItems().put(key, leaf);
 		return leaf;
 	}
@@ -779,8 +782,12 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	@SuppressWarnings("unused")
 	protected void createPendingSteps(@Nullable String step, @Nonnull TestItemTree.TestItemLeaf leaf) {
 		ReportPortal.emitLog(leaf.getItemId(),
-				getLogSupplier(LogLevel.WARN, String.format("Unable to locate a step implementation: '%s'",
-						StringEscapeUtils.escapeHtml4(step)))
+				getLogSupplier(
+						LogLevel.WARN,
+						String.format("Unable to locate a step implementation: '%s'",
+								StringEscapeUtils.escapeHtml4(step)
+						)
+				)
 		);
 	}
 
@@ -1029,7 +1036,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 
 	/**
 	 * @param scenario - JBehave's Scenario Object
-	 * @param filter - Scenario filter
+	 * @param filter   - Scenario filter
 	 * @deprecated use {@link #scenarioExcluded(Scenario, String)}
 	 */
 	@Deprecated
