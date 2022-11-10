@@ -16,8 +16,10 @@
 
 package com.epam.reportportal.jbehave.integration.basic;
 
-import com.epam.reportportal.jbehave.*;
-import com.epam.reportportal.jbehave.util.ItemTreeUtils;
+import com.epam.reportportal.jbehave.ReportPortalFormat;
+import com.epam.reportportal.jbehave.ReportPortalStepFormat;
+import com.epam.reportportal.jbehave.ReportPortalStepStoryReporter;
+import com.epam.reportportal.jbehave.ReportPortalStoryReporter;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.tree.ItemTreeReporter;
@@ -28,7 +30,6 @@ import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.Given;
 
-import javax.annotation.Nonnull;
 import java.util.Calendar;
 import java.util.Optional;
 
@@ -52,27 +53,14 @@ public class CallbackReportingSteps {
 
 		reporter.flatMap(ReportPortalStoryReporter::getLastStep).ifPresent(itemLeaf -> {
 			TestItemTree.TestItemLeaf scenario = itemLeaf.getAttribute(ReportPortalStepStoryReporter.PARENT);
-			TestItemTree.TestItemLeaf stepLeaf;
-			if (BaseTest.IS_JBEHAVE_5) {
-				// For JBehave 5 the item will be `after` method, so we need to find actual step
-				stepLeaf = ofNullable(scenario).map(TestItemTree.TestItemLeaf::getChildItems)
-						.map(c -> c.get(ItemTreeUtils.createKey("Given " + STEP_TEXT)))
-						.orElse(null);
-			} else {
-				stepLeaf = itemLeaf;
-			}
 			if (ofNullable(scenario).isPresent()) {
 				String scenarioName = ofNullable((StartTestItemRQ) scenario.getAttribute(ReportPortalStepStoryReporter.START_REQUEST)).map(
-								StartTestItemRQ::getName)
-						.orElseThrow(() -> new IllegalStateException("Unable to get start item request"));
-
+						StartTestItemRQ::getName).orElseThrow(() -> new IllegalStateException("Unable to get start item request"));
 				if (scenarioName.contains("failure")) {
-					ofNullable(stepLeaf).ifPresent(l -> {
-						finishWithStatus(rp, tree, "FAILED", l);
-						attachLog(rp, tree, l);
-					});
+					finishWithStatus(rp, tree, "FAILED", itemLeaf);
+					attachLog(rp, tree, itemLeaf);
 				} else {
-					ofNullable(stepLeaf).ifPresent(l -> finishWithStatus(rp, tree, "PASSED", stepLeaf));
+					finishWithStatus(rp, tree, "PASSED", itemLeaf);
 				}
 			} else {
 				throw new IllegalStateException("Unable to find parent item");
@@ -80,22 +68,17 @@ public class CallbackReportingSteps {
 		});
 	}
 
-	private void finishWithStatus(@Nonnull ReportPortal rp, @Nonnull TestItemTree tree, @Nonnull String status,
-			@Nonnull TestItemTree.TestItemLeaf testItemLeaf) {
+	private void finishWithStatus(ReportPortal rp, TestItemTree tree, String status, TestItemTree.TestItemLeaf testItemLeaf) {
 		FinishTestItemRQ finishTestItemRQ = new FinishTestItemRQ();
 		finishTestItemRQ.setStatus(status);
 		finishTestItemRQ.setEndTime(Calendar.getInstance().getTime());
 		//noinspection ResultOfMethodCallIgnored
-		ItemTreeReporter.finishItem(rp.getClient(), finishTestItemRQ, tree.getLaunchId(), testItemLeaf)
-				.cache()
-				.blockingGet();
+		ItemTreeReporter.finishItem(rp.getClient(), finishTestItemRQ, tree.getLaunchId(), testItemLeaf).cache().blockingGet();
 		testItemLeaf.setStatus(ItemStatus.valueOf(status));
 	}
 
-	private void attachLog(@Nonnull ReportPortal rp, @Nonnull TestItemTree tree,
-			@Nonnull TestItemTree.TestItemLeaf testItemLeaf) {
-		ItemTreeReporter.sendLog(
-				rp.getClient(),
+	private void attachLog(ReportPortal rp, TestItemTree tree, TestItemTree.TestItemLeaf testItemLeaf) {
+		ItemTreeReporter.sendLog(rp.getClient(),
 				"ERROR",
 				"Error message",
 				Calendar.getInstance().getTime(),

@@ -74,11 +74,7 @@ public class CallbackReportingTest extends BaseTest {
 
 		ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<FinishTestItemRQ> rqCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
-		if(IS_JBEHAVE_5) {
-			verify(client, times(9)).finishTestItem(idCaptor.capture(), rqCaptor.capture());
-		} else {
-			verify(client, times(7)).finishTestItem(idCaptor.capture(), rqCaptor.capture());
-		}
+		verify(client, times(7)).finishTestItem(idCaptor.capture(), rqCaptor.capture()); // Start test class and test method
 
 		ArgumentCaptor<SaveLogRQ> saveLogRQArgumentCaptor = ArgumentCaptor.forClass(SaveLogRQ.class);
 		verify(client, times(1)).log(saveLogRQArgumentCaptor.capture());
@@ -97,13 +93,9 @@ public class CallbackReportingTest extends BaseTest {
 		List<Pair<String, FinishTestItemRQ>> secondScenarioIds = idRqs.stream()
 				.filter(e -> stepIds.get(1).equals(e.getKey()))
 				.collect(Collectors.toList());
-		if(IS_JBEHAVE_5) {
-			assertThat(firstScenarioIds, hasSize(3));
-			assertThat(secondScenarioIds, hasSize(3));
-		} else {
-			assertThat(firstScenarioIds, hasSize(2));
-			assertThat(secondScenarioIds, hasSize(2));
-		}
+
+		assertThat(firstScenarioIds, hasSize(2));
+		assertThat(secondScenarioIds, hasSize(2));
 
 		List<Pair<String, FinishTestItemRQ>> failureUpdates = firstScenarioIds.stream()
 				.filter(r -> "FAILED".equals(r.getValue().getStatus()))

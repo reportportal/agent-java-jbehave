@@ -73,18 +73,6 @@ import static org.mockito.Mockito.when;
 public class BaseTest {
 	public static final String ROOT_SUITE_PREFIX = "root_";
 
-	public static final boolean IS_JBEHAVE_5;
-	static {
-		boolean isJbehave5;
-		try {
-			Class.forName("org.jbehave.core.model.Step");
-			isJbehave5 = true;
-		} catch (ClassNotFoundException ignore) {
-			isJbehave5 = false;
-		}
-		IS_JBEHAVE_5 = isJbehave5;
-	}
-
 	public static ExecutorService testExecutor() {
 		return Executors.newSingleThreadExecutor(r -> {
 			Thread t = new Thread(r);

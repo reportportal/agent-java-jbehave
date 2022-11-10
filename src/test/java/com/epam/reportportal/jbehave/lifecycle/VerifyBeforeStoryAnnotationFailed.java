@@ -42,7 +42,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class BeforeStoryAnnotationFailedTest extends BaseTest {
+public class VerifyBeforeStoryAnnotationFailed extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String beforeStoryId = CommonUtils.namedId("before_story_");
@@ -50,10 +50,7 @@ public class BeforeStoryAnnotationFailedTest extends BaseTest {
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final String stepId = CommonUtils.namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(
-					beforeStoryId,
-					Collections.singletonList(beforeStepId)
-			),
+	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(beforeStoryId, Collections.singletonList(beforeStepId)),
 			Pair.of(scenarioId, Collections.singletonList(stepId))
 	);
 
@@ -72,53 +69,37 @@ public class BeforeStoryAnnotationFailedTest extends BaseTest {
 	private static final String STORY_PATH = "stories/NoScenario.story";
 	private static final String DEFAULT_SCENARIO_NAME = "No name";
 	private static final String STEP_NAME = "Given I have empty step";
-	private static final String BEFORE_STORY_NAME = "beforeStoryFailed";
 
 	@Test
 	public void verify_before_story_annotation_failed_method_reporting() {
 		run(format, STORY_PATH, new BeforeStoryFailedSteps(), new EmptySteps());
 
 		verify(client).startTestItem(any());
-		ArgumentCaptor<StartTestItemRQ> storyLevelCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
-		verify(client, times(2)).startTestItem(same(storyId), storyLevelCaptor.capture());
-		ArgumentCaptor<StartTestItemRQ> beforeLevelCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
-		if (!IS_JBEHAVE_5) {
-			verify(client).startTestItem(same(beforeStoryId), beforeLevelCaptor.capture());
-		}
-		ArgumentCaptor<StartTestItemRQ> scenarioLevelCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
-		verify(client).startTestItem(same(scenarioId), scenarioLevelCaptor.capture());
+		ArgumentCaptor<StartTestItemRQ> startCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
+		verify(client, times(2)).startTestItem(same(storyId), startCaptor.capture());
+		verify(client).startTestItem(same(beforeStoryId), startCaptor.capture());
+		verify(client).startTestItem(same(scenarioId), startCaptor.capture());
 
 		// Start items verification
-		List<StartTestItemRQ> storyStartItems = storyLevelCaptor.getAllValues();
-		StartTestItemRQ beforeStoryStart = storyStartItems.get(0);
-		if (IS_JBEHAVE_5) {
-			assertThat(beforeStoryStart.getName(), equalTo(BEFORE_STORY_NAME));
-			assertThat(
-					beforeStoryStart.getCodeRef(),
-					equalTo(STORY_PATH + String.format("/[STEP:%s]", BEFORE_STORY_NAME))
-			);
-			assertThat(beforeStoryStart.getType(), equalTo(ItemType.STEP.name()));
-		} else {
-			assertThat(beforeStoryStart.getName(), equalTo("BeforeStory"));
-			assertThat(beforeStoryStart.getCodeRef(), nullValue());
-			assertThat(beforeStoryStart.getType(), equalTo(ItemType.TEST.name()));
-		}
+		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
+		StartTestItemRQ beforeStoryStart = startItems.get(0);
+		assertThat(beforeStoryStart.getName(), equalTo("BeforeStory"));
+		assertThat(beforeStoryStart.getCodeRef(), nullValue());
+		assertThat(beforeStoryStart.getType(), equalTo(ItemType.TEST.name()));
 
 		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", DEFAULT_SCENARIO_NAME);
-		StartTestItemRQ scenarioStart = storyStartItems.get(1);
+		StartTestItemRQ scenarioStart = startItems.get(1);
 		assertThat(scenarioStart.getName(), equalTo(DEFAULT_SCENARIO_NAME));
 		assertThat(scenarioStart.getCodeRef(), equalTo(scenarioCodeRef));
 		assertThat(scenarioStart.getType(), equalTo(ItemType.SCENARIO.name()));
 
-		if(!IS_JBEHAVE_5) {
-			StartTestItemRQ beforeStep = beforeLevelCaptor.getValue();
-			String beforeStepCodeRef = BeforeStoryFailedSteps.class.getCanonicalName() + ".beforeStoryFailed()";
-			assertThat(beforeStep.getName(), equalTo(beforeStepCodeRef));
-			assertThat(beforeStep.getCodeRef(), equalTo(beforeStepCodeRef));
-			assertThat(beforeStep.getType(), equalTo(ItemType.BEFORE_SUITE.name()));
-		}
+		StartTestItemRQ beforeStep = startItems.get(2);
+		String beforeStepCodeRef = BeforeStoryFailedSteps.class.getCanonicalName() + ".beforeStoryFailed()";
+		assertThat(beforeStep.getName(), equalTo(beforeStepCodeRef));
+		assertThat(beforeStep.getCodeRef(), equalTo(beforeStepCodeRef));
+		assertThat(beforeStep.getType(), equalTo(ItemType.BEFORE_SUITE.name()));
 
-		StartTestItemRQ step = scenarioLevelCaptor.getValue();
+		StartTestItemRQ step = startItems.get(3);
 		String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAME);
 		assertThat(step.getName(), equalTo(STEP_NAME));
 		assertThat(step.getCodeRef(), equalTo(stepCodeRef));
@@ -126,32 +107,27 @@ public class BeforeStoryAnnotationFailedTest extends BaseTest {
 
 		// Finish items verification
 		ArgumentCaptor<FinishTestItemRQ> finishStepCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
-		if(!IS_JBEHAVE_5) {
-			verify(client).finishTestItem(same(beforeStepId), finishStepCaptor.capture());
-		}
+		verify(client).finishTestItem(same(beforeStepId), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(stepId), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(beforeStoryId), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(scenarioId), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(storyId), finishStepCaptor.capture());
 
 		List<FinishTestItemRQ> finishItems = finishStepCaptor.getAllValues();
-		if(!IS_JBEHAVE_5) {
-			FinishTestItemRQ beforeStepFinish = finishItems.get(0);
-			assertThat(beforeStepFinish.getStatus(), equalTo(ItemStatus.FAILED.name()));
-			assertThat(beforeStepFinish.getIssue(), nullValue());
-			finishItems = finishItems.subList(1, finishItems.size());
-		}
+		FinishTestItemRQ beforeStepFinish = finishItems.get(0);
+		assertThat(beforeStepFinish.getStatus(), equalTo(ItemStatus.FAILED.name()));
+		assertThat(beforeStepFinish.getIssue(), nullValue());
 
-		FinishTestItemRQ stepFinish = finishItems.get(0);
+		FinishTestItemRQ stepFinish = finishItems.get(1);
 		assertThat(stepFinish.getStatus(), equalTo(ItemStatus.PASSED.name()));
 
-		FinishTestItemRQ beforeScenarioFinish = finishItems.get(1);
+		FinishTestItemRQ beforeScenarioFinish = finishItems.get(2);
 		assertThat(beforeScenarioFinish.getStatus(), equalTo(ItemStatus.FAILED.name()));
 
-		FinishTestItemRQ scenarioFinish = finishItems.get(2);
+		FinishTestItemRQ scenarioFinish = finishItems.get(3);
 		assertThat(scenarioFinish.getStatus(), equalTo(ItemStatus.PASSED.name()));
 
-		FinishTestItemRQ storyFinish = finishItems.get(3);
+		FinishTestItemRQ storyFinish = finishItems.get(4);
 		assertThat(storyFinish.getStatus(), equalTo(ItemStatus.FAILED.name()));
 	}
 }
