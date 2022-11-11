@@ -883,7 +883,6 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 			)).ifPresent(stepStack::add);
 			return;
 		}
-		currentLifecycleItemType = ItemType.BEFORE_METHOD;
 		TestItemTree.TestItemLeaf stepLeaf = ofNullable(retrieveLeaf()).map(l -> startStep(step.getStepAsString(), l))
 				.orElse(null);
 		stepStack.add(stepLeaf);

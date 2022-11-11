@@ -70,6 +70,8 @@ public class BeforeScenarioAnnotationFailedTest extends BaseTest {
 	private static final String DEFAULT_SCENARIO_NAME = "No name";
 	private static final String STEP_NAME = "Given I have empty step";
 
+	private static final String BEFORE_SCENARIO_NAME = "beforeScenarioFailed";
+
 	@Test
 	public void verify_before_scenario_annotation_failed_method_reporting() {
 		run(format, STORY_PATH, new BeforeScenarioFailedSteps(), new EmptySteps());
@@ -88,10 +90,10 @@ public class BeforeScenarioAnnotationFailedTest extends BaseTest {
 		assertThat(scenarioStart.getType(), equalTo(ItemType.SCENARIO.name()));
 
 		StartTestItemRQ beforeStep = startItems.get(1);
-		String beforeStepCodeRef = BeforeScenarioFailedSteps.class.getCanonicalName() + ".beforeScenarioFailed()";
-		assertThat(beforeStep.getName(), equalTo(beforeStepCodeRef));
-		assertThat(beforeStep.getCodeRef(), equalTo(beforeStepCodeRef));
-		assertThat(beforeStep.getType(), equalTo(ItemType.BEFORE_TEST.name()));
+		assertThat(beforeStep.getName(), equalTo(BEFORE_SCENARIO_NAME));
+		String beforeCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", BEFORE_SCENARIO_NAME);
+		assertThat(beforeStep.getCodeRef(), equalTo(beforeCodeRef));
+		assertThat(beforeStep.getType(), equalTo(ItemType.STEP.name()));
 
 		StartTestItemRQ step = startItems.get(2);
 		String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAME);
