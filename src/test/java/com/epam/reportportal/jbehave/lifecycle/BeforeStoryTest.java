@@ -40,14 +40,17 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class VerifyBeforeStory extends BaseTest {
+public class BeforeStoryTest extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
-	private final String beforeStepId = CommonUtils.namedId("before_story_step_");
+	private final String beforeSuiteId = CommonUtils.namedId("before_story_suite_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
+	private final String beforeStepId = CommonUtils.namedId("before_story_step_");
 	private final String stepId = CommonUtils.namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(beforeStepId, Collections.emptyList()),
+	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(beforeSuiteId,
+					Collections.singletonList(beforeStepId)
+			),
 			Pair.of(scenarioId, Collections.singletonList(stepId))
 	);
 
@@ -66,6 +69,7 @@ public class VerifyBeforeStory extends BaseTest {
 	private static final String STORY_PATH = "stories/lifecycle/BeforeStory.story";
 	private static final String SCENARIO_NAME = "The scenario";
 	private static final String STEP_NAME = "Given I have empty step";
+	private static final String LIFECYCLE_SUITE_NAME = "BeforeStory";
 	private static final String LIFECYCLE_STEP_NAME = "Then I have another empty step";
 
 	@Test
@@ -75,13 +79,25 @@ public class VerifyBeforeStory extends BaseTest {
 		verify(client).startTestItem(any());
 		ArgumentCaptor<StartTestItemRQ> startCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
 		verify(client, times(2)).startTestItem(same(storyId), startCaptor.capture());
-		verify(client).startTestItem(same(scenarioId), startCaptor.capture());
+		ArgumentCaptor<StartTestItemRQ> beforeCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
+		verify(client).startTestItem(same(beforeSuiteId), beforeCaptor.capture());
+		ArgumentCaptor<StartTestItemRQ> scenarioCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
+		verify(client).startTestItem(same(scenarioId), scenarioCaptor.capture());
 
 		// Start items verification
 		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
-		StartTestItemRQ beforeStoryStart = startItems.get(0);
+		StartTestItemRQ beforeStorySuiteStart = startItems.get(0);
+		assertThat(beforeStorySuiteStart.getName(), equalTo(LIFECYCLE_SUITE_NAME));
+		String beforeSuiteCodeRef = STORY_PATH + String.format("/[LIFECYCLE:%s]", LIFECYCLE_SUITE_NAME);
+		assertThat(beforeStorySuiteStart.getCodeRef(),
+				equalTo(beforeSuiteCodeRef)
+		);
+
+		StartTestItemRQ beforeStoryStart = beforeCaptor.getValue();
 		assertThat(beforeStoryStart.getName(), equalTo(LIFECYCLE_STEP_NAME));
-		assertThat(beforeStoryStart.getCodeRef(), equalTo(STORY_PATH + String.format("/[STEP:%s]", LIFECYCLE_STEP_NAME)));
+		assertThat(beforeStoryStart.getCodeRef(),
+				equalTo(beforeSuiteCodeRef + String.format("/[STEP:%s]", LIFECYCLE_STEP_NAME))
+		);
 		assertThat(beforeStoryStart.getType(), equalTo(ItemType.STEP.name()));
 
 		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", SCENARIO_NAME);
@@ -90,7 +106,7 @@ public class VerifyBeforeStory extends BaseTest {
 		assertThat(scenarioStart.getCodeRef(), equalTo(scenarioCodeRef));
 		assertThat(scenarioStart.getType(), equalTo(ItemType.SCENARIO.name()));
 
-		StartTestItemRQ step = startItems.get(2);
+		StartTestItemRQ step = scenarioCaptor.getValue();
 		String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAME);
 		assertThat(step.getName(), equalTo(STEP_NAME));
 		assertThat(step.getCodeRef(), equalTo(stepCodeRef));

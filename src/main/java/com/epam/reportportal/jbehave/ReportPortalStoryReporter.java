@@ -74,6 +74,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	private static final String EXAMPLE_VALUE_PATTERN = "<%s>";
 	private static final Pattern EXAMPLE_VALUE_MATCH = Pattern.compile("<([^>]*)>");
 	private static final String EXAMPLE = "EXAMPLE";
+	private static final String LIFECYCLE = "LIFECYCLE";
 	private static final String EXAMPLE_PARAMETER_DELIMITER = PARAMETER_ITEMS_DELIMITER + " ";
 	private static final String EXAMPLE_KEY_VALUE_DELIMITER = CODE_REFERENCE_ITEM_TYPE_DELIMITER + " ";
 	private static final String NO_NAME = "No name";
@@ -115,15 +116,26 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @return a code reference string to identify every element of a story
 	 */
 	private String getCodeRef(@Nullable final String parentCodeRef, @Nonnull final TestItemTree.ItemTreeKey key,
-			ItemType type) {
+			@Nonnull ItemType type) {
 		StringBuilder sb = new StringBuilder();
 		if (isBlank(parentCodeRef)) {
 			sb.append(key.getName());
 		} else {
+			String typeName;
+			switch (type) {
+				case SUITE:
+					typeName = EXAMPLE;
+					break;
+				case TEST:
+					typeName = LIFECYCLE;
+					break;
+				default:
+					typeName = type.name();
+			}
 			sb.append(parentCodeRef)
 					.append(CODE_REFERENCE_DELIMITER)
 					.append(CODE_REFERENCE_ITEM_START)
-					.append(type != ItemType.SUITE ? type.name() : EXAMPLE)
+					.append(typeName)
 					.append(CODE_REFERENCE_ITEM_TYPE_DELIMITER)
 					.append(key.getName().replace("\n", "").replace("\r", ""))
 					.append(CODE_REFERENCE_ITEM_END);
@@ -376,9 +388,11 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @return Request to ReportPortal
 	 */
 	@Nonnull
-	protected StartTestItemRQ buildLifecycleSuiteStartRq(@Nonnull final String name, @Nullable final Date startTime) {
+	protected StartTestItemRQ buildLifecycleSuiteStartRq(@Nonnull final String name, @Nullable String codeRef,
+			@Nullable final Date startTime) {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(name);
+		rq.setCodeRef(codeRef);
 		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
 		rq.setType(ItemType.TEST.name());
 		return rq;
@@ -518,7 +532,10 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 					TestItemTree.ItemTreeKey lifecycleSuiteKey = ItemTreeUtils.createKey(lifecycleSuiteName);
 					leafChain.add(ImmutablePair.of(lifecycleSuiteKey,
 							children.computeIfAbsent(lifecycleSuiteKey, k -> createLeaf(itemType,
-									buildLifecycleSuiteStartRq(lifecycleSuiteName, itemDate),
+									buildLifecycleSuiteStartRq(lifecycleSuiteName,
+											getCodeRef(parentCodeRef, k, ItemType.TEST),
+											itemDate
+									),
 									parentLeaf
 							))
 					));
@@ -878,10 +895,12 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 					currentLifecycleItemType == ItemType.BEFORE_SUITE ? BEFORE_STORY : AFTER_STORY
 			));
 		}
-		if (parentItem == null || parentItem.getType() == ItemType.STORY) {
-			ItemType itemType = parentItem == null ? currentLifecycleTopItemType : currentLifecycleItemType;
-			ofNullable(retrieveLeaf()).map(i -> startLifecycleMethod(step.getStepAsString(), itemType, i))
-					.ifPresent(stepStack::add);
+		if (parentItem == null) {
+			ofNullable(retrieveLeaf()).map(i -> startLifecycleMethod(
+					step.getStepAsString(),
+					currentLifecycleTopItemType,
+					i
+			)).ifPresent(stepStack::add);
 			return;
 		}
 		currentLifecycleItemType = ItemType.BEFORE_METHOD;
