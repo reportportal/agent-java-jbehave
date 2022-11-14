@@ -43,7 +43,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class VerifyBeforeStep extends BaseTest {
+public class BeforeStepTest extends BaseTest {
 
 	private static final int STEP_NUMBER = 2;
 	private final String storyId = CommonUtils.namedId("story_");
@@ -76,7 +76,8 @@ public class VerifyBeforeStep extends BaseTest {
 
 	private static final String STORY_PATH = "stories/lifecycle/BeforeStep.story";
 	private static final String SCENARIO_NAME = "The scenario";
-	private static final String[] STEP_NAMES = new String[] { "Given I have empty step", "When I have one more empty step" };
+	private static final String[] STEP_NAMES = new String[] { "Given I have empty step",
+			"When I have one more empty step" };
 	private static final String LIFECYCLE_STEP_NAME = "Then I have another empty step";
 
 	@Test
