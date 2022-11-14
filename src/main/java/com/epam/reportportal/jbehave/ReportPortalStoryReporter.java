@@ -86,8 +86,10 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	private final Deque<TestItemTree.TestItemLeaf> stepStack = new LinkedList<>();
 	private final Supplier<Launch> launch;
 	private final TestItemTree itemTree;
-	private volatile ItemType currentLifecycleItemType;
+
 	private volatile TestItemTree.TestItemLeaf lastStep;
+	private static volatile String currentLifecycleTopItemType;
+	private volatile ItemType currentLifecycleItemType;
 
 	public ReportPortalStoryReporter(final Supplier<Launch> launchSupplier, TestItemTree testItemTree) {
 		launch = launchSupplier;
@@ -318,8 +320,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		}
 		String result = step;
 		for (Map.Entry<String, String> e : example.entrySet()) {
-			result = result.replaceAll(
-					String.format(EXAMPLE_VALUE_PATTERN, e.getKey()),
+			result = result.replaceAll(String.format(EXAMPLE_VALUE_PATTERN, e.getKey()),
 					Matcher.quoteReplacement(e.getValue())
 			);
 		}
@@ -514,12 +515,15 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 				case TEST: // type TEST == a lifecycle SUITE
 					String lifecycleSuiteName = (String) entity.get();
 					TestItemTree.ItemTreeKey lifecycleSuiteKey = ItemTreeUtils.createKey(lifecycleSuiteName);
-					leafChain.add(ImmutablePair.of(lifecycleSuiteKey, children.computeIfAbsent(lifecycleSuiteKey,
-							k -> createLeaf(itemType,
-									buildLifecycleSuiteStartRq(lifecycleSuiteName, itemDate),
-									parentLeaf
+					leafChain.add(ImmutablePair.of(lifecycleSuiteKey,
+							children.computeIfAbsent(
+									lifecycleSuiteKey,
+									k -> createLeaf(itemType,
+											buildLifecycleSuiteStartRq(lifecycleSuiteName, itemDate),
+											parentLeaf
+									)
 							)
-					)));
+					));
 					break;
 			}
 		}
@@ -601,8 +605,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 			@Nonnull final ItemType itemType, @Nonnull final TestItemTree.TestItemLeaf parent) {
 		TestItemTree.ItemTreeKey key = ItemTreeUtils.createKey(name);
 		String codeRef = getCodeRef(parent.getAttribute(CODE_REF), key, itemType);
-		TestItemTree.TestItemLeaf leaf = createLeaf(
-				itemType,
+		TestItemTree.TestItemLeaf leaf = createLeaf(itemType,
 				buildLifecycleMethodStartRq(itemType, name, codeRef, getItemDate(parent)),
 				parent
 		);
@@ -718,8 +721,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @param thrown {@link Throwable} object with details of the failure
 	 */
 	protected void sendStackTraceToRP(@Nonnull Maybe<String> itemId, @Nullable final Throwable thrown) {
-		ofNullable(thrown).ifPresent(t -> ReportPortal.emitLog(
-				itemId,
+		ofNullable(thrown).ifPresent(t -> ReportPortal.emitLog(itemId,
 				getLogSupplier(LogLevel.ERROR, ExceptionUtils.getStackTrace(t))
 		));
 	}
@@ -734,6 +736,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	protected void finishItem(final @Nonnull Maybe<String> id, final @Nonnull ItemStatus status,
 			@Nullable Issue issue) {
 		FinishTestItemRQ rq = buildFinishTestItemRequest(id, status, issue);
+		//noinspection ReactiveStreamsUnusedPublisher
 		launch.get().finishTestItem(id, rq);
 	}
 
@@ -800,7 +803,8 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void beforeStory(@Nonnull Story story, boolean givenStory) {
-		currentLifecycleItemType = AFTER_STORIES.equals(story.getName()) ? ItemType.AFTER_SUITE : ItemType.BEFORE_SUITE;
+		currentLifecycleTopItemType = AFTER_STORIES;
+		currentLifecycleItemType = ItemType.BEFORE_SUITE;
 		structure.add(new Entity<>(ItemType.STORY, story));
 	}
 
@@ -864,25 +868,28 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		TestItemTree.TestItemLeaf parentItem = retrieveLeaf();
 		if (parentItem == null) {
 			// Before Stories
-			structure.add(new Entity<>(
-					ItemType.TEST,
-					currentLifecycleItemType == null ? BEFORE_STORIES : AFTER_STORIES
+			structure.add(new Entity<>(ItemType.TEST,
+					currentLifecycleTopItemType == null ? BEFORE_STORIES : currentLifecycleTopItemType
 			));
 		} else if (parentItem.getType() == ItemType.STORY) {
 			// Before Story
-			structure.add(new Entity<>(
-					ItemType.TEST,
+			structure.add(new Entity<>(ItemType.TEST,
 					currentLifecycleItemType == ItemType.BEFORE_SUITE ? BEFORE_STORY : AFTER_STORY
 			));
 		}
 		if (parentItem == null || parentItem.getType() == ItemType.STORY) {
-			ofNullable(retrieveLeaf()).map(i -> startLifecycleMethod(
-					step.getStepAsString(),
-					currentLifecycleItemType,
+			//noinspection StringEquality
+			ofNullable(retrieveLeaf()).map(i -> startLifecycleMethod(step.getStepAsString(),
+					parentItem == null ?
+							currentLifecycleTopItemType == BEFORE_STORIES ?
+									ItemType.BEFORE_GROUPS :
+									ItemType.AFTER_GROUPS :
+							ItemType.BEFORE_SUITE,
 					i
 			)).ifPresent(stepStack::add);
 			return;
 		}
+		currentLifecycleItemType = ItemType.BEFORE_METHOD;
 		TestItemTree.TestItemLeaf stepLeaf = ofNullable(retrieveLeaf()).map(l -> startStep(step.getStepAsString(), l))
 				.orElse(null);
 		stepStack.add(stepLeaf);
@@ -918,13 +925,24 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		evaluateAndFinishLastItem();
 	}
 
+	private void finishAfterSuites(TestItemTree.TestItemLeaf item) {
+		if (item.getType() == ItemType.AFTER_GROUPS) {
+			Entity<?> parentSuite = structure.getLast();
+			evaluateAndFinishLastItem(); // Finish parent suite
+			structure.add(parentSuite);
+		}
+	}
+
 	/**
 	 * Finishes step in ReportPortal
 	 */
 	@Override
 	public void successful(String step) {
 		currentLifecycleItemType = ItemType.AFTER_TEST;
-		ofNullable(stepStack.pollLast()).ifPresent(s -> finishStep(s, ItemStatus.PASSED));
+		ofNullable(stepStack.pollLast()).ifPresent(s -> {
+			finishStep(s, ItemStatus.PASSED);
+			finishAfterSuites(s);
+		});
 	}
 
 	/**
@@ -938,6 +956,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		ofNullable(stepStack.pollLast()).ifPresent(i -> {
 			sendStackTraceToRP(i.getItemId(), cause);
 			finishStep(i, ItemStatus.FAILED);
+			finishAfterSuites(i);
 		});
 	}
 
@@ -951,6 +970,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		ofNullable(stepStack.pollLast()).ifPresent(i -> {
 			createIgnoredSteps(step, i);
 			finishStep(i, ItemStatus.SKIPPED);
+			finishAfterSuites(i);
 		});
 	}
 
@@ -964,6 +984,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		ofNullable(stepStack.pollLast()).ifPresent(i -> {
 			createNotPerformedSteps(step, i);
 			finishStep(i, ItemStatus.SKIPPED, Launch.NOT_ISSUE);
+			finishAfterSuites(i);
 		});
 	}
 
@@ -972,6 +993,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		ofNullable(stepStack.pollLast()).ifPresent(i -> {
 			createPendingSteps(step, i);
 			finishStep(i, ItemStatus.SKIPPED);
+			finishAfterSuites(i);
 		});
 	}
 

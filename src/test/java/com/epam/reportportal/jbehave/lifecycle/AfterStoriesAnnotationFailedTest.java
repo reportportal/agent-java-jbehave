@@ -41,20 +41,19 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class VerifyAfterStoriesAnnotationFailed extends BaseTest {
+public class AfterStoriesAnnotationFailedTest extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final String stepId = CommonUtils.namedId("step_");
 	private final String afterStoriesId = CommonUtils.namedId("after_stories_");
-	private final String afterStoryId = CommonUtils.namedId("after_story_");
 	private final String afterStepId = CommonUtils.namedId("after_story_step_");
 
 	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(scenarioId,
 			Collections.singletonList(stepId)
 	));
 
-	private final List<Pair<String, List<String>>> afterSteps = Collections.singletonList(Pair.of(afterStoryId,
+	private final List<Pair<String, List<String>>> afterSteps = Collections.singletonList(Pair.of(afterStoriesId,
 			Collections.singletonList(afterStepId)
 	));
 
@@ -75,6 +74,8 @@ public class VerifyAfterStoriesAnnotationFailed extends BaseTest {
 	private static final String DEFAULT_SCENARIO_NAME = "No name";
 	private static final String STEP_NAME = "Given I have empty step";
 
+	private static final String AFTER_STORY_NAME = "afterStoriesFailed";
+
 	@Test
 	public void verify_before_story_annotation_failed_method_reporting() {
 		run(format, STORY_PATH, new AfterStoriesFailedSteps(), new EmptySteps());
@@ -84,7 +85,6 @@ public class VerifyAfterStoriesAnnotationFailed extends BaseTest {
 		verify(client).startTestItem(same(storyId), startCaptor.capture());
 		verify(client).startTestItem(same(scenarioId), startCaptor.capture());
 		verify(client).startTestItem(same(afterStoriesId), startCaptor.capture());
-		verify(client).startTestItem(same(afterStoryId), startCaptor.capture());
 
 		// Start items verification
 		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
@@ -95,8 +95,7 @@ public class VerifyAfterStoriesAnnotationFailed extends BaseTest {
 
 		StartTestItemRQ afterStoriesStart = startItems.get(1);
 		assertThat(afterStoriesStart.getName(), equalTo("AfterStories"));
-		assertThat(afterStoriesStart.getCodeRef(), equalTo("AfterStories"));
-		assertThat(afterStoriesStart.getType(), equalTo(ItemType.STORY.name()));
+		assertThat(afterStoriesStart.getType(), equalTo(ItemType.TEST.name()));
 
 		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", DEFAULT_SCENARIO_NAME);
 		StartTestItemRQ scenarioStart = startItems.get(2);
@@ -110,16 +109,10 @@ public class VerifyAfterStoriesAnnotationFailed extends BaseTest {
 		assertThat(step.getCodeRef(), equalTo(stepCodeRef));
 		assertThat(step.getType(), equalTo(ItemType.STEP.name()));
 
-		StartTestItemRQ afterStoryStart = startItems.get(4);
-		assertThat(afterStoryStart.getName(), equalTo("AfterStory"));
-		assertThat(afterStoryStart.getCodeRef(), nullValue());
-		assertThat(afterStoryStart.getType(), equalTo(ItemType.TEST.name()));
-
-		StartTestItemRQ afterStep = startItems.get(5);
-		String beforeStepCodeRef = AfterStoriesFailedSteps.class.getCanonicalName() + ".afterStoriesFailed()";
-		assertThat(afterStep.getName(), equalTo(beforeStepCodeRef));
-		assertThat(afterStep.getCodeRef(), equalTo(beforeStepCodeRef));
-		assertThat(afterStep.getType(), equalTo(ItemType.AFTER_SUITE.name()));
+		StartTestItemRQ afterStep = startItems.get(4);
+		assertThat(afterStep.getName(), equalTo(AFTER_STORY_NAME));
+		assertThat(afterStep.getCodeRef(), equalTo(AFTER_STORY_NAME));
+		assertThat(afterStep.getType(), equalTo(ItemType.AFTER_GROUPS.name()));
 
 		// Finish items verification
 		ArgumentCaptor<FinishTestItemRQ> finishStepCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
@@ -127,7 +120,6 @@ public class VerifyAfterStoriesAnnotationFailed extends BaseTest {
 		verify(client).finishTestItem(same(scenarioId), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(storyId), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(afterStepId), finishStepCaptor.capture());
-		verify(client).finishTestItem(same(afterStoryId), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(afterStoriesId), finishStepCaptor.capture());
 
 		List<FinishTestItemRQ> finishItems = finishStepCaptor.getAllValues();
@@ -147,9 +139,5 @@ public class VerifyAfterStoriesAnnotationFailed extends BaseTest {
 		FinishTestItemRQ beforeStoryFinish = finishItems.get(4);
 		assertThat(beforeStoryFinish.getStatus(), equalTo(ItemStatus.FAILED.name()));
 		assertThat(beforeStoryFinish.getIssue(), nullValue());
-
-		FinishTestItemRQ beforeStoriesFinish = finishItems.get(5);
-		assertThat(beforeStoriesFinish.getStatus(), equalTo(ItemStatus.FAILED.name()));
-		assertThat(beforeStoriesFinish.getIssue(), nullValue());
 	}
 }
