@@ -89,7 +89,9 @@ public class BeforeStoriesAnnotationFailedTest extends BaseTest {
 		// Start items verification
 		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
 		StartTestItemRQ beforeStoriesStart = startItems.get(0);
-		assertThat(beforeStoriesStart.getName(), equalTo("BeforeStories"));
+		String beforeStoriesCodeRef = "BeforeStories";
+		assertThat(beforeStoriesStart.getName(), equalTo(beforeStoriesCodeRef));
+		assertThat(beforeStoriesStart.getCodeRef(), equalTo(beforeStoriesCodeRef));
 		assertThat(beforeStoriesStart.getType(), equalTo(ItemType.TEST.name()));
 
 		StartTestItemRQ storyStart = startItems.get(1);
@@ -98,7 +100,10 @@ public class BeforeStoriesAnnotationFailedTest extends BaseTest {
 
 		StartTestItemRQ beforeStep = startItems.get(2);
 		assertThat(beforeStep.getName(), equalTo(AFTER_STORY_NAME));
-		assertThat(beforeStep.getCodeRef(), equalTo(AFTER_STORY_NAME));
+		assertThat(
+				beforeStep.getCodeRef(),
+				equalTo(beforeStoriesCodeRef + String.format("/[BEFORE_GROUPS:%s]", AFTER_STORY_NAME))
+		);
 		assertThat(beforeStep.getType(), equalTo(ItemType.BEFORE_GROUPS.name()));
 
 		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", DEFAULT_SCENARIO_NAME);

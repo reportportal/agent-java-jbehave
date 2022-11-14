@@ -94,7 +94,9 @@ public class AfterStoriesAnnotationFailedTest extends BaseTest {
 		assertThat(storyStart.getType(), allOf(notNullValue(), equalTo(ItemType.STORY.name())));
 
 		StartTestItemRQ afterStoriesStart = startItems.get(1);
-		assertThat(afterStoriesStart.getName(), equalTo("AfterStories"));
+		String afterStoriesCodeRef = "AfterStories";
+		assertThat(afterStoriesStart.getName(), equalTo(afterStoriesCodeRef));
+		assertThat(afterStoriesStart.getCodeRef(), equalTo(afterStoriesCodeRef));
 		assertThat(afterStoriesStart.getType(), equalTo(ItemType.TEST.name()));
 
 		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", DEFAULT_SCENARIO_NAME);
@@ -111,7 +113,7 @@ public class AfterStoriesAnnotationFailedTest extends BaseTest {
 
 		StartTestItemRQ afterStep = startItems.get(4);
 		assertThat(afterStep.getName(), equalTo(AFTER_STORY_NAME));
-		assertThat(afterStep.getCodeRef(), equalTo(AFTER_STORY_NAME));
+		assertThat(afterStep.getCodeRef(), equalTo(afterStoriesCodeRef + String.format("/[AFTER_GROUPS:%s]", AFTER_STORY_NAME)));
 		assertThat(afterStep.getType(), equalTo(ItemType.AFTER_GROUPS.name()));
 
 		// Finish items verification
