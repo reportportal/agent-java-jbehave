@@ -42,7 +42,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class VerifyAfterScenarioAnnotationFailed extends BaseTest {
+public class AfterScenarioAnnotationFailedTest extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
@@ -68,6 +68,7 @@ public class VerifyAfterScenarioAnnotationFailed extends BaseTest {
 	private static final String STORY_PATH = "stories/NoScenario.story";
 	private static final String DEFAULT_SCENARIO_NAME = "No name";
 	private static final String STEP_NAME = "Given I have empty step";
+	private static final String AFTER_SCENARIO_NAME = "afterScenarioFailed";
 
 	@Test
 	public void verify_after_scenario_annotation_failed_method_reporting() {
@@ -93,10 +94,10 @@ public class VerifyAfterScenarioAnnotationFailed extends BaseTest {
 		assertThat(step.getType(), equalTo(ItemType.STEP.name()));
 
 		StartTestItemRQ afterStep = startItems.get(2);
-		String afterStepCodeRef = AfterScenarioFailedSteps.class.getCanonicalName() + ".afterScenarioFailed()";
-		assertThat(afterStep.getName(), equalTo(afterStepCodeRef));
-		assertThat(afterStep.getCodeRef(), equalTo(afterStepCodeRef));
-		assertThat(afterStep.getType(), equalTo(ItemType.AFTER_TEST.name()));
+		assertThat(afterStep.getName(), equalTo(AFTER_SCENARIO_NAME));
+		String afterCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, AFTER_SCENARIO_NAME);
+		assertThat(afterStep.getCodeRef(), equalTo(afterCodeRef));
+		assertThat(afterStep.getType(), equalTo(ItemType.STEP.name()));
 
 		// Finish items verification
 		ArgumentCaptor<FinishTestItemRQ> finishStepCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);

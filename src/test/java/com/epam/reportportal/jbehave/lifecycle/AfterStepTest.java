@@ -43,7 +43,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class VerifyAfterStep extends BaseTest {
+public class AfterStepTest extends BaseTest {
 
 	private static final int STEP_NUMBER = 2;
 	private final String storyId = CommonUtils.namedId("story_");
