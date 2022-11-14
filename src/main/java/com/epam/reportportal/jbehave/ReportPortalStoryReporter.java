@@ -88,7 +88,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	private final TestItemTree itemTree;
 
 	private volatile TestItemTree.TestItemLeaf lastStep;
-	private static volatile String currentLifecycleTopItemType;
+	private static volatile ItemType currentLifecycleTopItemType;
 	private volatile ItemType currentLifecycleItemType;
 
 	public ReportPortalStoryReporter(final Supplier<Launch> launchSupplier, TestItemTree testItemTree) {
@@ -389,6 +389,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 *
 	 * @param type      item type
 	 * @param name      a lifecycle method name
+	 * @param codeRef   method's code reference
 	 * @param startTime item start time
 	 * @return Request to ReportPortal
 	 */
@@ -803,7 +804,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void beforeStory(@Nonnull Story story, boolean givenStory) {
-		currentLifecycleTopItemType = AFTER_STORIES;
+		currentLifecycleTopItemType = ItemType.AFTER_GROUPS;
 		currentLifecycleItemType = ItemType.BEFORE_SUITE;
 		structure.add(new Entity<>(ItemType.STORY, story));
 	}
@@ -869,8 +870,11 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		if (parentItem == null) {
 			// Before Stories
 			structure.add(new Entity<>(ItemType.TEST,
-					currentLifecycleTopItemType == null ? BEFORE_STORIES : currentLifecycleTopItemType
+					currentLifecycleTopItemType == null ? BEFORE_STORIES : AFTER_STORIES
 			));
+			if (currentLifecycleTopItemType == null) {
+				currentLifecycleTopItemType = ItemType.BEFORE_GROUPS;
+			}
 		} else if (parentItem.getType() == ItemType.STORY) {
 			// Before Story
 			structure.add(new Entity<>(ItemType.TEST,
@@ -878,15 +882,9 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 			));
 		}
 		if (parentItem == null || parentItem.getType() == ItemType.STORY) {
-			//noinspection StringEquality
-			ofNullable(retrieveLeaf()).map(i -> startLifecycleMethod(step.getStepAsString(),
-					parentItem == null ?
-							currentLifecycleTopItemType == BEFORE_STORIES ?
-									ItemType.BEFORE_GROUPS :
-									ItemType.AFTER_GROUPS :
-							ItemType.BEFORE_SUITE,
-					i
-			)).ifPresent(stepStack::add);
+			ItemType itemType = parentItem == null ? currentLifecycleTopItemType : currentLifecycleItemType;
+			ofNullable(retrieveLeaf()).map(i -> startLifecycleMethod(step.getStepAsString(), itemType, i))
+					.ifPresent(stepStack::add);
 			return;
 		}
 		currentLifecycleItemType = ItemType.BEFORE_METHOD;
