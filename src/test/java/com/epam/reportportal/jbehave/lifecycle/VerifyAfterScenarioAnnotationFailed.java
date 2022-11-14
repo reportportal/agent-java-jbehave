@@ -80,14 +80,14 @@ public class VerifyAfterScenarioAnnotationFailed extends BaseTest {
 
 		// Start items verification
 		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
-		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", DEFAULT_SCENARIO_NAME);
+		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, DEFAULT_SCENARIO_NAME);
 		StartTestItemRQ scenarioStart = startItems.get(0);
 		assertThat(scenarioStart.getName(), equalTo(DEFAULT_SCENARIO_NAME));
 		assertThat(scenarioStart.getCodeRef(), equalTo(scenarioCodeRef));
 		assertThat(scenarioStart.getType(), equalTo(ItemType.SCENARIO.name()));
 
 		StartTestItemRQ step = startItems.get(1);
-		String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAME);
+		String stepCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, STEP_NAME);
 		assertThat(step.getName(), equalTo(STEP_NAME));
 		assertThat(step.getCodeRef(), equalTo(stepCodeRef));
 		assertThat(step.getType(), equalTo(ItemType.STEP.name()));

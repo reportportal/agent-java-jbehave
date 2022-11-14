@@ -88,7 +88,7 @@ public class BeforeStoryTest extends BaseTest {
 		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
 		StartTestItemRQ beforeStorySuiteStart = startItems.get(0);
 		assertThat(beforeStorySuiteStart.getName(), equalTo(LIFECYCLE_SUITE_NAME));
-		String beforeSuiteCodeRef = STORY_PATH + String.format("/[LIFECYCLE:%s]", LIFECYCLE_SUITE_NAME);
+		String beforeSuiteCodeRef = STORY_PATH + String.format(LIFECYCLE_PATTERN, LIFECYCLE_SUITE_NAME);
 		assertThat(beforeStorySuiteStart.getCodeRef(),
 				equalTo(beforeSuiteCodeRef)
 		);
@@ -96,18 +96,18 @@ public class BeforeStoryTest extends BaseTest {
 		StartTestItemRQ beforeStoryStart = beforeCaptor.getValue();
 		assertThat(beforeStoryStart.getName(), equalTo(LIFECYCLE_STEP_NAME));
 		assertThat(beforeStoryStart.getCodeRef(),
-				equalTo(beforeSuiteCodeRef + String.format("/[STEP:%s]", LIFECYCLE_STEP_NAME))
+				equalTo(beforeSuiteCodeRef + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAME))
 		);
 		assertThat(beforeStoryStart.getType(), equalTo(ItemType.STEP.name()));
 
-		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", SCENARIO_NAME);
+		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, SCENARIO_NAME);
 		StartTestItemRQ scenarioStart = startItems.get(1);
 		assertThat(scenarioStart.getName(), equalTo(SCENARIO_NAME));
 		assertThat(scenarioStart.getCodeRef(), equalTo(scenarioCodeRef));
 		assertThat(scenarioStart.getType(), equalTo(ItemType.SCENARIO.name()));
 
 		StartTestItemRQ step = scenarioCaptor.getValue();
-		String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAME);
+		String stepCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, STEP_NAME);
 		assertThat(step.getName(), equalTo(STEP_NAME));
 		assertThat(step.getCodeRef(), equalTo(stepCodeRef));
 		assertThat(step.getType(), equalTo(ItemType.STEP.name()));

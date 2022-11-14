@@ -91,7 +91,7 @@ public class VerifyAfterStep extends BaseTest {
 		// Start items verification
 		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
 		StartTestItemRQ scenarioStart = startItems.get(0);
-		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", SCENARIO_NAME);
+		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, SCENARIO_NAME);
 		assertThat(scenarioStart.getName(), equalTo(SCENARIO_NAME));
 		assertThat(scenarioStart.getCodeRef(), equalTo(scenarioCodeRef));
 		assertThat(scenarioStart.getType(), equalTo(ItemType.SCENARIO.name()));
@@ -99,7 +99,7 @@ public class VerifyAfterStep extends BaseTest {
 		List<StartTestItemRQ> steps = Arrays.asList(startItems.get(1), startItems.get(3));
 		IntStream.range(0, steps.size()).forEach(i -> {
 			StartTestItemRQ step = steps.get(i);
-			String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAMES[i]);
+			String stepCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, STEP_NAMES[i]);
 			assertThat(step.getName(), equalTo(STEP_NAMES[i]));
 			assertThat(step.getCodeRef(), equalTo(stepCodeRef));
 			assertThat(step.getType(), equalTo(ItemType.STEP.name()));
@@ -108,7 +108,7 @@ public class VerifyAfterStep extends BaseTest {
 		List<StartTestItemRQ> afterStarts = Arrays.asList(startItems.get(2), startItems.get(4));
 		IntStream.range(0, afterStarts.size()).forEach(i -> {
 			StartTestItemRQ beforeStart = afterStarts.get(i);
-			String lifecycleCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", LIFECYCLE_STEP_NAME);
+			String lifecycleCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAME);
 			assertThat(beforeStart.getName(), equalTo(LIFECYCLE_STEP_NAME));
 			assertThat(beforeStart.getCodeRef(), equalTo(lifecycleCodeRef));
 			assertThat(beforeStart.getType(), equalTo(ItemType.STEP.name()));

@@ -69,7 +69,7 @@ public class TestCaseIdSimpleTest extends BaseTest {
 
 		// Start items verification
 		StartTestItemRQ startStep = startCaptor.getValue();
-		String stepCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", DEFAULT_SCENARIO_NAME) + String.format("/[STEP:%s]", STEP_NAME);
+		String stepCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, DEFAULT_SCENARIO_NAME) + String.format(STEP_PATTERN, STEP_NAME);
 		assertThat(startStep.getTestCaseId(), equalTo(stepCodeRef));
 	}
 }

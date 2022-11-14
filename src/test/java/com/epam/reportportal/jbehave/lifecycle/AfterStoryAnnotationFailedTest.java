@@ -83,7 +83,7 @@ public class AfterStoryAnnotationFailedTest extends BaseTest {
 
 		// Start items verification
 		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
-		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", DEFAULT_SCENARIO_NAME);
+		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, DEFAULT_SCENARIO_NAME);
 		StartTestItemRQ scenarioStart = startItems.get(0);
 		assertThat(scenarioStart.getName(), equalTo(DEFAULT_SCENARIO_NAME));
 		assertThat(scenarioStart.getCodeRef(), equalTo(scenarioCodeRef));
@@ -91,19 +91,19 @@ public class AfterStoryAnnotationFailedTest extends BaseTest {
 
 		StartTestItemRQ beforeStoryStart = startItems.get(1);
 		assertThat(beforeStoryStart.getName(), equalTo("AfterStory"));
-		String afterStoryCodeRef = STORY_PATH + String.format("/[LIFECYCLE:%s]", "AfterStory");
+		String afterStoryCodeRef = STORY_PATH + String.format(LIFECYCLE_PATTERN, "AfterStory");
 		assertThat(beforeStoryStart.getCodeRef(), equalTo(afterStoryCodeRef));
 		assertThat(beforeStoryStart.getType(), equalTo(ItemType.TEST.name()));
 
 		StartTestItemRQ step = startItems.get(2);
-		String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAME);
+		String stepCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, STEP_NAME);
 		assertThat(step.getName(), equalTo(STEP_NAME));
 		assertThat(step.getCodeRef(), equalTo(stepCodeRef));
 		assertThat(step.getType(), equalTo(ItemType.STEP.name()));
 
 		StartTestItemRQ afterStep = startItems.get(3);
 		assertThat(afterStep.getName(), equalTo(AFTER_STORY_NAME));
-		assertThat(afterStep.getCodeRef(), equalTo(afterStoryCodeRef + String.format("/[STEP:%s]", AFTER_STORY_NAME)));
+		assertThat(afterStep.getCodeRef(), equalTo(afterStoryCodeRef + String.format(STEP_PATTERN, AFTER_STORY_NAME)));
 		assertThat(afterStep.getType(), equalTo(ItemType.STEP.name()));
 
 		// Finish items verification

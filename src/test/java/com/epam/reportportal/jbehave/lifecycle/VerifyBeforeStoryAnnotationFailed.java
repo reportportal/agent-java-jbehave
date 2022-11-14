@@ -87,7 +87,7 @@ public class VerifyBeforeStoryAnnotationFailed extends BaseTest {
 		assertThat(beforeStoryStart.getCodeRef(), nullValue());
 		assertThat(beforeStoryStart.getType(), equalTo(ItemType.TEST.name()));
 
-		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", DEFAULT_SCENARIO_NAME);
+		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, DEFAULT_SCENARIO_NAME);
 		StartTestItemRQ scenarioStart = startItems.get(1);
 		assertThat(scenarioStart.getName(), equalTo(DEFAULT_SCENARIO_NAME));
 		assertThat(scenarioStart.getCodeRef(), equalTo(scenarioCodeRef));
@@ -100,7 +100,7 @@ public class VerifyBeforeStoryAnnotationFailed extends BaseTest {
 		assertThat(beforeStep.getType(), equalTo(ItemType.BEFORE_SUITE.name()));
 
 		StartTestItemRQ step = startItems.get(3);
-		String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAME);
+		String stepCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, STEP_NAME);
 		assertThat(step.getName(), equalTo(STEP_NAME));
 		assertThat(step.getCodeRef(), equalTo(stepCodeRef));
 		assertThat(step.getType(), equalTo(ItemType.STEP.name()));

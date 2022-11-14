@@ -80,7 +80,7 @@ public class VerifyAfterStory extends BaseTest {
 		// Start items verification
 		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
 
-		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", SCENARIO_NAME);
+		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, SCENARIO_NAME);
 		StartTestItemRQ scenarioStart = startItems.get(0);
 		assertThat(scenarioStart.getName(), equalTo(SCENARIO_NAME));
 		assertThat(scenarioStart.getCodeRef(), equalTo(scenarioCodeRef));
@@ -88,11 +88,11 @@ public class VerifyAfterStory extends BaseTest {
 
 		StartTestItemRQ afterStoryStart = startItems.get(1);
 		assertThat(afterStoryStart.getName(), equalTo(LIFECYCLE_STEP_NAME));
-		assertThat(afterStoryStart.getCodeRef(), equalTo(STORY_PATH + String.format("/[STEP:%s]", LIFECYCLE_STEP_NAME)));
+		assertThat(afterStoryStart.getCodeRef(), equalTo(STORY_PATH + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAME)));
 		assertThat(afterStoryStart.getType(), equalTo(ItemType.STEP.name()));
 
 		StartTestItemRQ step = startItems.get(2);
-		String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAME);
+		String stepCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, STEP_NAME);
 		assertThat(step.getName(), equalTo(STEP_NAME));
 		assertThat(step.getCodeRef(), equalTo(stepCodeRef));
 		assertThat(step.getType(), equalTo(ItemType.STEP.name()));

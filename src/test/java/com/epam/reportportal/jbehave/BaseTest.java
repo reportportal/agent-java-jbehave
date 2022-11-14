@@ -73,6 +73,10 @@ import static org.mockito.Mockito.when;
 public class BaseTest {
 	public static final String ROOT_SUITE_PREFIX = "root_";
 
+	public static final String STEP_PATTERN = "/[STEP:%s]";
+	public static final String LIFECYCLE_PATTERN = "/[LIFECYCLE:%s]";
+	public static final String SCENARIO_PATTERN = "/[SCENARIO:%s]";
+
 	public static ExecutorService testExecutor() {
 		return Executors.newSingleThreadExecutor(r -> {
 			Thread t = new Thread(r);

@@ -129,7 +129,7 @@ public class GivenStoryCodeRefTest extends BaseTest {
 		List<StartTestItemRQ> outerScenarioSteps = items.subList(4, 6);
 		IntStream.range(0, outerScenarioSteps.size()).forEach(i -> {
 			StartTestItemRQ rq = outerScenarioSteps.get(i);
-			String outerScenarioStepCodeRef = outerScenarioCodeRef + String.format("/[STEP:%s]", DUMMY_SCENARIO_STEPS.get(i));
+			String outerScenarioStepCodeRef = outerScenarioCodeRef + String.format(STEP_PATTERN, DUMMY_SCENARIO_STEPS.get(i));
 			assertThat(rq.getCodeRef(), equalTo(outerScenarioStepCodeRef));
 			assertThat(rq.getType(), equalTo(ItemType.STEP.name()));
 		});
@@ -140,7 +140,7 @@ public class GivenStoryCodeRefTest extends BaseTest {
 		assertThat(innerStory.getType(), equalTo(ItemType.STORY.name()));
 
 		StartTestItemRQ rootStep = items.get(7);
-		String rootStepCodeRef = rootScenarioCodeRef + String.format("/[STEP:%s]", GIVEN_STORY_STEP);
+		String rootStepCodeRef = rootScenarioCodeRef + String.format(STEP_PATTERN, GIVEN_STORY_STEP);
 		assertThat(rootStep.getCodeRef(), equalTo(rootStepCodeRef));
 		assertThat(rootStep.getType(), equalTo(ItemType.STEP.name()));
 
@@ -152,7 +152,7 @@ public class GivenStoryCodeRefTest extends BaseTest {
 		List<StartTestItemRQ> innerScenarioSteps = items.subList(9, 11);
 		IntStream.range(0, innerScenarioSteps.size()).forEach(i -> {
 			StartTestItemRQ rq = innerScenarioSteps.get(i);
-			String innerStepCodeRef = innerScenarioCodeRef + String.format("/[STEP:%s]", INLINE_PARAMETERS_STEPS.get(i));
+			String innerStepCodeRef = innerScenarioCodeRef + String.format(STEP_PATTERN, INLINE_PARAMETERS_STEPS.get(i));
 			assertThat(rq.getCodeRef(), equalTo(innerStepCodeRef));
 			assertThat(rq.getType(), equalTo(ItemType.STEP.name()));
 		});

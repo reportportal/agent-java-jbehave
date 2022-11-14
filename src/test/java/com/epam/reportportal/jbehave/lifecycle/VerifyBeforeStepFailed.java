@@ -47,7 +47,6 @@ import static org.mockito.Mockito.*;
 
 public class VerifyBeforeStepFailed extends BaseTest {
 
-	public static final String STEP_PATTERN = "/[STEP:%s]";
 	private final String storyId = namedId("story_");
 	private final List<String> lifecycleStepIds = Arrays.asList(namedId("before_story_"),
 			namedId("before_scenario_"),
@@ -102,7 +101,7 @@ public class VerifyBeforeStepFailed extends BaseTest {
 		assertThat(beforeStoryStart.getCodeRef(), equalTo(STORY_PATH + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAMES[0])));
 		assertThat(beforeStoryStart.getType(), equalTo(ItemType.STEP.name()));
 
-		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", SCENARIO_NAME);
+		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, SCENARIO_NAME);
 		StartTestItemRQ scenarioStart = startItems.get(1);
 		assertThat(scenarioStart.getName(), equalTo(SCENARIO_NAME));
 		assertThat(scenarioStart.getCodeRef(), equalTo(scenarioCodeRef));
