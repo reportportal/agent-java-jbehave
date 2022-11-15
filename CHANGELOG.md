@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Test new actions
 
 ## [5.1.3]
 ### Changed
