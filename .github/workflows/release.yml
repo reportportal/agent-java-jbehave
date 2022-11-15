@@ -54,7 +54,7 @@ jobs:
           version-file-extraction-pattern: ${{ env.VERSION_EXTRACT_PATTERN }}
 
       - name: Setup git credentials
-        uses: oleksiyrudenko/gha-git-credentials@v2
+        uses: oleksiyrudenko/gha-git-credentials@v2.1
         with:
           name: 'reportportal.io'
           email: 'support@reportportal.io'
@@ -95,8 +95,6 @@ jobs:
         with:
           version: ${{ env.RELEASE_VERSION }}
           path: ./${{ env.CHANGE_LOG_FILE }}
-
-      - run: 'echo "${{ steps.readChangelogEntry.outputs.log_entry }}"'
 
       - name: Create Release
         id: createRelease
