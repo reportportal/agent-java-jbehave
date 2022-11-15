@@ -384,6 +384,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * Extension point to customize lifecycle suite (before/after) creation event/request
 	 *
 	 * @param name      a lifecycle suite name
+	 * @param codeRef   the suite code reference
 	 * @param startTime item start time
 	 * @return Request to ReportPortal
 	 */
