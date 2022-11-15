@@ -85,7 +85,7 @@ public class SimpleCodeRefTest extends BaseTest {
 		List<StartTestItemRQ> stepRqs = items.subList(2, items.size());
 		IntStream.range(0, stepRqs.size()).forEach(i -> {
 			StartTestItemRQ step = stepRqs.get(i);
-			String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", DUMMY_SCENARIO_STEPS.get(i));
+			String stepCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, DUMMY_SCENARIO_STEPS.get(i));
 			assertThat(step.getCodeRef(), allOf(notNullValue(), equalTo(stepCodeRef)));
 			assertThat(step.getType(), allOf(notNullValue(), equalTo(ItemType.STEP.name())));
 		});

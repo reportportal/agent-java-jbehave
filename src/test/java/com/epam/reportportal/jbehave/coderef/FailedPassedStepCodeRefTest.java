@@ -89,7 +89,7 @@ public class FailedPassedStepCodeRefTest extends BaseTest {
 		List<StartTestItemRQ> stepRqs = items.subList(2, items.size());
 		IntStream.range(0, stepRqs.size()).forEach(i -> {
 			StartTestItemRQ step = stepRqs.get(i);
-			String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", SCENARIO_STEPS.get(i));
+			String stepCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, SCENARIO_STEPS.get(i));
 			assertThat(step.getCodeRef(), allOf(notNullValue(), equalTo(stepCodeRef)));
 			assertThat(step.getType(), allOf(notNullValue(), equalTo(ItemType.STEP.name())));
 		});

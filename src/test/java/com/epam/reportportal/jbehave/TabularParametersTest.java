@@ -35,10 +35,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class TabularParametersTest extends BaseTest {
-
-	public static final String SCENARIO_PATTERN = "/[SCENARIO:%s]";
-	public static final String STEP_PATTERN = "/[STEP:%s]";
-
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final String stepId = CommonUtils.namedId("step_");

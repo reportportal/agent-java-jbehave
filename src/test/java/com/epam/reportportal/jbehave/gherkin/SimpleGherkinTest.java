@@ -42,10 +42,6 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 public class SimpleGherkinTest extends BaseTest {
-
-	public static final String SCENARIO_PATTERN = "/[SCENARIO:%s]";
-	public static final String STEP_PATTERN = "/[STEP:%s]";
-
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("step_")).limit(2).collect(Collectors.toList());
