@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.2.0]
 ### Added
 - JBehave version 5 support, by @HardNorth
 ### Removed
