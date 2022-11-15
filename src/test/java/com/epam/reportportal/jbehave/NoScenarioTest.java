@@ -79,12 +79,12 @@ public class NoScenarioTest extends BaseTest {
 		assertThat(startStory.getCodeRef(), equalTo(STORY_PATH));
 
 		StartTestItemRQ startScenario = startItems.get(1);
-		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", DEFAULT_SCENARIO_NAME);
+		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, DEFAULT_SCENARIO_NAME);
 		assertThat(startScenario.getName(), equalTo(DEFAULT_SCENARIO_NAME));
 		assertThat(startScenario.getCodeRef(), equalTo(scenarioCodeRef));
 
 		StartTestItemRQ startStep = startItems.get(2);
-		String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAME);
+		String stepCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, STEP_NAME);
 		assertThat(startStep.getName(), equalTo(STEP_NAME));
 		assertThat(startStep.getCodeRef(), equalTo(stepCodeRef));
 

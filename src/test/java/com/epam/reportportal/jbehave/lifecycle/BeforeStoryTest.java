@@ -19,7 +19,6 @@ package com.epam.reportportal.jbehave.lifecycle;
 import com.epam.reportportal.jbehave.BaseTest;
 import com.epam.reportportal.jbehave.ReportPortalStepFormat;
 import com.epam.reportportal.jbehave.integration.basic.EmptySteps;
-import com.epam.reportportal.jbehave.integration.lifecycle.AfterStoryFailedSteps;
 import com.epam.reportportal.listeners.ItemStatus;
 import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.service.ReportPortal;
@@ -38,20 +37,21 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class VerifyAfterStoryAnnotationFailed extends BaseTest {
+public class BeforeStoryTest extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
-	private final String afterStoryId = CommonUtils.namedId("after_scenario_");
-	private final String afterStepId = CommonUtils.namedId("after_step_");
+	private final String beforeSuiteId = CommonUtils.namedId("before_story_suite_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
+	private final String beforeStepId = CommonUtils.namedId("before_story_step_");
 	private final String stepId = CommonUtils.namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(scenarioId, Collections.singletonList(stepId)),
-			Pair.of(afterStoryId, Collections.singletonList(afterStepId))
+	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(beforeSuiteId,
+					Collections.singletonList(beforeStepId)
+			),
+			Pair.of(scenarioId, Collections.singletonList(stepId))
 	);
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
@@ -66,68 +66,58 @@ public class VerifyAfterStoryAnnotationFailed extends BaseTest {
 		mockBatchLogging(client);
 	}
 
-	private static final String STORY_PATH = "stories/NoScenario.story";
-	private static final String DEFAULT_SCENARIO_NAME = "No name";
+	private static final String STORY_PATH = "stories/lifecycle/BeforeStory.story";
+	private static final String SCENARIO_NAME = "The scenario";
 	private static final String STEP_NAME = "Given I have empty step";
+	private static final String LIFECYCLE_SUITE_NAME = "BeforeStory";
+	private static final String LIFECYCLE_STEP_NAME = "Then I have another empty step";
 
 	@Test
-	public void verify_after_story_annotation_failed_method_reporting() {
-		run(format, STORY_PATH, new AfterStoryFailedSteps(), new EmptySteps());
+	public void verify_before_story_lifecycle_step_reporting() {
+		run(format, STORY_PATH, new EmptySteps());
 
 		verify(client).startTestItem(any());
 		ArgumentCaptor<StartTestItemRQ> startCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
 		verify(client, times(2)).startTestItem(same(storyId), startCaptor.capture());
-		verify(client).startTestItem(same(scenarioId), startCaptor.capture());
-		verify(client).startTestItem(same(afterStoryId), startCaptor.capture());
+		ArgumentCaptor<StartTestItemRQ> beforeCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
+		verify(client).startTestItem(same(beforeSuiteId), beforeCaptor.capture());
+		ArgumentCaptor<StartTestItemRQ> scenarioCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
+		verify(client).startTestItem(same(scenarioId), scenarioCaptor.capture());
 
 		// Start items verification
 		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
-		String scenarioCodeRef = STORY_PATH + String.format("/[SCENARIO:%s]", DEFAULT_SCENARIO_NAME);
-		StartTestItemRQ scenarioStart = startItems.get(0);
-		assertThat(scenarioStart.getName(), equalTo(DEFAULT_SCENARIO_NAME));
+		StartTestItemRQ beforeStorySuiteStart = startItems.get(0);
+		assertThat(beforeStorySuiteStart.getName(), equalTo(LIFECYCLE_SUITE_NAME));
+		String beforeSuiteCodeRef = STORY_PATH + String.format(LIFECYCLE_PATTERN, LIFECYCLE_SUITE_NAME);
+		assertThat(beforeStorySuiteStart.getCodeRef(), equalTo(beforeSuiteCodeRef));
+
+		StartTestItemRQ beforeStoryStart = beforeCaptor.getValue();
+		assertThat(beforeStoryStart.getName(), equalTo(LIFECYCLE_STEP_NAME));
+		assertThat(beforeStoryStart.getCodeRef(),
+				equalTo(beforeSuiteCodeRef + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAME))
+		);
+		assertThat(beforeStoryStart.getType(), equalTo(ItemType.STEP.name()));
+
+		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, SCENARIO_NAME);
+		StartTestItemRQ scenarioStart = startItems.get(1);
+		assertThat(scenarioStart.getName(), equalTo(SCENARIO_NAME));
 		assertThat(scenarioStart.getCodeRef(), equalTo(scenarioCodeRef));
 		assertThat(scenarioStart.getType(), equalTo(ItemType.SCENARIO.name()));
 
-		StartTestItemRQ beforeStoryStart = startItems.get(1);
-		assertThat(beforeStoryStart.getName(), equalTo("AfterStory"));
-		assertThat(beforeStoryStart.getCodeRef(), nullValue());
-		assertThat(beforeStoryStart.getType(), equalTo(ItemType.TEST.name()));
-
-		StartTestItemRQ step = startItems.get(2);
-		String stepCodeRef = scenarioCodeRef + String.format("/[STEP:%s]", STEP_NAME);
+		StartTestItemRQ step = scenarioCaptor.getValue();
+		String stepCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, STEP_NAME);
 		assertThat(step.getName(), equalTo(STEP_NAME));
 		assertThat(step.getCodeRef(), equalTo(stepCodeRef));
 		assertThat(step.getType(), equalTo(ItemType.STEP.name()));
 
-		StartTestItemRQ afterStep = startItems.get(3);
-		String beforeStepCodeRef = AfterStoryFailedSteps.class.getCanonicalName() + ".afterStoryFailed()";
-		assertThat(afterStep.getName(), equalTo(beforeStepCodeRef));
-		assertThat(afterStep.getCodeRef(), equalTo(beforeStepCodeRef));
-		assertThat(afterStep.getType(), equalTo(ItemType.AFTER_SUITE.name()));
-
 		// Finish items verification
 		ArgumentCaptor<FinishTestItemRQ> finishStepCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
+		verify(client).finishTestItem(same(beforeStepId), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(stepId), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(scenarioId), finishStepCaptor.capture());
-		verify(client).finishTestItem(same(afterStepId), finishStepCaptor.capture());
-		verify(client).finishTestItem(same(afterStoryId), finishStepCaptor.capture());
 		verify(client).finishTestItem(same(storyId), finishStepCaptor.capture());
 
 		List<FinishTestItemRQ> finishItems = finishStepCaptor.getAllValues();
-		FinishTestItemRQ stepFinish = finishItems.get(0);
-		assertThat(stepFinish.getStatus(), equalTo(ItemStatus.PASSED.name()));
-
-		FinishTestItemRQ scenarioFinish = finishItems.get(1);
-		assertThat(scenarioFinish.getStatus(), equalTo(ItemStatus.PASSED.name()));
-
-		FinishTestItemRQ afterStepFinish = finishItems.get(2);
-		assertThat(afterStepFinish.getStatus(), equalTo(ItemStatus.FAILED.name()));
-		assertThat(afterStepFinish.getIssue(), nullValue());
-
-		FinishTestItemRQ afterStoryFinish = finishItems.get(3);
-		assertThat(afterStoryFinish.getStatus(), equalTo(ItemStatus.FAILED.name()));
-
-		FinishTestItemRQ storyFinish = finishItems.get(4);
-		assertThat(storyFinish.getStatus(), equalTo(ItemStatus.FAILED.name()));
+		finishItems.forEach(i -> assertThat(i.getStatus(), equalTo(ItemStatus.PASSED.name())));
 	}
 }

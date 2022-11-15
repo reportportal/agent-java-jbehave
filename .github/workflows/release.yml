@@ -104,7 +104,7 @@ jobs:
         with:
           tag: ${{ env.RELEASE_VERSION }}
           name: Release ${{ env.RELEASE_VERSION }}
-          body: ${{ steps.readChangelogEntry.outputs.log_entry }}
+          body: ${{ steps.readChangelogEntry.outputs.changes }}
 
       - name: Checkout develop branch
         if: ${{ github.ref }} == 'master'

@@ -1,10 +1,10 @@
 # Changelog
 
 ## [Unreleased]
-
-## [5.1.4]
-### Changed
-- Test new actions
+### Added
+- JBehave version 5 support, by @HardNorth
+### Removed
+- JBehave version 4.8 support, by @HardNorth
 
 ## [5.1.3]
 ### Changed
