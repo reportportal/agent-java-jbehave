@@ -1,8 +1,8 @@
 # Report Portal Java reporter for JBehave tests
 
-> **DISCLAIMER**: We use Google Analytics for sending anonymous usage information such as agent's and client's names, and their versions
-> after a successful launch start. This information might help us to improve both ReportPortal backend and client sides. It is used by the
-> ReportPortal team only and is not supposed for sharing with 3rd parties.
+> **DISCLAIMER**: We use Google Analytics for sending anonymous usage information such as agent's and client's names,
+> and their versions after a successful launch start. This information might help us to improve both ReportPortal
+> backend and client sides. It is used by the ReportPortal team only and is not supposed for sharing with 3rd parties.
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.epam.reportportal/agent-java-jbehave.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.epam.reportportal%22%20AND%20a:%22agent-java-jbehave%22)
 [![CI Build](https://github.com/reportportal/agent-java-jbehave/actions/workflows/ci.yml/badge.svg)](https://github.com/reportportal/agent-java-jbehave/actions/workflows/ci.yml)
@@ -11,7 +11,8 @@
 [![stackoverflow](https://img.shields.io/badge/reportportal-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/reportportal)
 [![Build with Love](https://img.shields.io/badge/build%20with-❤%EF%B8%8F%E2%80%8D-lightgrey.svg)](http://reportportal.io?style=flat)
 
-The latest version: 5.1.3. Please use `Download` link above to get the agent. Minimal supported JBehave version: 4.8
+The latest version: 5.2.0. Please use `Download` link above to get the agent. **For JBehave version 5.0 and
+higher**
 
 ## Overview: How to Add ReportPortal Logging to Your JBehave Java Project
 
@@ -27,17 +28,17 @@ To start using Report Portal with JBehave framework please do the following step
 3. [Running tests](#test-run)
     * Add test runner class
     * Build system commands
-   
-Additionally, you may want to configure [Step reporter or Scenario reporter](#steps-vs-scenarios). They are regulate how Report Portal count
-your tests. Step reporter posts statistics per a test step (each test step is counted in 'total' column). Scenario reporter posts statistics
-per a scenario.
+
+Additionally, you may want to configure [Step reporter or Scenario reporter](#steps-vs-scenarios). They are regulate how
+Report Portal count your tests. Step reporter posts statistics per a test step (each test step is counted in 'total'
+column). Scenario reporter posts statistics per a scenario.
 
 ## Configuration
 
 ### 'reportportal.properties' configuration file
 
-To start using Report Portal you need to create a file named `reportportal.properties` in your Java project in a source folder
-`src/main/resources` or `src/test/resources` (depending on where your tests are located):
+To start using Report Portal you need to create a file named `reportportal.properties` in your Java project in a source
+folder `src/main/resources` or `src/test/resources` (depending on where your tests are located):
 
 **reportportal.properties**
 
@@ -51,9 +52,10 @@ rp.project = default_personal
 **Property description**
 
 * `rp.endpoint` - the URL for the report portal server (actual link).
-* `rp.api.key` - an access token for Report Portal which is used for user identification. It can be found on your report portal user profile
-  page.
-* `rp.project` - a project ID on which the agent will report test launches. Must be set to one of your assigned projects.
+* `rp.api.key` - an access token for Report Portal which is used for user identification. It can be found on your report
+  portal user profile page.
+* `rp.project` - a project ID on which the agent will report test launches. Must be set to one of your assigned
+  projects.
 * `rp.launch` - a user-selected identifier of test launches.
 
 ### Build system configuration
@@ -80,7 +82,7 @@ rp.project = default_personal
         <dependency>
             <groupId>com.epam.reportportal</groupId>
             <artifactId>agent-java-jbehave</artifactId>
-            <version>5.1.3</version>
+            <version>5.2.0</version>
         </dependency>
 
         <dependency>
@@ -153,7 +155,7 @@ def jbehaveVersion = '4.8.1'
 dependencies {
     testCompile "org.jbehave:jbehave-core:${jbehaveVersion}"
     testCompile "org.jbehave:jbehave-navigator:${jbehaveVersion}"
-    testCompile 'com.epam.reportportal:agent-java-jbehave:5.1.3'
+    testCompile 'com.epam.reportportal:agent-java-jbehave:5.2.0'
     testCompile 'com.epam.reportportal:logger-java-logback:5.1.1'
 }
 
@@ -255,28 +257,24 @@ It should be already here if you used gradle configuration listed above.
 
 ### Test runner class
 
-JBehave requires runtime configuration, to do this place the following class into your `src/main/java` (for Maven) or `src/test/java`
+JBehave requires runtime configuration, to do this place the following class into your `src/main/java` (for Maven)
+or `src/test/java`
 (for Gradle) folders. Notice that you need replace step initialization in `stepsFactory` method with your own:
 
 `MyStories.java`
 
 ```java
-
 import com.epam.reportportal.example.jbehave.steps.*;
 import com.epam.reportportal.jbehave.ReportPortalStepFormat;
-import com.epam.reportportal.utils.properties.PropertiesLoader;
-import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.Embeddable;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.MostUsefulConfiguration;
-import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.i18n.LocalizedKeywords;
 import org.jbehave.core.io.CodeLocations;
 import org.jbehave.core.io.LoadFromClasspath;
 import org.jbehave.core.io.StoryFinder;
 import org.jbehave.core.junit.JUnitStories;
 import org.jbehave.core.model.ExamplesTableFactory;
-import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.model.TableTransformers;
 import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.reporters.StoryReporterBuilder;
@@ -286,16 +284,15 @@ import org.jbehave.core.steps.ParameterConverters;
 import org.jbehave.core.steps.ParameterConverters.DateConverter;
 import org.jbehave.core.steps.ParameterConverters.ExamplesTableConverter;
 
-import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.jbehave.core.io.CodeLocations.codeLocationFromClass;
-import static org.jbehave.core.reporters.Format.*;
+import static org.jbehave.core.io.CodeLocations.getPathFromURL;
+import static org.jbehave.core.reporters.Format.CONSOLE;
+import static org.jbehave.core.reporters.Format.HTML;
 
 /**
  * <p>
@@ -307,18 +304,13 @@ import static org.jbehave.core.reporters.Format.*;
  */
 public class MyStories extends JUnitStories {
 
-	private static final String META_FILTERS_PROPERTY = "metaFilters";
-    private static final String STORY_FILTER_PROPERTY = "story";
-
 	public MyStories() {
-		Embedder embedder = configuredEmbedder();
-		embedder.embedderControls()
+		configuredEmbedder().embedderControls()
 				.doGenerateViewAfterStories(true)
 				.doIgnoreFailureInStories(true)
 				.doIgnoreFailureInView(true)
 				.useThreads(1)
 				.useStoryTimeouts("60");
-		ofNullable(System.getProperty(META_FILTERS_PROPERTY)).ifPresent(p -> embedder.useMetaFilters(Arrays.asList(p.split(","))));
 	}
 
 	@Override
@@ -328,11 +320,9 @@ public class MyStories extends JUnitStories {
 		ParameterConverters parameterConverters = new ParameterConverters();
 
 		TableTransformers tableTransformers = new TableTransformers();
-		TableParsers tableParsers = new TableParsers();
 		// factory to allow parameter conversion and loading from external resources (used by StoryParser too)
 		ExamplesTableFactory examplesTableFactory = new ExamplesTableFactory(new LocalizedKeywords(),
 				new LoadFromClasspath(embeddableClass),
-				tableParsers,
 				tableTransformers
 		);
 		// add custom converters
@@ -341,9 +331,8 @@ public class MyStories extends JUnitStories {
 		);
 		return new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(embeddableClass))
 				.useStoryParser(new RegexStoryParser(examplesTableFactory))
-				.useStoryReporterBuilder(new StoryReporterBuilder().withCodeLocation(CodeLocations.codeLocationFromClass(embeddableClass))
-						.withDefaultFormats()
-						.withFormats(CONSOLE, TXT, HTML, XML, ReportPortalStepFormat.INSTANCE))
+				.useStoryReporterBuilder(new StoryReporterBuilder().withCodeLocation(CodeLocations.codeLocationFromClass(
+						embeddableClass)).withFormats(CONSOLE, HTML, ReportPortalStepFormat.INSTANCE))
 				.useParameterConverters(parameterConverters);
 	}
 
@@ -360,34 +349,37 @@ public class MyStories extends JUnitStories {
 	}
 
 	@Override
-	protected List<String> storyPaths() {
-		String storyPatternToRun = ofNullable(System.getProperty(STORY_FILTER_PROPERTY)).filter(s -> !s.isEmpty())
+	public List<String> storyPaths() {
+		String storyPatternToRun = ofNullable(System.getProperty("story")).filter(s -> !s.isEmpty())
 				.map(s -> "**/" + s)
 				.orElse("**/*.story");
-		List<URL> resourceFolders = new ArrayList<>();
-		ofNullable(getClass().getClassLoader().getResource(PropertiesLoader.INNER_PATH)).map(p -> {
-			String filePath = CodeLocations.getPathFromURL(p);
-			String rootPath = StringUtils.removeEnd(filePath, "/" + PropertiesLoader.INNER_PATH);
-			return CodeLocations.codeLocationFromPath(rootPath);
-		}).ifPresent(resourceFolders::add);
-		resourceFolders.add(codeLocationFromClass(this.getClass()));
-
-		return resourceFolders.stream()
-				.flatMap(u -> new StoryFinder().findPaths(u, storyPatternToRun, "**/excluded*.story").stream())
+		return new StoryFinder().findPaths(getPathFromURL(codeLocationFromClass(this.getClass())),
+						storyPatternToRun,
+						"**/excluded*.story"
+				)
+				.stream()
 				.distinct()
 				.collect(Collectors.toList());
 	}
 }
 ```
+
 ### Build system commands
+
 We are set. To run set we just need to execute corresponding command in our build system.
+
 #### Maven
+
 `mvn test` or `mvnw test` if you are using Maven wrapper
+
 #### Gradle
+
 `gradle test` or `gradlew test` if you are using Gradle wrapper
 
 ## Steps vs scenarios
+
 Let's take a look on a simple example:
+
 ```
 Scenario: Stock trade alert
 
@@ -400,15 +392,20 @@ Examples:
 |STK1|10.0|5.0|OFF|
 |STK1|10.0|11.0|ON|
 ```
+
 ### Step reporter
-Step reporter posts statistics per test step. On example above Report Portal display 6 test units. Each example row will be a suite,
+
+Step reporter posts statistics per test step. On example above Report Portal display 6 test units. Each example row will
+be a suite,
 as on screenshots below and each test step will be marked as a test.
 
 ![Story](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-01.png)
 ![Examples](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-02.png)
 ![Steps](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-03.png)
 
-To use Step reporter you need to set `ReportPortalStepFormat.INSTANCE` constant as your story reporter format in configuration:
+To use Step reporter you need to set `ReportPortalStepFormat.INSTANCE` constant as your story reporter format in
+configuration:
+
 ```java
 new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(embeddableClass))
         .useStoryParser(new RegexStoryParser(examplesTableFactory))
@@ -420,20 +417,24 @@ new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(embeddableCla
 ```
 
 ### Scenario reporter
-Scenario reporter posts statistics per a scenario. On example above Report Portal display 2 test units. Each example row will be a test,
-as on screenshots below and each test step will be a nested step. 
+
+Scenario reporter posts statistics per a scenario. On example above Report Portal display 2 test units. Each example row
+will be a test,
+as on screenshots below and each test step will be a nested step.
 
 ![Story](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-04.png)
 ![Examples](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-05.png)
 ![Steps](https://raw.githubusercontent.com/reportportal/agent-java-jbehave/develop/doc/screen-06.png)
 
-To use Scenario reporter you need to set `ReportPortalScenarioFormat.INSTANCE` constant as your story reporter format in configuration:
+To use Scenario reporter you need to set `ReportPortalScenarioFormat.INSTANCE` constant as your story reporter format in
+configuration:
+
 ```java
 new MostUsefulConfiguration().useStoryLoader(new LoadFromClasspath(embeddableClass))
-        .useStoryParser(new RegexStoryParser(examplesTableFactory))
-        .useStoryReporterBuilder(new StoryReporterBuilder()
-        .withCodeLocation(CodeLocations.codeLocationFromClass(embeddableClass))
-        .withDefaultFormats()
-        .withFormats(ReportPortalScenarioFormat.INSTANCE))
-        .useParameterConverters(parameterConverters);
+		.useStoryParser(new RegexStoryParser(examplesTableFactory))
+		.useStoryReporterBuilder(new StoryReporterBuilder()
+		.withCodeLocation(CodeLocations.codeLocationFromClass(embeddableClass))
+		.withDefaultFormats()
+		.withFormats(ReportPortalScenarioFormat.INSTANCE))
+		.useParameterConverters(parameterConverters);
 ```
