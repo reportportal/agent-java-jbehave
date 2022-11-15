@@ -73,8 +73,8 @@ public class BeforeStoriesAnnotationFailedTest extends BaseTest {
 	private static final String STORY_PATH = "stories/NoScenario.story";
 	private static final String DEFAULT_SCENARIO_NAME = "No name";
 	private static final String STEP_NAME = "Given I have empty step";
-
-	private static final String AFTER_STORY_NAME = "beforeStoriesFailed";
+	private static final String BEFORE_STORY_SUITE_NAME = "BeforeStories";
+	private static final String BEFORE_STORY_NAME = "beforeStoriesFailed";
 
 	@Test
 	public void verify_before_story_annotation_failed_method_reporting() {
@@ -89,7 +89,7 @@ public class BeforeStoriesAnnotationFailedTest extends BaseTest {
 		// Start items verification
 		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
 		StartTestItemRQ beforeStoriesStart = startItems.get(0);
-		String beforeStoriesCodeRef = "BeforeStories";
+		String beforeStoriesCodeRef = BEFORE_STORY_SUITE_NAME;
 		assertThat(beforeStoriesStart.getName(), equalTo(beforeStoriesCodeRef));
 		assertThat(beforeStoriesStart.getCodeRef(), equalTo(beforeStoriesCodeRef));
 		assertThat(beforeStoriesStart.getType(), equalTo(ItemType.TEST.name()));
@@ -99,10 +99,9 @@ public class BeforeStoriesAnnotationFailedTest extends BaseTest {
 		assertThat(storyStart.getType(), allOf(notNullValue(), equalTo(ItemType.STORY.name())));
 
 		StartTestItemRQ beforeStep = startItems.get(2);
-		assertThat(beforeStep.getName(), equalTo(AFTER_STORY_NAME));
-		assertThat(
-				beforeStep.getCodeRef(),
-				equalTo(beforeStoriesCodeRef + String.format("/[BEFORE_GROUPS:%s]", AFTER_STORY_NAME))
+		assertThat(beforeStep.getName(), equalTo(BEFORE_STORY_NAME));
+		assertThat(beforeStep.getCodeRef(),
+				equalTo(beforeStoriesCodeRef + String.format("/[BEFORE_GROUPS:%s]", BEFORE_STORY_NAME))
 		);
 		assertThat(beforeStep.getType(), equalTo(ItemType.BEFORE_GROUPS.name()));
 

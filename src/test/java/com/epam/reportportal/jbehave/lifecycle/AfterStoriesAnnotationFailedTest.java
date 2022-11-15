@@ -113,7 +113,10 @@ public class AfterStoriesAnnotationFailedTest extends BaseTest {
 
 		StartTestItemRQ afterStep = startItems.get(4);
 		assertThat(afterStep.getName(), equalTo(AFTER_STORY_NAME));
-		assertThat(afterStep.getCodeRef(), equalTo(afterStoriesCodeRef + String.format("/[AFTER_GROUPS:%s]", AFTER_STORY_NAME)));
+		assertThat(
+				afterStep.getCodeRef(),
+				equalTo(afterStoriesCodeRef + String.format("/[AFTER_GROUPS:%s]", AFTER_STORY_NAME))
+		);
 		assertThat(afterStep.getType(), equalTo(ItemType.AFTER_GROUPS.name()));
 
 		// Finish items verification

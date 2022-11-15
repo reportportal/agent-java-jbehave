@@ -49,7 +49,10 @@ public class AfterStoryTest extends BaseTest {
 	private final String afterStepId = CommonUtils.namedId("after_story_step_");
 	private final String stepId = CommonUtils.namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(scenarioId, Collections.singletonList(stepId)),
+	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(
+					scenarioId,
+					Collections.singletonList(stepId)
+			),
 			Pair.of(afterStoryId, Collections.singletonList(afterStepId))
 	);
 
@@ -104,7 +107,10 @@ public class AfterStoryTest extends BaseTest {
 
 		StartTestItemRQ afterStep = startItems.get(3);
 		assertThat(afterStep.getName(), equalTo(LIFECYCLE_STEP_NAME));
-		assertThat(afterStep.getCodeRef(), equalTo(afterStoryCodeRef + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAME)));
+		assertThat(
+				afterStep.getCodeRef(),
+				equalTo(afterStoryCodeRef + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAME))
+		);
 		assertThat(afterStep.getType(), equalTo(ItemType.STEP.name()));
 
 		// Finish items verification

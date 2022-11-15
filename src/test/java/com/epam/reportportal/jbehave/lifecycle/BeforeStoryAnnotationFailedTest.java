@@ -42,7 +42,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class VerifyBeforeStoryAnnotationFailed extends BaseTest {
+public class BeforeStoryAnnotationFailedTest extends BaseTest {
 
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String beforeStoryId = CommonUtils.namedId("before_story_");
@@ -50,7 +50,10 @@ public class VerifyBeforeStoryAnnotationFailed extends BaseTest {
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final String stepId = CommonUtils.namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(beforeStoryId, Collections.singletonList(beforeStepId)),
+	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(
+					beforeStoryId,
+					Collections.singletonList(beforeStepId)
+			),
 			Pair.of(scenarioId, Collections.singletonList(stepId))
 	);
 
@@ -69,6 +72,8 @@ public class VerifyBeforeStoryAnnotationFailed extends BaseTest {
 	private static final String STORY_PATH = "stories/NoScenario.story";
 	private static final String DEFAULT_SCENARIO_NAME = "No name";
 	private static final String STEP_NAME = "Given I have empty step";
+	private static final String BEFORE_STORY_SUITE_NAME = "BeforeStory";
+	private static final String BEFORE_STORY_NAME = "beforeStoryFailed";
 
 	@Test
 	public void verify_before_story_annotation_failed_method_reporting() {
@@ -83,8 +88,9 @@ public class VerifyBeforeStoryAnnotationFailed extends BaseTest {
 		// Start items verification
 		List<StartTestItemRQ> startItems = startCaptor.getAllValues();
 		StartTestItemRQ beforeStoryStart = startItems.get(0);
-		assertThat(beforeStoryStart.getName(), equalTo("BeforeStory"));
-		assertThat(beforeStoryStart.getCodeRef(), nullValue());
+		assertThat(beforeStoryStart.getName(), equalTo(BEFORE_STORY_SUITE_NAME));
+		String beforeStorySuiteCodeRef = STORY_PATH + String.format(LIFECYCLE_PATTERN, BEFORE_STORY_SUITE_NAME);
+		assertThat(beforeStoryStart.getCodeRef(), equalTo(beforeStorySuiteCodeRef));
 		assertThat(beforeStoryStart.getType(), equalTo(ItemType.TEST.name()));
 
 		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, DEFAULT_SCENARIO_NAME);
@@ -94,10 +100,10 @@ public class VerifyBeforeStoryAnnotationFailed extends BaseTest {
 		assertThat(scenarioStart.getType(), equalTo(ItemType.SCENARIO.name()));
 
 		StartTestItemRQ beforeStep = startItems.get(2);
-		String beforeStepCodeRef = BeforeStoryFailedSteps.class.getCanonicalName() + ".beforeStoryFailed()";
-		assertThat(beforeStep.getName(), equalTo(beforeStepCodeRef));
+		String beforeStepCodeRef = beforeStorySuiteCodeRef + String.format(STEP_PATTERN, BEFORE_STORY_NAME);
+		assertThat(beforeStep.getName(), equalTo(BEFORE_STORY_NAME));
 		assertThat(beforeStep.getCodeRef(), equalTo(beforeStepCodeRef));
-		assertThat(beforeStep.getType(), equalTo(ItemType.BEFORE_SUITE.name()));
+		assertThat(beforeStep.getType(), equalTo(ItemType.STEP.name()));
 
 		StartTestItemRQ step = startItems.get(3);
 		String stepCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, STEP_NAME);

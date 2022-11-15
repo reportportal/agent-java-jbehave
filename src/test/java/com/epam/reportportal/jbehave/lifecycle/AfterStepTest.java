@@ -76,7 +76,8 @@ public class AfterStepTest extends BaseTest {
 
 	private static final String STORY_PATH = "stories/lifecycle/AfterStep.story";
 	private static final String SCENARIO_NAME = "The scenario";
-	private static final String[] STEP_NAMES = new String[] { "Given I have empty step", "When I have one more empty step" };
+	private static final String[] STEP_NAMES = new String[] { "Given I have empty step",
+			"When I have one more empty step" };
 	private static final String LIFECYCLE_STEP_NAME = "Then I have another empty step";
 
 	@Test

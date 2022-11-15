@@ -45,7 +45,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class VerifyBeforeScenarioFailed extends BaseTest {
+public class BeforeScenarioFailedTest extends BaseTest {
 	private final String storyId = namedId("story_");
 	private final List<String> lifecycleStepIds = Arrays.asList(namedId("before_story_"),
 			namedId("before_scenario_"),
@@ -57,7 +57,10 @@ public class VerifyBeforeScenarioFailed extends BaseTest {
 	private final String scenarioId = namedId("scenario_");
 	private final String stepId = namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(lifecycleStepIds.get(0), Collections.emptyList()),
+	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(
+					lifecycleStepIds.get(0),
+					Collections.emptyList()
+			),
 			Pair.of(scenarioId, Stream.concat(Stream.concat(lifecycleStepIds.subList(1, 3).stream(), Stream.of(stepId)),
 					lifecycleStepIds.subList(3, lifecycleStepIds.size() - 1).stream()
 			).collect(Collectors.toList())),
@@ -79,9 +82,9 @@ public class VerifyBeforeScenarioFailed extends BaseTest {
 	private static final String STORY_PATH = "stories/lifecycle/BeforeScenarioFailed.story";
 	private static final String SCENARIO_NAME = "The scenario";
 	private static final String STEP_NAME = "Given I have empty step";
-	private static final String[] LIFECYCLE_STEP_NAMES = new String[] { "When I have one more empty step", "Given I have a failed step",
-			"Given It is test with parameters", "When I have parameter test", "Then I have another empty step",
-			"Given It is a step with an integer parameter 42" };
+	private static final String[] LIFECYCLE_STEP_NAMES = new String[] { "When I have one more empty step",
+			"Given I have a failed step", "Given It is test with parameters", "When I have parameter test",
+			"Then I have another empty step", "Given It is a step with an integer parameter 42" };
 
 	@Test
 	public void verify_before_scenario_lifecycle_step_failure_reporting() {
@@ -97,7 +100,10 @@ public class VerifyBeforeScenarioFailed extends BaseTest {
 
 		StartTestItemRQ beforeStoryStart = startItems.get(0);
 		assertThat(beforeStoryStart.getName(), equalTo(LIFECYCLE_STEP_NAMES[0]));
-		assertThat(beforeStoryStart.getCodeRef(), equalTo(STORY_PATH + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAMES[0])));
+		assertThat(
+				beforeStoryStart.getCodeRef(),
+				equalTo(STORY_PATH + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAMES[0]))
+		);
 		assertThat(beforeStoryStart.getType(), equalTo(ItemType.STEP.name()));
 
 		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, SCENARIO_NAME);
@@ -137,7 +143,8 @@ public class VerifyBeforeScenarioFailed extends BaseTest {
 		assertThat(afterScenario.getType(), equalTo(ItemType.STEP.name()));
 
 		StartTestItemRQ afterStory = startItems.get(2);
-		String afterStoryCodeRef = STORY_PATH + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAMES[LIFECYCLE_STEP_NAMES.length - 1]);
+		String afterStoryCodeRef =
+				STORY_PATH + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAMES[LIFECYCLE_STEP_NAMES.length - 1]);
 		assertThat(afterStory.getName(), equalTo(LIFECYCLE_STEP_NAMES[LIFECYCLE_STEP_NAMES.length - 1]));
 		assertThat(afterStory.getCodeRef(), equalTo(afterStoryCodeRef));
 		assertThat(afterStory.getType(), equalTo(ItemType.STEP.name()));

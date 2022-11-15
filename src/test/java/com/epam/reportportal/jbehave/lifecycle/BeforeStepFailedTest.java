@@ -60,8 +60,7 @@ public class BeforeStepFailedTest extends BaseTest {
 	private final String scenarioId = namedId("scenario_");
 	private final String stepId = namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(
-					beforeStoryId,
+	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(beforeStoryId,
 					Collections.singletonList(lifecycleStepIds.get(0))
 			),
 			Pair.of(scenarioId, Stream.concat(Stream.concat(lifecycleStepIds.subList(1, 3).stream(), Stream.of(stepId)),

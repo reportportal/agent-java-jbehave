@@ -50,7 +50,10 @@ public class AfterStoryAnnotationFailedTest extends BaseTest {
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final String stepId = CommonUtils.namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(scenarioId, Collections.singletonList(stepId)),
+	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(
+					scenarioId,
+					Collections.singletonList(stepId)
+			),
 			Pair.of(afterStoryId, Collections.singletonList(afterStepId))
 	);
 
