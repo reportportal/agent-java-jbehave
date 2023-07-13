@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Client version updated on [5.1.22](https://github.com/reportportal/client-java/releases/tag/5.1.22), by @HardNorth
+- Jbehave version was updated on version 5.1.1, by @HardNorth
 
 ## [5.2.1]
 ### Changed
