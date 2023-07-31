@@ -44,7 +44,7 @@ folder `src/main/resources` or `src/test/resources` (depending on where your tes
 
 ```
 rp.endpoint = http://localhost:8080
-rp.uuid = e0e541d8-b1cd-426a-ae18-b771173c545a
+rp.api.key = e0e541d8-b1cd-426a-ae18-b771173c545a
 rp.launch = JBehave Tests
 rp.project = default_personal
 ```
@@ -73,7 +73,7 @@ rp.project = default_personal
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
-        <jbehave.core.version>4.8.1</jbehave.core.version> <!-- JBehave binaries version -->
+        <jbehave.core.version>5.1.1</jbehave.core.version> <!-- JBehave binaries version -->
         <embeddables>**/*Stories.java</embeddables> <!-- JBehave story filter -->
         <meta.filter>-skip</meta.filter> <!-- Skip tests tagged with '@skip' tag -->
     </properties>
@@ -151,7 +151,7 @@ repositories {
     mavenCentral()
 }
 
-def jbehaveVersion = '4.8.1'
+def jbehaveVersion = '5.1.1'
 dependencies {
     testCompile "org.jbehave:jbehave-core:${jbehaveVersion}"
     testCompile "org.jbehave:jbehave-navigator:${jbehaveVersion}"
