@@ -58,6 +58,10 @@ rp.project = default_personal
   projects.
 * `rp.launch` - a user-selected identifier of test launches.
 
+The full list of supported properties is located here in client-java library documentation (a common library for all
+Java agents): https://github.com/reportportal/client-java
+
+
 ### Build system configuration
 
 #### Maven
