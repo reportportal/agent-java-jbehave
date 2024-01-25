@@ -24,7 +24,9 @@ import org.jbehave.core.reporters.StoryReporterBuilder;
  * Scenarios will not have it.
  *
  * @author Vadzim Hushchanskou
+ * @deprecated Use {@link ReportPortalScenarioFormat}, since the semantic of this class is completely broken and will be removed
  */
+@Deprecated
 public class ReportPortalStepFormat extends ReportPortalFormat {
 	public static final ReportPortalStepFormat INSTANCE = new ReportPortalStepFormat();
 
