@@ -1,4 +1,7 @@
 # Changelog
+### Changed
+- Client version updated on [5.2.1](https://github.com/reportportal/client-java/releases/tag/5.2.1), by @HardNorth
+- JBehave dependency marked as `implementation` to force users specify their own versions, by @HardNorth
 
 ## [Unreleased]
 ### Changed
