@@ -5,6 +5,8 @@
 - JBehave dependency marked as `implementation` to force users specify their own versions, by @HardNorth
 
 ## [Unreleased]
+
+## [5.3.0]
 ### Changed
 - Client version updated on [5.1.24](https://github.com/reportportal/client-java/releases/tag/5.1.24), by @HardNorth
 
