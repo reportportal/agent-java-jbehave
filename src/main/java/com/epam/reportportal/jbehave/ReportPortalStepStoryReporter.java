@@ -25,7 +25,9 @@ import java.util.function.Supplier;
  * statistic.
  *
  * @author Vadzim Hushchanskou
+ * @deprecated Use {@link ReportPortalScenarioStoryReporter}, since the semantic of this class is completely broken and will be removed
  */
+@Deprecated
 public class ReportPortalStepStoryReporter extends ReportPortalStoryReporter {
 	public ReportPortalStepStoryReporter(final Supplier<Launch> launchSupplier, TestItemTree testItemTree) {
 		super(launchSupplier, testItemTree);

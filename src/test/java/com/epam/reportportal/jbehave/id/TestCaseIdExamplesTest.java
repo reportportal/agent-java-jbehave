@@ -29,7 +29,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -45,11 +47,10 @@ public class TestCaseIdExamplesTest extends BaseTest {
 
 	public static final int STEPS_QUANTITY = 4;
 	private final String storyId = CommonUtils.namedId("story_");
-	private final String scenarioId = CommonUtils.namedId("scenario_");
-	private final List<String> exampleIds = Stream.generate(() -> CommonUtils.namedId("example_")).limit(2).collect(Collectors.toList());
+	private final List<String> scenarioIds = Stream.generate(() -> CommonUtils.namedId("scenario_")).limit(2).collect(Collectors.toList());
 
-	private final List<Pair<String, String>> stepIds = exampleIds.stream()
-			.flatMap(e -> Stream.generate(() -> Pair.of(e, CommonUtils.namedId("step_"))).limit(STEPS_QUANTITY))
+	private final List<Pair<String, List<String>>> stepIds = scenarioIds.stream()
+			.map(e -> Pair.of(e, Stream.generate(() -> CommonUtils.namedId("step_")).limit(STEPS_QUANTITY).collect(Collectors.toList())))
 			.collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
@@ -60,8 +61,7 @@ public class TestCaseIdExamplesTest extends BaseTest {
 
 	@BeforeEach
 	public void setupMock() {
-		mockLaunch(client, null, storyId, scenarioId, exampleIds);
-		mockNestedSteps(client, stepIds);
+		mockLaunch(client, null, storyId, stepIds);
 		mockBatchLogging(client);
 
 	}
@@ -82,8 +82,10 @@ public class TestCaseIdExamplesTest extends BaseTest {
 			"When I have first parameter <symbol> and second parameter <symbol>"
 	);
 
-	private static final List<List<ParameterResource>> STEP_PARAMETERS = asList(
-			asList(parameterOf("symbol", "STK1$"), parameterOf("threshold", "10.0")),
+	private static final List<List<ParameterResource>> STEP_PARAMETERS = asList(asList(
+					parameterOf("symbol", "STK1$"),
+					parameterOf("threshold", "10.0")
+			),
 			asList(parameterOf("price", "5.0")),
 			asList(parameterOf("status", "OFF")),
 			asList(parameterOf("symbol", "STK1$"), parameterOf("symbol", "STK1$")),
@@ -100,11 +102,10 @@ public class TestCaseIdExamplesTest extends BaseTest {
 		run(format, EXAMPLES_STORY, new StockSteps());
 
 		verify(client, times(1)).startTestItem(any());
-		verify(client, times(1)).startTestItem(same(storyId), any());
-		verify(client, times(2)).startTestItem(same(scenarioId), any());
+		verify(client, times(2)).startTestItem(same(storyId), any());
 		ArgumentCaptor<StartTestItemRQ> startCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
-		verify(client, times(STEPS_QUANTITY)).startTestItem(same(exampleIds.get(0)), startCaptor.capture());
-		verify(client, times(STEPS_QUANTITY)).startTestItem(same(exampleIds.get(1)), startCaptor.capture());
+		verify(client, times(STEPS_QUANTITY)).startTestItem(same(scenarioIds.get(0)), startCaptor.capture());
+		verify(client, times(STEPS_QUANTITY)).startTestItem(same(scenarioIds.get(1)), startCaptor.capture());
 
 		String scenarioCodeRef = EXAMPLES_STORY + "/[SCENARIO:Stock trade alert]";
 
@@ -115,8 +116,12 @@ public class TestCaseIdExamplesTest extends BaseTest {
 			StartTestItemRQ rq = steps.get(i);
 			String exampleCodeRef = scenarioCodeRef + "/" + EXAMPLE_NODES.get(i);
 			String stepCodeRef = exampleCodeRef + "/" + String.format("[STEP:%s]", STEP_NAMES.get(i));
-			assertThat(rq.getTestCaseId(), equalTo(stepCodeRef + STEP_PARAMETERS.get(i).stream()
-					.map(ParameterResource::getValue).collect(Collectors.joining(",", "[", "]")))
+			assertThat(
+					rq.getTestCaseId(),
+					equalTo(stepCodeRef + STEP_PARAMETERS.get(i)
+							.stream()
+							.map(ParameterResource::getValue)
+							.collect(Collectors.joining(",", "[", "]")))
 			);
 		});
 	}

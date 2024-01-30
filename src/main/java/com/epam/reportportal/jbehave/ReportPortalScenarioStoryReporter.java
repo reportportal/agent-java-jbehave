@@ -32,7 +32,7 @@ import static java.util.Optional.ofNullable;
 
 /**
  * JBehave Reporter for reporting results into ReportPortal. Reports each Story Scenario as a separate test. That means each Scenario
- * has it's own statistic and each Scenario Step is reported as nested step and does not add test count.
+ * has its own statistic and each Scenario Step is reported as nested step and does not add test count.
  *
  * @author Vadzim Hushchanskou
  */
@@ -46,9 +46,9 @@ public class ReportPortalScenarioStoryReporter extends ReportPortalStoryReporter
 	 * {@inheritDoc}
 	 */
 	@Nonnull
-	protected StartTestItemRQ buildStartExampleRq(@Nonnull final Map<String, String> example, @Nonnull String codeRef,
+	protected StartTestItemRQ buildStartExampleRq(@Nonnull Scenario scenario, @Nonnull Map<String, String> example, @Nonnull String codeRef,
 			@Nullable final Date startTime) {
-		StartTestItemRQ rq = super.buildStartExampleRq(example, codeRef, startTime);
+		StartTestItemRQ rq = super.buildStartExampleRq(scenario, example, codeRef, startTime);
 		rq.setType(ItemType.STEP.name());
 		rq.setTestCaseId(ofNullable(getTestCaseId(codeRef, null)).map(TestCaseIdEntry::getId).orElse(null));
 		return rq;
@@ -61,10 +61,8 @@ public class ReportPortalScenarioStoryReporter extends ReportPortalStoryReporter
 	@Nonnull
 	protected StartTestItemRQ buildStartScenarioRq(@Nonnull Scenario scenario, @Nonnull String codeRef, @Nullable final Date startTime) {
 		StartTestItemRQ rq = super.buildStartScenarioRq(scenario, codeRef, startTime);
-		if (!scenario.hasExamplesTable() || scenario.getExamplesTable().getRows().isEmpty()) {
-			rq.setTestCaseId(ofNullable(getTestCaseId(codeRef, null)).map(TestCaseIdEntry::getId).orElse(null));
-			rq.setType(ItemType.STEP.name());
-		}
+		rq.setTestCaseId(ofNullable(getTestCaseId(codeRef, null)).map(TestCaseIdEntry::getId).orElse(null));
+		rq.setType(ItemType.STEP.name());
 		return rq;
 	}
 

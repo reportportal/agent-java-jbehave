@@ -8,5 +8,5 @@ Feature: Basic test with parameters
     Examples:
       | str      | parameters |
       | "first"  | 123        |
-      | "second" | 12345      |
-      | "third"  | 12345678   |
+      | "scond"  | 321        |
+      | "third"  | 213        |

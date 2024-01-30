@@ -4,7 +4,7 @@
 > and their versions after a successful launch start. This information might help us to improve both ReportPortal
 > backend and client sides. It is used by the ReportPortal team only and is not supposed for sharing with 3rd parties.
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.epam.reportportal/agent-java-jbehave.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.epam.reportportal%22%20AND%20a:%22agent-java-jbehave%22)
+[![Maven Central](https://img.shields.io/maven-central/v/com.epam.reportportal/agent-java-jbehave.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/com.epam.reportportal/agent-java-jbehave)
 [![CI Build](https://github.com/reportportal/agent-java-jbehave/actions/workflows/ci.yml/badge.svg)](https://github.com/reportportal/agent-java-jbehave/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/reportportal/agent-java-jbehave/branch/develop/graph/badge.svg?token=BCglguEcoR)](https://codecov.io/gh/reportportal/agent-java-jbehave)
 [![Join Slack chat!](https://slack.epmrpp.reportportal.io/badge.svg)](https://slack.epmrpp.reportportal.io/)
@@ -44,7 +44,7 @@ folder `src/main/resources` or `src/test/resources` (depending on where your tes
 
 ```
 rp.endpoint = http://localhost:8080
-rp.uuid = e0e541d8-b1cd-426a-ae18-b771173c545a
+rp.api.key = e0e541d8-b1cd-426a-ae18-b771173c545a
 rp.launch = JBehave Tests
 rp.project = default_personal
 ```
@@ -57,6 +57,10 @@ rp.project = default_personal
 * `rp.project` - a project ID on which the agent will report test launches. Must be set to one of your assigned
   projects.
 * `rp.launch` - a user-selected identifier of test launches.
+
+The full list of supported properties is located here in client-java library documentation (a common library for all
+Java agents): https://github.com/reportportal/client-java
+
 
 ### Build system configuration
 
@@ -73,7 +77,7 @@ rp.project = default_personal
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
-        <jbehave.core.version>4.8.1</jbehave.core.version> <!-- JBehave binaries version -->
+        <jbehave.core.version>5.1.1</jbehave.core.version> <!-- JBehave binaries version -->
         <embeddables>**/*Stories.java</embeddables> <!-- JBehave story filter -->
         <meta.filter>-skip</meta.filter> <!-- Skip tests tagged with '@skip' tag -->
     </properties>
@@ -151,7 +155,7 @@ repositories {
     mavenCentral()
 }
 
-def jbehaveVersion = '4.8.1'
+def jbehaveVersion = '5.1.1'
 dependencies {
     testCompile "org.jbehave:jbehave-core:${jbehaveVersion}"
     testCompile "org.jbehave:jbehave-navigator:${jbehaveVersion}"

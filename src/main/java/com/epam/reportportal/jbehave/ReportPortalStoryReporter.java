@@ -25,6 +25,7 @@ import com.epam.reportportal.service.item.TestCaseIdEntry;
 import com.epam.reportportal.service.tree.TestItemTree;
 import com.epam.reportportal.utils.StatusEvaluation;
 import com.epam.reportportal.utils.TestCaseIdUtils;
+import com.epam.reportportal.utils.markdown.MarkdownUtils;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.OperationCompletionRS;
 import com.epam.ta.reportportal.ws.model.ParameterResource;
@@ -38,7 +39,10 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.model.*;
 import org.jbehave.core.reporters.NullStoryReporter;
+import org.jbehave.core.steps.StepCreator;
 import org.jbehave.core.steps.Timing;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -58,6 +62,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * @author Vadzim Hushchanskou
  */
 public abstract class ReportPortalStoryReporter extends NullStoryReporter {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ReportPortalStoryReporter.class);
+
 	public static final String CODE_REF = "CODE_REF";
 	public static final String START_TIME = "START_TIME";
 	public static final String PARAMETERS = "PARAMETERS";
@@ -67,30 +73,27 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 
 	private static final String CODE_REFERENCE_DELIMITER = "/";
 	private static final String CODE_REFERENCE_ITEM_TYPE_DELIMITER = ":";
-	private static final String PARAMETER_ITEMS_DELIMITER = ";";
 	private static final String CODE_REFERENCE_ITEM_START = "[";
 	private static final String CODE_REFERENCE_ITEM_END = "]";
-	private static final String EXAMPLE_PATTERN = "Example: %s";
 	private static final String EXAMPLE_VALUE_PATTERN = "<%s>";
 	private static final Pattern EXAMPLE_VALUE_MATCH = Pattern.compile("<([^>]*)>");
 	private static final String EXAMPLE = "EXAMPLE";
 	private static final String LIFECYCLE = "LIFECYCLE";
-	private static final String EXAMPLE_PARAMETER_DELIMITER = PARAMETER_ITEMS_DELIMITER + " ";
-	private static final String EXAMPLE_KEY_VALUE_DELIMITER = CODE_REFERENCE_ITEM_TYPE_DELIMITER + " ";
 	private static final String NO_NAME = "No name";
 	private static final String BEFORE_STORIES = "BeforeStories";
 	private static final String AFTER_STORIES = "AfterStories";
 	private static final String BEFORE_STORY = "BeforeStory";
 	private static final String AFTER_STORY = "AfterStory";
+	private static final String PARAMETERS_PATTERN = "Parameters:\n\n%s";
 
 	private final Deque<Entity<?>> structure = new LinkedList<>();
 	private final Deque<TestItemTree.TestItemLeaf> stepStack = new LinkedList<>();
 	private final Supplier<Launch> launch;
 	private final TestItemTree itemTree;
 
-	private volatile TestItemTree.TestItemLeaf lastStep;
+	private TestItemTree.TestItemLeaf lastStep;
 	private static volatile ItemType currentLifecycleTopItemType;
-	private volatile ItemType currentLifecycleItemType;
+	private ItemType currentLifecycleItemType;
 
 	public ReportPortalStoryReporter(final Supplier<Launch> launchSupplier, TestItemTree testItemTree) {
 		launch = launchSupplier;
@@ -244,24 +247,6 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	}
 
 	/**
-	 * Extension point to customize example names
-	 *
-	 * @param example a map of variable name -&gt; variable value
-	 * @return a name of the given example
-	 */
-	protected String formatExampleName(@Nonnull final Map<String, String> example) {
-		return String.format(EXAMPLE_PATTERN,
-				example.entrySet()
-						.stream()
-						.map(e -> e.getKey() + EXAMPLE_KEY_VALUE_DELIMITER + e.getValue())
-						.collect(Collectors.joining(EXAMPLE_PARAMETER_DELIMITER,
-								CODE_REFERENCE_ITEM_START,
-								CODE_REFERENCE_ITEM_END
-						))
-		);
-	}
-
-	/**
 	 * Converts parameters map into Report Portal's {@link ParameterResource} list ready to use in a request to Report Portal
 	 *
 	 * @param params a parameters map
@@ -285,20 +270,22 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	/**
 	 * Extension point to customize test creation event/request
 	 *
+	 * @param scenario  JBehave scenario object
 	 * @param example   an example map
 	 * @param codeRef   a step code reference
 	 * @param startTime a step start time which will be passed to RP
 	 * @return Request to ReportPortal
 	 */
 	@Nonnull
-	protected StartTestItemRQ buildStartExampleRq(@Nonnull final Map<String, String> example, @Nonnull String codeRef,
+	protected StartTestItemRQ buildStartExampleRq(@Nonnull Scenario scenario, @Nonnull Map<String, String> example, @Nonnull String codeRef,
 			@Nullable final Date startTime) {
 		StartTestItemRQ rq = new StartTestItemRQ();
-		rq.setName(formatExampleName(example));
+		rq.setName(getScenarioName(scenario));
 		rq.setCodeRef(codeRef);
 		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
 		rq.setType(ItemType.TEST.name());
 		rq.setParameters(getStepParameters(example));
+		rq.setDescription(String.format(PARAMETERS_PATTERN, MarkdownUtils.formatDataTable(example)));
 		return rq;
 	}
 
@@ -486,6 +473,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	@Nullable
 	protected TestItemTree.TestItemLeaf retrieveLeaf() {
 		final List<Pair<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf>> leafChain = new ArrayList<>();
+		Entity<?> parentEntity = null;
 		for (Entity<?> entity : structure) {
 			final ItemType itemType = entity.type();
 			final Optional<Pair<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf>> parent = leafChain.isEmpty() ?
@@ -509,6 +497,10 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 					break;
 				case SCENARIO:
 					Scenario scenario = (Scenario) entity.get();
+					if (scenario.hasExamplesTable() && !scenario.getExamplesTable().getRows().isEmpty()) {
+						// Each Example has its own scenario node, no need to wrap them into suite once again
+						break;
+					}
 					TestItemTree.ItemTreeKey scenarioKey = ItemTreeUtils.createKey(getScenarioName(scenario));
 					leafChain.add(ImmutablePair.of(scenarioKey, children.computeIfAbsent(scenarioKey, k -> createLeaf(
 							ItemType.SCENARIO,
@@ -517,11 +509,19 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 					))));
 					break;
 				case SUITE: // type SUITE == an Example
+					if (parentEntity == null) {
+						LOGGER.error("Unable to locate Scenario item for Example, this is not something which is supposed to happen,"
+								+ " skipping reporting");
+						break;
+					}
+					Scenario parentScenario = (Scenario) parentEntity.get();
 					Map<String, String> example = (Map<String, String>) entity.get();
+					TestItemTree.ItemTreeKey parentScenarioKey = ItemTreeUtils.createKey(getScenarioName(parentScenario));
 					TestItemTree.ItemTreeKey exampleKey = ItemTreeUtils.createKey(example);
 					leafChain.add(ImmutablePair.of(exampleKey, children.computeIfAbsent(exampleKey, k -> {
+						String parentScenarioCodeRef = getCodeRef(parentCodeRef, parentScenarioKey, ItemType.SCENARIO);
 						TestItemTree.TestItemLeaf leaf = createLeaf(ItemType.SUITE,
-								buildStartExampleRq(example, getCodeRef(parentCodeRef, k, ItemType.SUITE), itemDate),
+								buildStartExampleRq(parentScenario, example, getCodeRef(parentScenarioCodeRef, k, ItemType.SUITE), itemDate),
 								parentLeaf
 						);
 						leaf.setAttribute(PARAMETERS, example);
@@ -542,6 +542,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 					));
 					break;
 			}
+			parentEntity = entity;
 		}
 		return leafChain.isEmpty() ? null : leafChain.get(leafChain.size() - 1).getValue();
 	}
@@ -573,7 +574,12 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 					leafChain.add(ImmutablePair.of(storyKey, children.get(storyKey)));
 					break;
 				case SCENARIO:
-					TestItemTree.ItemTreeKey scenarioKey = ItemTreeUtils.createKey(getScenarioName((Scenario) entity.get()));
+					Scenario scenario = (Scenario) entity.get();
+					if (scenario.hasExamplesTable() && !scenario.getExamplesTable().getRows().isEmpty()) {
+						// Each Example has its own scenario node, no need to wrap them into suite once again
+						continue;
+					}
+					TestItemTree.ItemTreeKey scenarioKey = ItemTreeUtils.createKey(getScenarioName(scenario));
 					leafChain.add(ImmutablePair.of(scenarioKey, children.get(scenarioKey)));
 					break;
 				case SUITE: // type SUITE == an Example
@@ -695,6 +701,14 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	protected void evaluateAndFinishLastItem() {
 		TestItemTree.TestItemLeaf item = getLeaf();
+		Entity<?> entity = structure.pollLast();
+		if (entity != null && ItemType.SCENARIO == entity.type()) {
+			Scenario scenario = (Scenario) entity.get();
+			if (scenario.hasExamplesTable() && !scenario.getExamplesTable().getRows().isEmpty()) {
+				// Each Example has its own scenario node, no need to wrap them into suite once again
+				return;
+			}
+		}
 		ofNullable(item).ifPresent(i -> {
 			ItemStatus status = i.getStatus();
 			for (Map.Entry<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf> entry : i.getChildItems().entrySet()) {
@@ -706,7 +720,6 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 			i.setStatus(status);
 			finishItem(i, status);
 		});
-		structure.pollLast();
 	}
 
 	/**
@@ -814,7 +827,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * Starts story (test suite level) in ReportPortal
 	 *
 	 * @param story      JBehave story object
-	 * @param givenStory whether or not this story is given
+	 * @param givenStory whether this story is given
 	 * @see <a href="https://jbehave.org/reference/latest/given-stories.html">Given Stories</a>
 	 */
 	@Override
@@ -1004,9 +1017,9 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	}
 
 	@Override
-	public void pending(String step) {
+	public void pending(StepCreator.PendingStep step) {
 		ofNullable(stepStack.pollLast()).ifPresent(i -> {
-			createPendingSteps(step, i);
+			createPendingSteps(step.stepAsString(), i);
 			finishStep(i, ItemStatus.SKIPPED);
 			finishBeforeAfterSuites(i);
 		});
