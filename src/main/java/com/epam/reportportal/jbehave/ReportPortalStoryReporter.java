@@ -497,7 +497,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 					break;
 				case SCENARIO:
 					Scenario scenario = (Scenario) entity.get();
-					if (scenario.hasExamplesTable() || !scenario.getExamplesTable().getRows().isEmpty()) {
+					if (scenario.hasExamplesTable() && !scenario.getExamplesTable().getRows().isEmpty()) {
 						// Each Example has its own scenario node, no need to wrap them into suite once again
 						break;
 					}
@@ -575,7 +575,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 					break;
 				case SCENARIO:
 					Scenario scenario = (Scenario) entity.get();
-					if (scenario.hasExamplesTable() || !scenario.getExamplesTable().getRows().isEmpty()) {
+					if (scenario.hasExamplesTable() && !scenario.getExamplesTable().getRows().isEmpty()) {
 						// Each Example has its own scenario node, no need to wrap them into suite once again
 						continue;
 					}
@@ -704,7 +704,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		Entity<?> entity = structure.pollLast();
 		if (entity != null && ItemType.SCENARIO == entity.type()) {
 			Scenario scenario = (Scenario) entity.get();
-			if (scenario.hasExamplesTable() || !scenario.getExamplesTable().getRows().isEmpty()) {
+			if (scenario.hasExamplesTable() && !scenario.getExamplesTable().getRows().isEmpty()) {
 				// Each Example has its own scenario node, no need to wrap them into suite once again
 				return;
 			}
