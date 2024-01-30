@@ -1,6 +1,7 @@
 # Changelog
 ### Changed
-- Client version updated on [5.2.1](https://github.com/reportportal/client-java/releases/tag/5.2.1), by @HardNorth
+- Examples are not reported in their own separate suite now, they are reported as separate scenarios instead, to conform other BDD framework implementation, by @HardNorth
+- Client version updated on [5.2.2](https://github.com/reportportal/client-java/releases/tag/5.2.2), by @HardNorth
 - JBehave dependency marked as `implementation` to force users specify their own versions, by @HardNorth
 
 ## [Unreleased]

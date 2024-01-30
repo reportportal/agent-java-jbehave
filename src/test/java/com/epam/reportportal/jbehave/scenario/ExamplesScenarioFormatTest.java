@@ -44,11 +44,10 @@ public class ExamplesScenarioFormatTest extends BaseTest {
 
 	public static final int STEPS_QUANTITY = 4;
 	private final String storyId = CommonUtils.namedId("story_");
-	private final String scenarioId = CommonUtils.namedId("scenario_");
-	private final List<String> exampleIds = Stream.generate(() -> CommonUtils.namedId("example_")).limit(2).collect(Collectors.toList());
+	private final List<String> scenarioIds = Stream.generate(() -> CommonUtils.namedId("scenario_")).limit(2).collect(Collectors.toList());
 
-	private final List<Pair<String, String>> stepIds = exampleIds.stream()
-			.flatMap(e -> Stream.generate(() -> Pair.of(e, CommonUtils.namedId("step_"))).limit(3))
+	private final List<Pair<String, List<String>>> stepIds = scenarioIds.stream()
+			.map(e -> Pair.of(e, Stream.generate(() -> CommonUtils.namedId("step_")).limit(4).collect(Collectors.toList())))
 			.collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
@@ -59,8 +58,7 @@ public class ExamplesScenarioFormatTest extends BaseTest {
 
 	@BeforeEach
 	public void setupMock() {
-		mockLaunch(client, null, storyId, scenarioId, exampleIds);
-		mockNestedSteps(client, stepIds);
+		mockLaunch(client, null, storyId, stepIds);
 		mockBatchLogging(client);
 	}
 
@@ -81,12 +79,11 @@ public class ExamplesScenarioFormatTest extends BaseTest {
 		run(format, EXAMPLES_STORY, new StockSteps());
 
 		verify(client, times(1)).startTestItem(any());
-		verify(client, times(1)).startTestItem(same(storyId), any());
 		ArgumentCaptor<StartTestItemRQ> exampleCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
-		verify(client, times(2)).startTestItem(same(scenarioId), exampleCaptor.capture());
+		verify(client, times(2)).startTestItem(same(storyId), exampleCaptor.capture());
 		ArgumentCaptor<StartTestItemRQ> startCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);
-		verify(client, times(STEPS_QUANTITY)).startTestItem(same(exampleIds.get(0)), startCaptor.capture());
-		verify(client, times(STEPS_QUANTITY)).startTestItem(same(exampleIds.get(1)), startCaptor.capture());
+		verify(client, times(STEPS_QUANTITY)).startTestItem(same(scenarioIds.get(0)), startCaptor.capture());
+		verify(client, times(STEPS_QUANTITY)).startTestItem(same(scenarioIds.get(1)), startCaptor.capture());
 
 		String scenarioCodeRef = EXAMPLES_STORY + "/[SCENARIO:Stock trade alert]";
 
