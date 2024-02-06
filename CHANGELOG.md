@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Remove `commons-model` dependency to rely on `clinet-java` exclusions in security fixes, by @HardNorth
+- Client version updated on [5.2.3](https://github.com/reportportal/client-java/releases/tag/5.2.3), by @HardNorth
 
 ## [5.3.0]
 ### Changed
