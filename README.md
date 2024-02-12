@@ -7,11 +7,11 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.epam.reportportal/agent-java-jbehave.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/com.epam.reportportal/agent-java-jbehave)
 [![CI Build](https://github.com/reportportal/agent-java-jbehave/actions/workflows/ci.yml/badge.svg)](https://github.com/reportportal/agent-java-jbehave/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/reportportal/agent-java-jbehave/branch/develop/graph/badge.svg?token=BCglguEcoR)](https://codecov.io/gh/reportportal/agent-java-jbehave)
-[![Join Slack chat!](https://img.shields.io/badge/slack-join-brightgreen.svg)](https://slack.epmrpp.reportportal.io/)
+[![Join Slack chat!](https://slack.epmrpp.reportportal.io/badge.svg)](https://slack.epmrpp.reportportal.io/)
 [![stackoverflow](https://img.shields.io/badge/reportportal-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/reportportal)
 [![Build with Love](https://img.shields.io/badge/build%20with-❤%EF%B8%8F%E2%80%8D-lightgrey.svg)](http://reportportal.io?style=flat)
 
-The latest version: 5.3.1. Please use `Maven Central` link above to get the agent. **For JBehave version 5.0 and
+The latest version: 5.3.2. Please use `Maven Central` link above to get the agent. **For JBehave version 5.0 and
 higher**
 
 ## Overview: How to Add ReportPortal Logging to Your JBehave Java Project
@@ -86,7 +86,7 @@ Java agents): https://github.com/reportportal/client-java
         <dependency>
             <groupId>com.epam.reportportal</groupId>
             <artifactId>agent-java-jbehave</artifactId>
-            <version>5.3.1</version>
+            <version>5.3.2</version>
         </dependency>
 
         <dependency>
@@ -159,7 +159,7 @@ def jbehaveVersion = '5.1.1'
 dependencies {
     testCompile "org.jbehave:jbehave-core:${jbehaveVersion}"
     testCompile "org.jbehave:jbehave-navigator:${jbehaveVersion}"
-    testCompile 'com.epam.reportportal:agent-java-jbehave:5.3.1'
+    testCompile 'com.epam.reportportal:agent-java-jbehave:5.3.2'
     testCompile 'com.epam.reportportal:logger-java-logback:5.1.1'
 }
 
