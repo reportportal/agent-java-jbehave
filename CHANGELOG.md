@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Removed
+- `ItemTreeUtils.createKey(org.jbehave.core.model.Scenario)` unused method, by @HardNorth
 
 ## [5.3.2]
 ### Changed
