@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- JBehave dependency marked as `compileOnly` to force users specify their own versions, by @HardNorth
+- Client version updated on [5.2.5](https://github.com/reportportal/client-java/releases/tag/5.2.5), by @HardNorth
 ### Removed
 - `ItemTreeUtils.createKey(org.jbehave.core.model.Scenario)` unused method, by @HardNorth
 
