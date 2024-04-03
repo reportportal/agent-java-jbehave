@@ -17,7 +17,6 @@
 package com.epam.reportportal.jbehave.util;
 
 import com.epam.reportportal.service.tree.TestItemTree;
-import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 
 import javax.annotation.Nonnull;
@@ -38,10 +37,6 @@ public class ItemTreeUtils {
 
 	public static TestItemTree.ItemTreeKey createKey(@Nonnull final Story key) {
 		return TestItemTree.ItemTreeKey.of(key.getPath());
-	}
-
-	public static TestItemTree.ItemTreeKey createKey(@Nonnull final Scenario key) {
-		return TestItemTree.ItemTreeKey.of(key.getTitle());
 	}
 
 	public static TestItemTree.ItemTreeKey createKey(@Nonnull final Map<String, String> example) {
