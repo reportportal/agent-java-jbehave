@@ -50,7 +50,7 @@ dependencies {
         exclude group: 'junit'
         exclude group: 'org.junit.vintage'
     }
-    testImplementation 'com.epam.reportportal:agent-java-test-utils:0.0.3'
+    testImplementation 'com.epam.reportportal:agent-java-test-utils:0.0.6'
     testImplementation 'org.aspectj:aspectjweaver:1.9.19'
     testImplementation 'org.hamcrest:hamcrest-core:2.2'
     testImplementation "org.mockito:mockito-core:${project.mockito_version}"
