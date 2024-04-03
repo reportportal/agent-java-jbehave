@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.3.3]
 ### Changed
 - JBehave dependency marked as `compileOnly` to force users specify their own versions, by @HardNorth
 - Client version updated on [5.2.11](https://github.com/reportportal/client-java/releases/tag/5.2.11), by @HardNorth
