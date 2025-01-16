@@ -25,7 +25,7 @@ import com.epam.reportportal.service.item.TestCaseIdEntry;
 import com.epam.reportportal.service.tree.TestItemTree;
 import com.epam.reportportal.utils.StatusEvaluation;
 import com.epam.reportportal.utils.TestCaseIdUtils;
-import com.epam.reportportal.utils.markdown.MarkdownUtils;
+import com.epam.reportportal.utils.formatting.MarkdownUtils;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.OperationCompletionRS;
 import com.epam.ta.reportportal.ws.model.ParameterResource;
