@@ -23,7 +23,7 @@ import com.epam.reportportal.listeners.ItemType;
 import com.epam.reportportal.service.ReportPortal;
 import com.epam.reportportal.service.ReportPortalClient;
 import com.epam.reportportal.util.test.CommonUtils;
-import com.epam.reportportal.utils.markdown.MarkdownUtils;
+import com.epam.reportportal.utils.formatting.MarkdownUtils;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.parsers.gherkin.GherkinStoryParser;
