@@ -91,9 +91,8 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	private final Supplier<Launch> launch;
 	private final TestItemTree itemTree;
 
+	private volatile ItemType currentLifecycleTopItemType;
 	private TestItemTree.TestItemLeaf lastStep;
-	private static volatile ItemType currentLifecycleTopItemType;
-	private static volatile ItemType currentLifecycleSuiteItemType;
 	private ItemType currentLifecycleItemType;
 
 	public ReportPortalStoryReporter(final Supplier<Launch> launchSupplier, TestItemTree testItemTree) {
