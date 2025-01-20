@@ -115,9 +115,9 @@ public class BeforeStepFailedTest extends BaseTest {
 		StartTestItemRQ beforeStoryStart = beforeCaptor.getValue();
 		assertThat(beforeStoryStart.getName(), equalTo(LIFECYCLE_STEP_NAMES[0]));
 		assertThat(beforeStoryStart.getCodeRef(),
-				equalTo(beforeSuiteCodeRef + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAMES[0]))
+				equalTo(beforeSuiteCodeRef + String.format(BEFORE_STORY_PATTERN, LIFECYCLE_STEP_NAMES[0]))
 		);
-		assertThat(beforeStoryStart.getType(), equalTo(ItemType.STEP.name()));
+		assertThat(beforeStoryStart.getType(), equalTo(ItemType.BEFORE_SUITE.name()));
 
 		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, SCENARIO_NAME);
 		StartTestItemRQ scenarioStart = storyStartItems.get(1);
@@ -158,10 +158,10 @@ public class BeforeStepFailedTest extends BaseTest {
 
 		StartTestItemRQ afterStoryStepStart = afterCaptor.getValue();
 		String afterStoryStepCodeRef =
-				afterStoryCodeRef + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAMES[LIFECYCLE_STEP_NAMES.length - 1]);
+				afterStoryCodeRef + String.format(AFTER_STORY_PATTERN, LIFECYCLE_STEP_NAMES[LIFECYCLE_STEP_NAMES.length - 1]);
 		assertThat(afterStoryStepStart.getName(), equalTo(LIFECYCLE_STEP_NAMES[LIFECYCLE_STEP_NAMES.length - 1]));
 		assertThat(afterStoryStepStart.getCodeRef(), equalTo(afterStoryStepCodeRef));
-		assertThat(afterStoryStepStart.getType(), equalTo(ItemType.STEP.name()));
+		assertThat(afterStoryStepStart.getType(), equalTo(ItemType.AFTER_SUITE.name()));
 
 		// Finish items verification
 		ArgumentCaptor<FinishTestItemRQ> finishStepCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);

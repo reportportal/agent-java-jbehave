@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+- [Issue #72](https://github.com/reportportal/agent-java-jbehave/issues/72): Incorrect test count on Before and After stories steps, by @HardNorth
+### Changed
+- Client version updated on [5.2.25](https://github.com/reportportal/client-java/releases/tag/5.2.25), by @HardNorth
 
 ## [5.3.5]
 ### Changed

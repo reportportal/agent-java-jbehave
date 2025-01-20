@@ -91,8 +91,8 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	private final Supplier<Launch> launch;
 	private final TestItemTree itemTree;
 
-	private TestItemTree.TestItemLeaf lastStep;
-	private static volatile ItemType currentLifecycleTopItemType;
+	private volatile ItemType currentLifecycleTopItemType;
+	private volatile TestItemTree.TestItemLeaf lastStep;
 	private ItemType currentLifecycleItemType;
 
 	public ReportPortalStoryReporter(final Supplier<Launch> launchSupplier, TestItemTree testItemTree) {
@@ -832,7 +832,6 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void beforeStory(@Nonnull Story story, boolean givenStory) {
-		currentLifecycleTopItemType = ItemType.AFTER_GROUPS;
 		currentLifecycleItemType = ItemType.BEFORE_SUITE;
 		structure.add(new Entity<>(ItemType.STORY, story));
 	}
@@ -897,31 +896,31 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		TestItemTree.TestItemLeaf parentItem = retrieveLeaf();
 		if (parentItem == null) {
 			// Before Stories
-			structure.add(new Entity<>(ItemType.TEST,
-					currentLifecycleTopItemType == null ? BEFORE_STORIES : AFTER_STORIES
-			));
-			if (currentLifecycleTopItemType == null) {
+			if (itemTree.getTestItems().isEmpty()) {
 				currentLifecycleTopItemType = ItemType.BEFORE_GROUPS;
+				structure.add(new Entity<>(ItemType.TEST, BEFORE_STORIES));
+			} else {
+				currentLifecycleTopItemType = ItemType.AFTER_GROUPS;
+				structure.add(new Entity<>(ItemType.TEST, AFTER_STORIES));
 			}
 		} else if (parentItem.getType() == ItemType.STORY) {
 			// Before Story
-			structure.add(new Entity<>(ItemType.TEST,
-					currentLifecycleItemType == ItemType.BEFORE_SUITE ? BEFORE_STORY : AFTER_STORY
-			));
+			structure.add(new Entity<>(ItemType.TEST, currentLifecycleItemType == ItemType.BEFORE_SUITE ? BEFORE_STORY : AFTER_STORY));
 		}
-		if (parentItem == null) {
-			ofNullable(retrieveLeaf()).map(i -> startLifecycleMethod(
-					step.getStepAsString(),
-					currentLifecycleTopItemType,
-					i
-			)).ifPresent(stepStack::add);
-			return;
-		}
-		currentLifecycleItemType = ItemType.BEFORE_METHOD;
-		TestItemTree.TestItemLeaf stepLeaf = ofNullable(retrieveLeaf()).map(l -> startStep(step.getStepAsString(), l))
-				.orElse(null);
-		stepStack.add(stepLeaf);
+		TestItemTree.TestItemLeaf stepLeaf = ofNullable(retrieveLeaf()).map(i -> {
+			if (parentItem == null) {
+				return startLifecycleMethod(step.getStepAsString(), currentLifecycleTopItemType, i);
+			} else {
+				if (ItemType.TEST == i.getType()) {
+					return startLifecycleMethod(step.getStepAsString(), currentLifecycleItemType, i);
+				} else {
+					currentLifecycleItemType = ItemType.BEFORE_METHOD;
+					return startStep(step.getStepAsString(), i);
+				}
+			}
+		}).orElse(null);
 		if (stepLeaf != null) {
+			stepStack.add(stepLeaf);
 			lastStep = stepLeaf;
 		}
 	}

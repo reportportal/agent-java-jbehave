@@ -100,10 +100,10 @@ public class BeforeStoryAnnotationFailedTest extends BaseTest {
 		assertThat(scenarioStart.getType(), equalTo(ItemType.SCENARIO.name()));
 
 		StartTestItemRQ beforeStep = startItems.get(2);
-		String beforeStepCodeRef = beforeStorySuiteCodeRef + String.format(STEP_PATTERN, BEFORE_STORY_NAME);
+		String beforeStepCodeRef = beforeStorySuiteCodeRef + String.format(BEFORE_STORY_PATTERN, BEFORE_STORY_NAME);
 		assertThat(beforeStep.getName(), equalTo(BEFORE_STORY_NAME));
 		assertThat(beforeStep.getCodeRef(), equalTo(beforeStepCodeRef));
-		assertThat(beforeStep.getType(), equalTo(ItemType.STEP.name()));
+		assertThat(beforeStep.getType(), equalTo(ItemType.BEFORE_SUITE.name()));
 
 		StartTestItemRQ step = startItems.get(3);
 		String stepCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, STEP_NAME);

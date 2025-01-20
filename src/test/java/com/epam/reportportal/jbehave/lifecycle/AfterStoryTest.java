@@ -109,9 +109,9 @@ public class AfterStoryTest extends BaseTest {
 		assertThat(afterStep.getName(), equalTo(LIFECYCLE_STEP_NAME));
 		assertThat(
 				afterStep.getCodeRef(),
-				equalTo(afterStoryCodeRef + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAME))
+				equalTo(afterStoryCodeRef + String.format(AFTER_STORY_PATTERN, LIFECYCLE_STEP_NAME))
 		);
-		assertThat(afterStep.getType(), equalTo(ItemType.STEP.name()));
+		assertThat(afterStep.getType(), equalTo(ItemType.AFTER_SUITE.name()));
 
 		// Finish items verification
 		ArgumentCaptor<FinishTestItemRQ> finishStepCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
