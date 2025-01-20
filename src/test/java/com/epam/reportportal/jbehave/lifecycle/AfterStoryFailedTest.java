@@ -116,9 +116,9 @@ public class AfterStoryFailedTest extends BaseTest {
 		StartTestItemRQ beforeStoryStart = beforeCaptor.getValue();
 		assertThat(beforeStoryStart.getName(), equalTo(LIFECYCLE_STEP_NAMES[0]));
 		assertThat(beforeStoryStart.getCodeRef(),
-				equalTo(beforeSuiteCodeRef + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAMES[0]))
+				equalTo(beforeSuiteCodeRef + String.format(AFTER_STORY_PATTERN, LIFECYCLE_STEP_NAMES[0]))
 		);
-		assertThat(beforeStoryStart.getType(), equalTo(ItemType.STEP.name()));
+		assertThat(beforeStoryStart.getType(), equalTo(ItemType.AFTER_SUITE.name()));
 
 		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, SCENARIO_NAME);
 		StartTestItemRQ scenarioStart = storyStartItems.get(1);

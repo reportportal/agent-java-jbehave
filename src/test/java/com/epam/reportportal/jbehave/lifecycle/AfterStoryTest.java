@@ -109,7 +109,7 @@ public class AfterStoryTest extends BaseTest {
 		assertThat(afterStep.getName(), equalTo(LIFECYCLE_STEP_NAME));
 		assertThat(
 				afterStep.getCodeRef(),
-				equalTo(afterStoryCodeRef + String.format("/[AFTER_SUITE:%s]", LIFECYCLE_STEP_NAME))
+				equalTo(afterStoryCodeRef + String.format(AFTER_STORY_PATTERN, LIFECYCLE_STEP_NAME))
 		);
 		assertThat(afterStep.getType(), equalTo(ItemType.AFTER_SUITE.name()));
 

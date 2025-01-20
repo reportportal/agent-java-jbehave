@@ -75,6 +75,8 @@ public class BaseTest {
 	public static final String ROOT_SUITE_PREFIX = "root_";
 
 	public static final String STEP_PATTERN = "/[STEP:%s]";
+	public static final String BEFORE_STORY_PATTERN = "/[BEFORE_SUITE:%s]";
+	public static final String AFTER_STORY_PATTERN = "/[AFTER_SUITE:%s]";
 	public static final String LIFECYCLE_PATTERN = "/[LIFECYCLE:%s]";
 	public static final String SCENARIO_PATTERN = "/[SCENARIO:%s]";
 

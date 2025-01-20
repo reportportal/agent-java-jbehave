@@ -92,7 +92,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	private final TestItemTree itemTree;
 
 	private volatile ItemType currentLifecycleTopItemType;
-	private TestItemTree.TestItemLeaf lastStep;
+	private volatile TestItemTree.TestItemLeaf lastStep;
 	private ItemType currentLifecycleItemType;
 
 	public ReportPortalStoryReporter(final Supplier<Launch> launchSupplier, TestItemTree testItemTree) {
@@ -832,7 +832,6 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	@Override
 	public void beforeStory(@Nonnull Story story, boolean givenStory) {
-		currentLifecycleTopItemType = ItemType.AFTER_GROUPS;
 		currentLifecycleItemType = ItemType.BEFORE_SUITE;
 		structure.add(new Entity<>(ItemType.STORY, story));
 	}
@@ -897,11 +896,12 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		TestItemTree.TestItemLeaf parentItem = retrieveLeaf();
 		if (parentItem == null) {
 			// Before Stories
-			structure.add(new Entity<>(ItemType.TEST, currentLifecycleTopItemType == null ? BEFORE_STORIES : AFTER_STORIES));
-			if (currentLifecycleTopItemType == null) {
+			if (itemTree.getTestItems().isEmpty()) {
 				currentLifecycleTopItemType = ItemType.BEFORE_GROUPS;
+				structure.add(new Entity<>(ItemType.TEST, BEFORE_STORIES));
 			} else {
 				currentLifecycleTopItemType = ItemType.AFTER_GROUPS;
+				structure.add(new Entity<>(ItemType.TEST, AFTER_STORIES));
 			}
 		} else if (parentItem.getType() == ItemType.STORY) {
 			// Before Story

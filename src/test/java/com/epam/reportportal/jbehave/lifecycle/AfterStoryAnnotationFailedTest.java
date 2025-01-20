@@ -106,8 +106,8 @@ public class AfterStoryAnnotationFailedTest extends BaseTest {
 
 		StartTestItemRQ afterStep = startItems.get(3);
 		assertThat(afterStep.getName(), equalTo(AFTER_STORY_NAME));
-		assertThat(afterStep.getCodeRef(), equalTo(afterStoryCodeRef + String.format(STEP_PATTERN, AFTER_STORY_NAME)));
-		assertThat(afterStep.getType(), equalTo(ItemType.STEP.name()));
+		assertThat(afterStep.getCodeRef(), equalTo(afterStoryCodeRef + String.format(AFTER_STORY_PATTERN, AFTER_STORY_NAME)));
+		assertThat(afterStep.getType(), equalTo(ItemType.AFTER_SUITE.name()));
 
 		// Finish items verification
 		ArgumentCaptor<FinishTestItemRQ> finishStepCaptor = ArgumentCaptor.forClass(FinishTestItemRQ.class);
