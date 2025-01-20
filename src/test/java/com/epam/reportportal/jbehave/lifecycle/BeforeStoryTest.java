@@ -94,9 +94,9 @@ public class BeforeStoryTest extends BaseTest {
 		StartTestItemRQ beforeStoryStart = beforeCaptor.getValue();
 		assertThat(beforeStoryStart.getName(), equalTo(LIFECYCLE_STEP_NAME));
 		assertThat(beforeStoryStart.getCodeRef(),
-				equalTo(beforeSuiteCodeRef + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAME))
+				equalTo(beforeSuiteCodeRef + String.format("/[BEFORE_SUITE:%s]", LIFECYCLE_STEP_NAME))
 		);
-		assertThat(beforeStoryStart.getType(), equalTo(ItemType.STEP.name()));
+		assertThat(beforeStoryStart.getType(), equalTo(ItemType.BEFORE_SUITE.name()));
 
 		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, SCENARIO_NAME);
 		StartTestItemRQ scenarioStart = startItems.get(1);
