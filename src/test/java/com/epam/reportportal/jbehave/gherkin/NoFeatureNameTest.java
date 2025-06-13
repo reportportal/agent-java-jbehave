@@ -29,19 +29,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
-public class SimpleGherkinTest extends BaseTest {
+public class NoFeatureNameTest extends BaseTest {
 	private final String storyId = CommonUtils.namedId("story_");
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("step_")).limit(2).collect(Collectors.toList());
@@ -59,8 +58,7 @@ public class SimpleGherkinTest extends BaseTest {
 		mockBatchLogging(client);
 	}
 
-	private static final String SIMPLE_GHERKIN_STORY = "features/DummyScenario.feature";
-	private static final List<String> DUMMY_SCENARIO_STEPS = Arrays.asList("Given I have empty step", "Then I have another empty step");
+	private static final String SIMPLE_GHERKIN_STORY = "features/NoFeatureName.feature";
 
 	@Test
 	public void verify_code_reference_generation_gherkin_feature() {
@@ -68,30 +66,18 @@ public class SimpleGherkinTest extends BaseTest {
 
 		ArgumentCaptor<StartTestItemRQ> captor = ArgumentCaptor.forClass(StartTestItemRQ.class);
 		verify(client, times(1)).startTestItem(captor.capture());
-		verify(client, times(1)).startTestItem(same(storyId), captor.capture());
-		verify(client, times(2)).startTestItem(same(scenarioId), captor.capture());
+		verify(client, times(1)).startTestItem(same(storyId), any(StartTestItemRQ.class));
+		verify(client, times(1)).startTestItem(same(scenarioId), any(StartTestItemRQ.class));
 
 		List<StartTestItemRQ> items = captor.getAllValues();
-		assertThat(items, hasSize(4));
+		assertThat(items, hasSize(1));
 
 		StartTestItemRQ storyRq = items.get(0);
-		StartTestItemRQ scenarioRq = items.get(1);
 
 		String storyCodeRef = SIMPLE_GHERKIN_STORY;
 		assertThat(storyRq.getCodeRef(), allOf(notNullValue(), equalTo(storyCodeRef)));
 		assertThat(storyRq.getType(), allOf(notNullValue(), equalTo(ItemType.STORY.name())));
-		assertThat(storyRq.getDescription(), equalTo("Test dummy scenario"));
-
-		String scenarioCodeRef = storyCodeRef + String.format(SCENARIO_PATTERN, "The scenario");
-		assertThat(scenarioRq.getCodeRef(), allOf(notNullValue(), equalTo(scenarioCodeRef)));
-		assertThat(scenarioRq.getType(), allOf(notNullValue(), equalTo(ItemType.SCENARIO.name())));
-
-		List<StartTestItemRQ> stepRqs = items.subList(2, items.size());
-		IntStream.range(0, stepRqs.size()).forEach(i -> {
-			StartTestItemRQ step = stepRqs.get(i);
-			String stepCodeRef = scenarioCodeRef + String.format(STEP_PATTERN, DUMMY_SCENARIO_STEPS.get(i));
-			assertThat(step.getCodeRef(), allOf(notNullValue(), equalTo(stepCodeRef)));
-			assertThat(step.getType(), allOf(notNullValue(), equalTo(ItemType.STEP.name())));
-		});
+		assertThat(storyRq.getName(), allOf(notNullValue(), equalTo(storyCodeRef.substring(storyCodeRef.lastIndexOf('/') + 1))));
+		assertThat(storyRq.getDescription(), emptyString());
 	}
 }
