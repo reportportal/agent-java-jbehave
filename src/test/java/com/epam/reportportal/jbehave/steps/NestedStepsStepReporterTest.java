@@ -109,6 +109,7 @@ public class NestedStepsStepReporterTest extends BaseTest {
 	@SuppressWarnings("unchecked")
 	public void verify_step_reporter_steps_integrity() {
 		run(format, STORY_PATH, new NestedStepsStepReporterSteps());
+		format.finishLaunch();
 
 		verify(client, times(2)).startTestItem(same(testId), any());
 		ArgumentCaptor<StartTestItemRQ> firstStepCaptor = ArgumentCaptor.forClass(StartTestItemRQ.class);

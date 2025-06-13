@@ -64,6 +64,7 @@ public class ItemStatusFailedTest extends BaseTest {
 	@SuppressWarnings("unchecked")
 	public void verify_a_step_failed_and_parent_status_calculated() {
 		run(format, FAILED_SCENARIO_PATH, new FailedSteps());
+		format.finishLaunch();
 
 		verify(client).startTestItem(any());
 		verify(client).startTestItem(same(storyId), any());
