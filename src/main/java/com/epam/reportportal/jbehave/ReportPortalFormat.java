@@ -67,7 +67,7 @@ public abstract class ReportPortalFormat extends Format {
 	/**
 	 * Finishes a {@link Launch} passed in the method parameters
 	 */
-	protected void finishLaunch() {
+	public void finishLaunch() {
 		FinishExecutionRQ rq = new FinishExecutionRQ();
 		rq.setEndTime(Calendar.getInstance().getTime());
 		launch.get().finish(rq);

@@ -65,6 +65,7 @@ public class ItemStatusPassedSkippedTest extends BaseTest {
 	@SuppressWarnings("unchecked")
 	public void verify_a_step_passed_and_a_step_skipped_parent_status_calculated() {
 		run(format, PASSED_SKIPPED_SCENARIO_PATH, new EmptySteps());
+		format.finishLaunch();
 
 		verify(client).startTestItem(any());
 		verify(client).startTestItem(same(storyId), any());
