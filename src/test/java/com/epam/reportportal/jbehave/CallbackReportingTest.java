@@ -63,6 +63,7 @@ public class CallbackReportingTest extends BaseTest {
 	@BeforeEach
 	public void setup() {
 		mockLaunch(client, launchId, suiteId, tests);
+		mockBatchLogging(client);
 		when(client.log(any(SaveLogRQ.class))).thenReturn(Maybe.just(new EntryCreatedAsyncRS()));
 	}
 

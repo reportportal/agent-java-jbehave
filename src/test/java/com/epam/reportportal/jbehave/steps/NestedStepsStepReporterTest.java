@@ -43,25 +43,22 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
 
 public class NestedStepsStepReporterTest extends BaseTest {
 
 	private final String launchId = CommonUtils.namedId("launch_");
 	private final String suiteId = CommonUtils.namedId("suite_");
 	private final String testId = CommonUtils.namedId("test_");
-	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("step_"))
-			.limit(2)
-			.collect(Collectors.toList());
+	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("step_")).limit(2).collect(Collectors.toList());
 
 	// Step reporter
 	private final List<String> stepNestedStepIds = Stream.generate(() -> CommonUtils.namedId("step_"))
 			.limit(3)
 			.collect(Collectors.toList());
-	private final List<Pair<String, String>> stepNestedSteps = Stream.concat(Stream.of(Pair.of(stepIds.get(0),
-					stepNestedStepIds.get(0)
-			)),
+	private final List<Pair<String, String>> stepNestedSteps = Stream.concat(
+			Stream.of(Pair.of(stepIds.get(0), stepNestedStepIds.get(0))),
 			stepNestedStepIds.stream().skip(1).map(s -> Pair.of(stepIds.get(1), s))
 	).collect(Collectors.toList());
 
@@ -84,8 +81,7 @@ public class NestedStepsStepReporterTest extends BaseTest {
 		assertThat(step.getType(), equalTo("STEP"));
 	}
 
-	private static SaveLogRQ verifyLogEntry(Collection<SaveLogRQ> logs, String stepId,
-			Predicate<String> messagePredicate) {
+	private static SaveLogRQ verifyLogEntry(Collection<SaveLogRQ> logs, String stepId, Predicate<String> messagePredicate) {
 		List<SaveLogRQ> wantedLogs = logs.stream()
 				.filter(l -> l.getMessage() != null && messagePredicate.test(l.getMessage()))
 				.collect(Collectors.toList());
@@ -100,7 +96,7 @@ public class NestedStepsStepReporterTest extends BaseTest {
 	}
 
 	private static void verifyFileLogEntry(Collection<SaveLogRQ> logs, String stepId) {
-		assertThat(verifyLogEntry(logs, stepId, m -> m.equals("")).getFile(), notNullValue());
+		assertThat(verifyLogEntry(logs, stepId, String::isEmpty).getFile(), notNullValue());
 	}
 
 	private static final String STORY_PATH = "stories/ManualStepReporter.story";
@@ -117,11 +113,12 @@ public class NestedStepsStepReporterTest extends BaseTest {
 		ArgumentCaptor<List<MultipartBody.Part>> logCaptor = ArgumentCaptor.forClass(List.class);
 		verify(client, atLeastOnce()).log(logCaptor.capture());
 		StartTestItemRQ firstStep = firstStepCaptor.getValue();
-		List<SaveLogRQ> logEntries = filterLogs(logCaptor, rq -> !LogLevel.DEBUG.name().equals(rq.getLevel()));
+		List<SaveLogRQ> logEntries = filterLogs(
+				logCaptor,
+				rq -> !LogLevel.DEBUG.name().equals(rq.getLevel()) && !LogLevel.TRACE.name().equals(rq.getLevel())
+		);
 		String firstStepId = stepNestedStepIds.get(0);
-		List<SaveLogRQ> firstStepLogs = logEntries.stream()
-				.filter(l -> firstStepId.equals(l.getItemUuid()))
-				.collect(Collectors.toList());
+		List<SaveLogRQ> firstStepLogs = logEntries.stream().filter(l -> firstStepId.equals(l.getItemUuid())).collect(Collectors.toList());
 		assertThat(logEntries, hasSize(5));
 
 		verifyStepStart(firstStep, NestedStepsStepReporterSteps.FIRST_NAME);
@@ -135,9 +132,7 @@ public class NestedStepsStepReporterTest extends BaseTest {
 		StartTestItemRQ secondStep = secondSteps.get(0);
 		verifyStepStart(secondStep, NestedStepsStepReporterSteps.SECOND_NAME);
 		String secondStepId = stepNestedStepIds.get(1);
-		List<SaveLogRQ> secondStepLogs = logEntries.stream()
-				.filter(l -> secondStepId.equals(l.getItemUuid()))
-				.collect(Collectors.toList());
+		List<SaveLogRQ> secondStepLogs = logEntries.stream().filter(l -> secondStepId.equals(l.getItemUuid())).collect(Collectors.toList());
 		assertThat(secondStepLogs, hasSize(2));
 		verifyTextLogEntry(secondStepLogs, secondStepId, NestedStepsStepReporterSteps.DURING_SECOND_NESTED_STEP_LOG);
 		verifyTextLogEntry(secondStepLogs, secondStepId, NestedStepsStepReporterSteps.SECOND_NESTED_STEP_LOG);
@@ -145,9 +140,7 @@ public class NestedStepsStepReporterTest extends BaseTest {
 		StartTestItemRQ thirdStep = secondSteps.get(1);
 		verifyStepStart(thirdStep, NestedStepsStepReporterSteps.THIRD_NAME);
 		String thirdStepId = stepNestedStepIds.get(2);
-		List<SaveLogRQ> thirdStepLogs = logEntries.stream()
-				.filter(l -> thirdStepId.equals(l.getItemUuid()))
-				.collect(Collectors.toList());
+		List<SaveLogRQ> thirdStepLogs = logEntries.stream().filter(l -> thirdStepId.equals(l.getItemUuid())).collect(Collectors.toList());
 		assertThat(thirdStepLogs, hasSize(2));
 
 		verifyFileLogEntry(thirdStepLogs, thirdStepId);
