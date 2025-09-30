@@ -44,8 +44,9 @@ import org.jbehave.core.steps.Timing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -193,11 +194,11 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	@Nonnull
 	protected StartTestItemRQ buildStartStoryRq(@Nonnull Story story, @Nonnull String codeRef,
-			@Nullable final Date startTime) {
+			@Nullable final Instant startTime) {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(getStoryName(story));
 		rq.setCodeRef(codeRef);
-		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
+		rq.setStartTime(ofNullable(startTime).orElseGet(Instant::now));
 		rq.setType(ItemType.STORY.name());
 		rq.setAttributes(getAttributes(story));
 		rq.setDescription(story.getDescription().asString());
@@ -236,11 +237,11 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	@Nonnull
 	protected StartTestItemRQ buildStartScenarioRq(@Nonnull Scenario scenario, @Nonnull String codeRef,
-			@Nullable final Date startTime) {
+			@Nullable final Instant startTime) {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(getScenarioName(scenario));
 		rq.setCodeRef(codeRef);
-		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
+		rq.setStartTime(ofNullable(startTime).orElseGet(Instant::now));
 		rq.setType(ItemType.SCENARIO.name());
 		rq.setAttributes(getAttributes(scenario));
 		return rq;
@@ -278,11 +279,11 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	@Nonnull
 	protected StartTestItemRQ buildStartExampleRq(@Nonnull Scenario scenario, @Nonnull Map<String, String> example, @Nonnull String codeRef,
-			@Nullable final Date startTime) {
+			@Nullable final Instant startTime) {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(getScenarioName(scenario));
 		rq.setCodeRef(codeRef);
-		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
+		rq.setStartTime(ofNullable(startTime).orElseGet(Instant::now));
 		rq.setType(ItemType.TEST.name());
 		rq.setParameters(getStepParameters(example));
 		rq.setDescription(String.format(PARAMETERS_PATTERN, MarkdownUtils.formatDataTable(example)));
@@ -349,11 +350,11 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	@Nonnull
 	protected StartTestItemRQ buildStartStepRq(@Nonnull final String step, @Nonnull final String codeRef,
-			@Nullable final Map<String, String> params, @Nullable final Date startTime) {
+			@Nullable final Map<String, String> params, @Nullable final Instant startTime) {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(formatExampleStep(step, params));
 		rq.setCodeRef(codeRef);
-		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
+		rq.setStartTime(ofNullable(startTime).orElseGet(Instant::now));
 		rq.setType(ItemType.STEP.name());
 		Optional<List<ParameterResource>> usedParams = ofNullable(params).map(p -> getUsedParameters(step).stream()
 				.filter(params::containsKey)
@@ -377,11 +378,11 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	@Nonnull
 	protected StartTestItemRQ buildLifecycleSuiteStartRq(@Nonnull final String name, @Nullable String codeRef,
-			@Nullable final Date startTime) {
+			@Nullable final Instant startTime) {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(name);
 		rq.setCodeRef(codeRef);
-		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
+		rq.setStartTime(ofNullable(startTime).orElseGet(Instant::now));
 		rq.setType(ItemType.TEST.name());
 		return rq;
 	}
@@ -397,11 +398,11 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 */
 	@Nonnull
 	protected StartTestItemRQ buildLifecycleMethodStartRq(@Nonnull final ItemType type, @Nonnull final String name,
-			@Nullable final String codeRef, @Nullable final Date startTime) {
+			@Nullable final String codeRef, @Nullable final Instant startTime) {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(name);
 		rq.setCodeRef(codeRef);
-		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Calendar.getInstance().getTime()));
+		rq.setStartTime(ofNullable(startTime).orElseGet(Instant::now));
 		rq.setType(type.name());
 		return rq;
 	}
@@ -451,11 +452,11 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	 * @return current date or parent date
 	 */
 	@Nonnull
-	protected Date getItemDate(@Nullable final TestItemTree.TestItemLeaf parent) {
-		final Date previousDate = ofNullable(parent).map(p -> p.<Date>getAttribute(START_TIME))
-				.orElseGet(() -> Calendar.getInstance().getTime());
-		Date currentDate = Calendar.getInstance().getTime();
-		Date itemDate;
+	protected Instant getItemDate(@Nullable final TestItemTree.TestItemLeaf parent) {
+		final Instant previousDate = ofNullable(parent).map(p -> p.<Instant>getAttribute(START_TIME))
+				.orElseGet(Instant::now);
+		Instant currentDate = Instant.now();
+		Instant itemDate;
 		if (previousDate.compareTo(currentDate) <= 0) {
 			itemDate = currentDate;
 		} else {
@@ -483,7 +484,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 			final Map<TestItemTree.ItemTreeKey, TestItemTree.TestItemLeaf> children = parent.map(p -> p.getValue()
 					.getChildItems()).orElseGet(itemTree::getTestItems);
 			final String parentCodeRef = parent.map(p -> (String) p.getValue().getAttribute(CODE_REF)).orElse(null);
-			Date itemDate = getItemDate(parent.map(Pair::getValue).orElse(null));
+			Instant itemDate = getItemDate(parent.map(Pair::getValue).orElse(null));
 			switch (itemType) {
 				case STORY:
 					Story story = (Story) entity.get();
@@ -648,7 +649,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	protected FinishTestItemRQ buildFinishTestItemRequest(@Nonnull final Maybe<String> id,
 			@Nullable final ItemStatus status, @Nullable Issue issue) {
 		FinishTestItemRQ rq = new FinishTestItemRQ();
-		rq.setEndTime(Calendar.getInstance().getTime());
+		rq.setEndTime(Instant.now());
 		rq.setStatus(ofNullable(status).map(Enum::name).orElse(null));
 		rq.setIssue(issue);
 		return rq;
@@ -736,9 +737,8 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 			SaveLogRQ rq = new SaveLogRQ();
 			rq.setItemUuid(itemUuid);
 			rq.setLevel(level.name());
-			rq.setLogTime(Calendar.getInstance().getTime());
+			rq.setLogTime(Instant.now());
 			rq.setMessage(message);
-			rq.setLogTime(Calendar.getInstance().getTime());
 			return rq;
 		};
 	}

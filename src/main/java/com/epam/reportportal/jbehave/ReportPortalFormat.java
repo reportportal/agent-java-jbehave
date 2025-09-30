@@ -29,7 +29,8 @@ import org.jbehave.core.reporters.Format;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -69,7 +70,7 @@ public abstract class ReportPortalFormat extends Format {
 	 */
 	public void finishLaunch() {
 		FinishExecutionRQ rq = new FinishExecutionRQ();
-		rq.setEndTime(Calendar.getInstance().getTime());
+		rq.setEndTime(Instant.now());
 		launch.get().finish(rq);
 	}
 
@@ -90,7 +91,7 @@ public abstract class ReportPortalFormat extends Format {
 	 * @param parameters Report Portal client parameters
 	 * @return a Start Launch request instance
 	 */
-	protected StartLaunchRQ buildStartLaunchRQ(Date startTime, ListenerParameters parameters) {
+	protected StartLaunchRQ buildStartLaunchRQ(Instant startTime, ListenerParameters parameters) {
 		StartLaunchRQ rq = new StartLaunchRQ();
 		rq.setName(parameters.getLaunchName());
 		rq.setStartTime(startTime);
@@ -119,9 +120,9 @@ public abstract class ReportPortalFormat extends Format {
 	 * @return a supplier with a lazy-initialized {@link Launch} instance
 	 */
 	protected MemoizingSupplier<Launch> createLaunch(final ReportPortal rp) {
-		return new MemoizingSupplier<>(new Supplier<Launch>() {
+		return new MemoizingSupplier<>(new Supplier<>() {
 			/* should no be lazy */
-			private final Date startTime = Calendar.getInstance().getTime();
+			private final Instant startTime = Instant.now();
 
 			@Override
 			public Launch get() {

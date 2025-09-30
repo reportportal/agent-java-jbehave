@@ -19,8 +19,8 @@ package com.epam.reportportal.jbehave.util;
 import com.epam.reportportal.service.tree.TestItemTree;
 import org.jbehave.core.model.Story;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.util.Map;
 
 import static com.epam.reportportal.jbehave.JBehaveUtils.formatExampleKey;

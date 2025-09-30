@@ -31,8 +31,8 @@ import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.Given;
 
-import javax.annotation.Nonnull;
-import java.util.Calendar;
+import jakarta.annotation.Nonnull;
+import java.time.Instant;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -83,7 +83,7 @@ public class CallbackReportingSteps {
 			@Nonnull TestItemTree.TestItemLeaf testItemLeaf) {
 		FinishTestItemRQ finishTestItemRQ = new FinishTestItemRQ();
 		finishTestItemRQ.setStatus(status);
-		finishTestItemRQ.setEndTime(Calendar.getInstance().getTime());
+		finishTestItemRQ.setEndTime(Instant.now());
 		//noinspection ResultOfMethodCallIgnored
 		ItemTreeReporter.finishItem(rp.getClient(), finishTestItemRQ, tree.getLaunchId(), testItemLeaf)
 				.cache()
@@ -97,7 +97,7 @@ public class CallbackReportingSteps {
 				rp.getClient(),
 				"ERROR",
 				"Error message",
-				Calendar.getInstance().getTime(),
+				Instant.now(),
 				tree.getLaunchId(),
 				testItemLeaf
 		);

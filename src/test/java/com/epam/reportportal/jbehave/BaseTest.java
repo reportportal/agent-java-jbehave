@@ -49,8 +49,8 @@ import org.jbehave.core.steps.InstanceStepsFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -274,7 +274,7 @@ public class BaseTest {
 				})
 				.map(b -> {
 					try {
-						return HttpRequestUtils.MAPPER.readValue(b, new TypeReference<List<SaveLogRQ>>() {
+						return HttpRequestUtils.MAPPER.readValue(b, new TypeReference<>() {
 						});
 					} catch (IOException e) {
 						return Collections.<SaveLogRQ>emptyList();
