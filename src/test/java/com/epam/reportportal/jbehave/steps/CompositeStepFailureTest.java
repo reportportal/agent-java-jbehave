@@ -50,7 +50,8 @@ public class CompositeStepFailureTest extends BaseTest {
 	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("step_")).limit(3).collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
@@ -63,7 +64,8 @@ public class CompositeStepFailureTest extends BaseTest {
 
 	private static final String STORY = "stories/composite/CompositeStepFailure.story";
 
-	private static final List<String> STEP_NAMES = Arrays.asList("Given failed composite step",
+	private static final List<String> STEP_NAMES = Arrays.asList(
+			"Given failed composite step",
 			"Given I have a failed step",
 			"Then I have another empty step"
 	);

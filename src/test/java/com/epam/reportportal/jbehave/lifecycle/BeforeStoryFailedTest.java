@@ -48,7 +48,8 @@ public class BeforeStoryFailedTest extends BaseTest {
 	private final String storyId = namedId("story_");
 	private final String beforeStoryId = namedId("before_story_");
 	private final String afterStoryId = namedId("after_story_");
-	private final List<String> lifecycleStepIds = Arrays.asList(namedId("before_story_"),
+	private final List<String> lifecycleStepIds = Arrays.asList(
+			namedId("before_story_"),
 			namedId("before_scenario_"),
 			namedId("before_step_"),
 			namedId("after_step_"),
@@ -58,17 +59,18 @@ public class BeforeStoryFailedTest extends BaseTest {
 	private final String scenarioId = namedId("scenario_");
 	private final String stepId = namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(beforeStoryId,
-					Collections.singletonList(lifecycleStepIds.get(0))
-			),
-			Pair.of(scenarioId, Stream.concat(Stream.concat(lifecycleStepIds.subList(1, 3).stream(), Stream.of(stepId)),
-					lifecycleStepIds.subList(3, lifecycleStepIds.size() - 1).stream()
-			).collect(Collectors.toList())),
-			Pair.of(afterStoryId, Collections.singletonList(lifecycleStepIds.get(lifecycleStepIds.size() - 1)))
+	private final List<Pair<String, List<String>>> steps = Arrays.asList(
+			Pair.of(beforeStoryId, Collections.singletonList(lifecycleStepIds.get(0))), Pair.of(
+					scenarioId, Stream.concat(
+							Stream.concat(lifecycleStepIds.subList(1, 3).stream(), Stream.of(stepId)),
+							lifecycleStepIds.subList(3, lifecycleStepIds.size() - 1).stream()
+					).collect(Collectors.toList())
+			), Pair.of(afterStoryId, Collections.singletonList(lifecycleStepIds.get(lifecycleStepIds.size() - 1)))
 	);
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
@@ -83,9 +85,9 @@ public class BeforeStoryFailedTest extends BaseTest {
 	private static final String SCENARIO_NAME = "The scenario";
 	private static final String STEP_NAME = "Given I have empty step";
 	private static final String[] LIFECYCLE_SUITES_NAMES = new String[] { "BeforeStory", "AfterStory" };
-	private static final String[] LIFECYCLE_STEP_NAMES = new String[] { "Given I have a failed step",
-			"Then I have another empty step", "Given It is test with parameters", "When I have parameter test",
-			"Then I have another empty step", "Given It is a step with an integer parameter 42" };
+	private static final String[] LIFECYCLE_STEP_NAMES = new String[] { "Given I have a failed step", "Then I have another empty step",
+			"Given It is test with parameters", "When I have parameter test", "Then I have another empty step",
+			"Given It is a step with an integer parameter 42" };
 
 	@Test
 	public void verify_before_story_lifecycle_step_failure_reporting() {
@@ -112,7 +114,8 @@ public class BeforeStoryFailedTest extends BaseTest {
 
 		StartTestItemRQ beforeStoryStart = beforeCaptor.getValue();
 		assertThat(beforeStoryStart.getName(), equalTo(LIFECYCLE_STEP_NAMES[0]));
-		assertThat(beforeStoryStart.getCodeRef(),
+		assertThat(
+				beforeStoryStart.getCodeRef(),
 				equalTo(beforeSuiteCodeRef + String.format(BEFORE_STORY_PATTERN, LIFECYCLE_STEP_NAMES[0]))
 		);
 		assertThat(beforeStoryStart.getType(), equalTo(ItemType.BEFORE_SUITE.name()));

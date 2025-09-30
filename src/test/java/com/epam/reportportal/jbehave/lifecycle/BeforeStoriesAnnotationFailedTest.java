@@ -49,16 +49,19 @@ public class BeforeStoriesAnnotationFailedTest extends BaseTest {
 	private final String scenarioId = CommonUtils.namedId("scenario_");
 	private final String stepId = CommonUtils.namedId("step_");
 
-	private final List<Pair<String, List<String>>> beforeSteps = Collections.singletonList(Pair.of(beforeStoriesId,
+	private final List<Pair<String, List<String>>> beforeSteps = Collections.singletonList(Pair.of(
+			beforeStoriesId,
 			Collections.singletonList(beforeStepId)
 	));
 
-	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(scenarioId,
+	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(
+			scenarioId,
 			Collections.singletonList(stepId)
 	));
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
@@ -100,9 +103,7 @@ public class BeforeStoriesAnnotationFailedTest extends BaseTest {
 
 		StartTestItemRQ beforeStep = startItems.get(2);
 		assertThat(beforeStep.getName(), equalTo(BEFORE_STORY_NAME));
-		assertThat(beforeStep.getCodeRef(),
-				equalTo(beforeStoriesCodeRef + String.format("/[BEFORE_GROUPS:%s]", BEFORE_STORY_NAME))
-		);
+		assertThat(beforeStep.getCodeRef(), equalTo(beforeStoriesCodeRef + String.format("/[BEFORE_GROUPS:%s]", BEFORE_STORY_NAME)));
 		assertThat(beforeStep.getType(), equalTo(ItemType.BEFORE_GROUPS.name()));
 
 		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, DEFAULT_SCENARIO_NAME);

@@ -48,14 +48,14 @@ public class BeforeStoryTest extends BaseTest {
 	private final String beforeStepId = CommonUtils.namedId("before_story_step_");
 	private final String stepId = CommonUtils.namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Arrays.asList(Pair.of(beforeSuiteId,
-					Collections.singletonList(beforeStepId)
-			),
+	private final List<Pair<String, List<String>>> steps = Arrays.asList(
+			Pair.of(beforeSuiteId, Collections.singletonList(beforeStepId)),
 			Pair.of(scenarioId, Collections.singletonList(stepId))
 	);
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
@@ -93,9 +93,7 @@ public class BeforeStoryTest extends BaseTest {
 
 		StartTestItemRQ beforeStoryStart = beforeCaptor.getValue();
 		assertThat(beforeStoryStart.getName(), equalTo(LIFECYCLE_STEP_NAME));
-		assertThat(beforeStoryStart.getCodeRef(),
-				equalTo(beforeSuiteCodeRef + String.format(BEFORE_STORY_PATTERN, LIFECYCLE_STEP_NAME))
-		);
+		assertThat(beforeStoryStart.getCodeRef(), equalTo(beforeSuiteCodeRef + String.format(BEFORE_STORY_PATTERN, LIFECYCLE_STEP_NAME)));
 		assertThat(beforeStoryStart.getType(), equalTo(ItemType.BEFORE_SUITE.name()));
 
 		String scenarioCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, SCENARIO_NAME);

@@ -45,7 +45,8 @@ public class ItemStatusFailedSkippedTest extends BaseTest {
 	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("step_")).limit(2).collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));

@@ -48,7 +48,8 @@ public class ExamplesCodeRefTest extends BaseTest {
 			.collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
@@ -59,11 +60,13 @@ public class ExamplesCodeRefTest extends BaseTest {
 		mockBatchLogging(client);
 	}
 
-	private static final List<String> EXAMPLE_NODES = Arrays.asList("[EXAMPLE:[symbol:STK1$;threshold:10.0;price:5.0;status:OFF]]",
+	private static final List<String> EXAMPLE_NODES = Arrays.asList(
+			"[EXAMPLE:[symbol:STK1$;threshold:10.0;price:5.0;status:OFF]]",
 			"[EXAMPLE:[symbol:STK1$;threshold:10.0;price:11.0;status:ON]]"
 	);
 
-	private static final List<String> STEP_NAMES = Arrays.asList("Given a stock of symbol <symbol> and a threshold <threshold>",
+	private static final List<String> STEP_NAMES = Arrays.asList(
+			"Given a stock of symbol <symbol> and a threshold <threshold>",
 			"When the stock is traded at price <price>",
 			"Then the alert status should be status <status>",
 			"When I have first parameter <symbol> and second parameter <symbol>"

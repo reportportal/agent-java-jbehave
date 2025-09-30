@@ -40,7 +40,8 @@ public class TabularParametersTest extends BaseTest {
 	private final String stepId = CommonUtils.namedId("step_");
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
@@ -66,7 +67,8 @@ public class TabularParametersTest extends BaseTest {
 		verify(client).startTestItem(same(scenarioId), startCaptor.capture());
 
 		assertThat(startCaptor.getValue().getName(), equalTo(STEP_NAME));
-		assertThat(startCaptor.getValue().getCodeRef(),
+		assertThat(
+				startCaptor.getValue().getCodeRef(),
 				equalTo(STORY_PATH + String.format(SCENARIO_PATTERN, "Tabular parameters") + String.format(STEP_PATTERN, CODE_REF))
 		);
 

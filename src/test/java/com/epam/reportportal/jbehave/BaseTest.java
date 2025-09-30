@@ -30,6 +30,8 @@ import com.epam.ta.reportportal.ws.model.launch.StartLaunchRS;
 import com.epam.ta.reportportal.ws.model.log.SaveLogRQ;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.reactivex.Maybe;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import okhttp3.MultipartBody;
 import okio.Buffer;
 import org.apache.commons.lang3.tuple.Pair;
@@ -49,8 +51,6 @@ import org.jbehave.core.steps.InstanceStepsFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -88,9 +88,8 @@ public class BaseTest {
 		});
 	}
 
-	public static void run(@Nonnull final Class<?> clazz, @Nonnull final Format format,
-	                       @Nonnull final List<String> stories, @Nonnull final StoryParser parser,
-	                       @Nullable final Object... steps) {
+	public static void run(@Nonnull final Class<?> clazz, @Nonnull final Format format, @Nonnull final List<String> stories,
+			@Nonnull final StoryParser parser, @Nullable final Object... steps) {
 		Properties viewResources = new Properties();
 
 		Embedder embedder = new Embedder();
@@ -113,20 +112,20 @@ public class BaseTest {
 						.withFailureTrace(true)
 						.withFailureTraceCompression(true)));
 
-		final InjectableStepsFactory stepsFactory = new InstanceStepsFactory(embedder.configuration(),
+		final InjectableStepsFactory stepsFactory = new InstanceStepsFactory(
+				embedder.configuration(),
 				steps == null ? Collections.emptyList() : Arrays.asList(steps)
 		);
 		embedder.useStepsFactory(stepsFactory);
 		embedder.runStoriesAsPaths(stories);
 	}
 
-	public void run(@Nonnull final Format format, @Nonnull final List<String> stories,
-	                @Nonnull final StoryParser parser, @Nullable final Object... steps) {
+	public void run(@Nonnull final Format format, @Nonnull final List<String> stories, @Nonnull final StoryParser parser,
+			@Nullable final Object... steps) {
 		run(getClass(), format, stories, parser, steps);
 	}
 
-	public void run(@Nonnull final Format format, @Nonnull final List<String> stories,
-	                @Nullable final Object... steps) {
+	public void run(@Nonnull final Format format, @Nonnull final List<String> stories, @Nullable final Object... steps) {
 		run(format, stories, new RegexStoryParser(), steps);
 	}
 
@@ -135,21 +134,17 @@ public class BaseTest {
 	}
 
 	public static void mockLaunch(@Nonnull final ReportPortalClient client, @Nullable final String launchUuid,
-	                              @Nullable final String storyUuid, @Nonnull String testClassUuid,
-	                              @Nonnull String stepUuid) {
+			@Nullable final String storyUuid, @Nonnull String testClassUuid, @Nonnull String stepUuid) {
 		mockLaunch(client, launchUuid, storyUuid, testClassUuid, Collections.singleton(stepUuid));
 	}
 
 	public static void mockLaunch(@Nonnull final ReportPortalClient client, @Nullable final String launchUuid,
-	                              @Nullable final String storyUuid, @Nonnull String testClassUuid,
-	                              @Nonnull Collection<String> stepList) {
+			@Nullable final String storyUuid, @Nonnull String testClassUuid, @Nonnull Collection<String> stepList) {
 		mockLaunch(client, launchUuid, storyUuid, Collections.singletonList(Pair.of(testClassUuid, stepList)));
 	}
 
 	public static <T extends Collection<String>> void mockLaunch(@Nonnull final ReportPortalClient client,
-	                                                             @Nullable final String launchUuid,
-	                                                             @Nullable final String storyUuid,
-	                                                             @Nonnull final Collection<Pair<String, T>> testSteps) {
+			@Nullable final String launchUuid, @Nullable final String storyUuid, @Nonnull final Collection<Pair<String, T>> testSteps) {
 		String launch = ofNullable(launchUuid).orElse(CommonUtils.namedId("launch_"));
 		when(client.startLaunch(any())).thenReturn(Maybe.just(new StartLaunchRS(launch, 1L)));
 		when(client.finishLaunch(eq(launch), any())).thenReturn(Maybe.just(new OperationCompletionRS()));
@@ -157,16 +152,14 @@ public class BaseTest {
 		mockStory(client, storyUuid, testSteps);
 	}
 
-	public static <T extends Collection<String>> void mockStory(@Nonnull final ReportPortalClient client,
-	                                                            @Nullable final String storyUuid,
-	                                                            @Nonnull final Collection<Pair<String, T>> testSteps) {
+	public static <T extends Collection<String>> void mockStory(@Nonnull final ReportPortalClient client, @Nullable final String storyUuid,
+			@Nonnull final Collection<Pair<String, T>> testSteps) {
 		String rootItemId = ofNullable(storyUuid).orElseGet(() -> CommonUtils.namedId(ROOT_SUITE_PREFIX));
 		mockStories(client, Collections.singletonList(Pair.of(rootItemId, testSteps)));
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends Collection<String>> void mockStories(
-			@Nonnull final ReportPortalClient client,
+	public static <T extends Collection<String>> void mockStories(@Nonnull final ReportPortalClient client,
 			@Nonnull final List<Pair<String, Collection<Pair<String, T>>>> stories) {
 		if (stories.isEmpty()) {
 			return;
@@ -188,9 +181,8 @@ public class BaseTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends Collection<String>> void mockScenario(
-			@Nonnull final ReportPortalClient client, @Nonnull final String storyUuid,
-			@Nonnull final Collection<Pair<String, T>> testSteps) {
+	public static <T extends Collection<String>> void mockScenario(@Nonnull final ReportPortalClient client,
+			@Nonnull final String storyUuid, @Nonnull final Collection<Pair<String, T>> testSteps) {
 		List<Maybe<ItemCreatedRS>> testResponses = testSteps.stream()
 				.map(Pair::getKey)
 				.map(uuid -> Maybe.just(new ItemCreatedRS(uuid, uuid)))
@@ -211,10 +203,10 @@ public class BaseTest {
 				Maybe<ItemCreatedRS> myFirst = stepResponses.get(0);
 				Maybe<ItemCreatedRS>[] myOther = stepResponses.subList(1, stepResponses.size()).toArray(new Maybe[0]);
 				when(client.startTestItem(same(testClassUuid), any())).thenReturn(myFirst, myOther);
-				new HashSet<>(test.getValue()).forEach(testMethodUuid -> when(
-						client.finishTestItem(same(testMethodUuid),
-								any()
-						)).thenReturn(Maybe.just(new OperationCompletionRS())));
+				new HashSet<>(test.getValue()).forEach(testMethodUuid -> when(client.finishTestItem(
+						same(testMethodUuid),
+						any()
+				)).thenReturn(Maybe.just(new OperationCompletionRS())));
 			}
 		});
 	}
@@ -229,8 +221,7 @@ public class BaseTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void mockNestedSteps(final ReportPortalClient client,
-	                                   final List<Pair<String, String>> parentNestedPairs) {
+	public static void mockNestedSteps(final ReportPortalClient client, final List<Pair<String, String>> parentNestedPairs) {
 		Map<String, List<String>> responseOrders = parentNestedPairs.stream()
 				.collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue, Collectors.toList())));
 		responseOrders.forEach((k, v) -> {
@@ -242,7 +233,8 @@ public class BaseTest {
 			Maybe<ItemCreatedRS>[] other = responses.subList(1, responses.size()).toArray(new Maybe[0]);
 			when(client.startTestItem(eq(k), any())).thenReturn(first, other);
 		});
-		parentNestedPairs.forEach(p -> when(client.finishTestItem(same(p.getValue()),
+		parentNestedPairs.forEach(p -> when(client.finishTestItem(
+				same(p.getValue()),
 				any()
 		)).thenAnswer((Answer<Maybe<OperationCompletionRS>>) invocation -> Maybe.just(new OperationCompletionRS())));
 	}
@@ -274,8 +266,10 @@ public class BaseTest {
 				})
 				.map(b -> {
 					try {
-						return HttpRequestUtils.MAPPER.readValue(b, new TypeReference<>() {
-						});
+						return HttpRequestUtils.MAPPER.readValue(
+								b, new TypeReference<>() {
+								}
+						);
 					} catch (IOException e) {
 						return Collections.<SaveLogRQ>emptyList();
 					}
@@ -284,27 +278,20 @@ public class BaseTest {
 				.collect(Collectors.toList());
 	}
 
-	public static List<SaveLogRQ> filterLogs(ArgumentCaptor<List<MultipartBody.Part>> logCaptor,
-	                                         Predicate<SaveLogRQ> filter) {
-		return logCaptor
-				.getAllValues()
-				.stream()
-				.flatMap(l -> extractJsonParts(l).stream())
-				.filter(filter)
-				.collect(Collectors.toList());
+	public static List<SaveLogRQ> filterLogs(ArgumentCaptor<List<MultipartBody.Part>> logCaptor, Predicate<SaveLogRQ> filter) {
+		return logCaptor.getAllValues().stream().flatMap(l -> extractJsonParts(l).stream()).filter(filter).collect(Collectors.toList());
 	}
 
-	public static void verifyLogged(@Nonnull final ArgumentCaptor<List<MultipartBody.Part>> logCaptor,
-	                                @Nullable final String itemId, @Nonnull final LogLevel level,
-	                                @Nonnull final String message) {
-		List<SaveLogRQ> expectedErrorList = filterLogs(logCaptor,
+	public static void verifyLogged(@Nonnull final ArgumentCaptor<List<MultipartBody.Part>> logCaptor, @Nullable final String itemId,
+			@Nonnull final LogLevel level, @Nonnull final String message) {
+		List<SaveLogRQ> expectedErrorList = filterLogs(
+				logCaptor,
 				l -> level.name().equals(l.getLevel()) && l.getMessage() != null && l.getMessage().contains(message)
 		);
 		assertThat(expectedErrorList, hasSize(1));
 		SaveLogRQ expectedError = expectedErrorList.get(0);
 		assertThat(expectedError.getItemUuid(), equalTo(itemId));
 	}
-
 
 	protected static ParameterResource parameterOf(String key, String value) {
 		ParameterResource parameterResource = new ParameterResource();

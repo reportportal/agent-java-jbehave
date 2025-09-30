@@ -20,10 +20,10 @@ import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.item.TestCaseIdEntry;
 import com.epam.reportportal.service.tree.TestItemTree;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
-import org.jbehave.core.model.Scenario;
-
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.jbehave.core.model.Scenario;
+
 import java.time.Instant;
 import java.util.Map;
 import java.util.function.Supplier;

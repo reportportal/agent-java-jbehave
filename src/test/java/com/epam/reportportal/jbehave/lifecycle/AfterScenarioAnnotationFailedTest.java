@@ -49,12 +49,14 @@ public class AfterScenarioAnnotationFailedTest extends BaseTest {
 	private final String afterStepId = CommonUtils.namedId("after_scenario_step_");
 	private final String stepId = CommonUtils.namedId("step_");
 
-	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(scenarioId,
+	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(
+			scenarioId,
 			Arrays.asList(stepId, afterStepId)
 	));
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));

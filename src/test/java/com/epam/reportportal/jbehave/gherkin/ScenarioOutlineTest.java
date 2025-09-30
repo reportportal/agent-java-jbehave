@@ -39,8 +39,8 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
 
 public class ScenarioOutlineTest extends BaseTest {
 
@@ -51,7 +51,8 @@ public class ScenarioOutlineTest extends BaseTest {
 			.collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
@@ -72,26 +73,26 @@ public class ScenarioOutlineTest extends BaseTest {
 					+ MarkdownUtils.TABLE_INDENT;
 	//@formatter:on
 	private static final List<String> EXAMPLE_DESCRIPTIONS = asList(
-			PARAMETERS_PREFIX
-					+ "|\u00A0\"first\"\u00A0|\u00A0\u00A0\u00A0\u00A0123\u00A0\u00A0\u00A0\u00A0\u00A0|",
-			PARAMETERS_PREFIX
-					+ "|\u00A0\"scond\"\u00A0|\u00A0\u00A0\u00A0\u00A0321\u00A0\u00A0\u00A0\u00A0\u00A0|",
-			PARAMETERS_PREFIX
-					+ "|\u00A0\"third\"\u00A0|\u00A0\u00A0\u00A0\u00A0213\u00A0\u00A0\u00A0\u00A0\u00A0|"
+			PARAMETERS_PREFIX + "|\u00A0\"first\"\u00A0|\u00A0\u00A0\u00A0\u00A0123\u00A0\u00A0\u00A0\u00A0\u00A0|",
+			PARAMETERS_PREFIX + "|\u00A0\"scond\"\u00A0|\u00A0\u00A0\u00A0\u00A0321\u00A0\u00A0\u00A0\u00A0\u00A0|",
+			PARAMETERS_PREFIX + "|\u00A0\"third\"\u00A0|\u00A0\u00A0\u00A0\u00A0213\u00A0\u00A0\u00A0\u00A0\u00A0|"
 	);
 
-	private static final List<Map<String, String>> OUTLINE_PARAMETERS = Arrays.asList(new HashMap<String, String>() {{
-		put("str", "\"first\"");
-		put("parameters", "123");
-	}}, new HashMap<String, String>() {{
-		put("str", "\"scond\"");
-		put("parameters", "321");
-	}}, new HashMap<String, String>() {{
-		put("str", "\"third\"");
-		put("parameters", "213");
-	}});
+	private static final List<Map<String, String>> OUTLINE_PARAMETERS = Arrays.asList(
+			new HashMap<>() {{
+				put("str", "\"first\"");
+				put("parameters", "123");
+			}}, new HashMap<>() {{
+				put("str", "\"scond\"");
+				put("parameters", "321");
+			}}, new HashMap<>() {{
+				put("str", "\"third\"");
+				put("parameters", "213");
+			}}
+	);
 
-	private static final List<String> STEP_NAMES = Arrays.asList("Given It is test with parameters",
+	private static final List<String> STEP_NAMES = Arrays.asList(
+			"Given It is test with parameters",
 			"When I have parameter \"first\"",
 			"Then I emit number 123 on level info",
 			"Given It is test with parameters",
@@ -102,19 +103,21 @@ public class ScenarioOutlineTest extends BaseTest {
 			"Then I emit number 213 on level info"
 	);
 
-	private static final List<Map<String, String>> STEP_PARAMETERS = Arrays.asList(new HashMap<>(), new HashMap<String, String>() {{
-		put("str", "\"first\"");
-	}}, new HashMap<String, String>() {{
-		put("parameters", "123");
-	}}, new HashMap<>(), new HashMap<String, String>() {{
-		put("str", "\"scond\"");
-	}}, new HashMap<String, String>() {{
-		put("parameters", "321");
-	}}, new HashMap<>(), new HashMap<String, String>() {{
-		put("str", "\"third\"");
-	}}, new HashMap<String, String>() {{
-		put("parameters", "213");
-	}});
+	private static final List<Map<String, String>> STEP_PARAMETERS = Arrays.asList(
+			new HashMap<>(), new HashMap<>() {{
+				put("str", "\"first\"");
+			}}, new HashMap<>() {{
+				put("parameters", "123");
+			}}, new HashMap<>(), new HashMap<>() {{
+				put("str", "\"scond\"");
+			}}, new HashMap<>() {{
+				put("parameters", "321");
+			}}, new HashMap<>(), new HashMap<>() {{
+				put("str", "\"third\"");
+			}}, new HashMap<>() {{
+				put("parameters", "213");
+			}}
+	);
 
 	@Test
 	public void verify_story_with_scenario_outline_names_types_and_parameters() {

@@ -38,8 +38,7 @@ public class CompositeSteps {
 	}
 
 	@When("parametrized with $parameter step")
-	@Composite(steps = { "When I have parameter <parameter>",
-			             "When I have a step with a string parameter <parameter>"})
+	@Composite(steps = { "When I have parameter <parameter>", "When I have a step with a string parameter <parameter>" })
 	public void parametrizedCompositeStep(String parameter) {
 		LOGGER.info("Inside 'parametrizedCompositeStep' method parametrized with {}", parameter);
 	}

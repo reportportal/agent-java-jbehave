@@ -28,10 +28,10 @@ import com.epam.reportportal.service.tree.TestItemTree;
 import com.epam.reportportal.util.test.CommonUtils;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
+import jakarta.annotation.Nonnull;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.Given;
 
-import jakarta.annotation.Nonnull;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -62,8 +62,7 @@ public class CallbackReportingSteps {
 					.orElse(null);
 			if (ofNullable(scenario).isPresent()) {
 				String scenarioName = ofNullable((StartTestItemRQ) scenario.getAttribute(ReportPortalStepStoryReporter.START_REQUEST)).map(
-								StartTestItemRQ::getName)
-						.orElseThrow(() -> new IllegalStateException("Unable to get start item request"));
+						StartTestItemRQ::getName).orElseThrow(() -> new IllegalStateException("Unable to get start item request"));
 
 				if (scenarioName.contains("failure")) {
 					ofNullable(stepLeaf).ifPresent(l -> {
@@ -85,22 +84,12 @@ public class CallbackReportingSteps {
 		finishTestItemRQ.setStatus(status);
 		finishTestItemRQ.setEndTime(Instant.now());
 		//noinspection ResultOfMethodCallIgnored
-		ItemTreeReporter.finishItem(rp.getClient(), finishTestItemRQ, tree.getLaunchId(), testItemLeaf)
-				.cache()
-				.blockingGet();
+		ItemTreeReporter.finishItem(rp.getClient(), finishTestItemRQ, tree.getLaunchId(), testItemLeaf).cache().blockingGet();
 		testItemLeaf.setStatus(ItemStatus.valueOf(status));
 	}
 
-	private void attachLog(@Nonnull ReportPortal rp, @Nonnull TestItemTree tree,
-			@Nonnull TestItemTree.TestItemLeaf testItemLeaf) {
-		ItemTreeReporter.sendLog(
-				rp.getClient(),
-				"ERROR",
-				"Error message",
-				Instant.now(),
-				tree.getLaunchId(),
-				testItemLeaf
-		);
+	private void attachLog(@Nonnull ReportPortal rp, @Nonnull TestItemTree tree, @Nonnull TestItemTree.TestItemLeaf testItemLeaf) {
+		ItemTreeReporter.sendLog(rp.getClient(), "ERROR", "Error message", Instant.now(), tree.getLaunchId(), testItemLeaf);
 	}
 
 }
