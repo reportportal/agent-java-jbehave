@@ -61,7 +61,8 @@ public class AfterScenarioTest extends BaseTest {
 			.collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
@@ -74,8 +75,7 @@ public class AfterScenarioTest extends BaseTest {
 
 	private static final String STORY_PATH = "stories/lifecycle/AfterScenario.story";
 	private static final String[] SCENARIO_NAMES = new String[] { "The scenario", "Another scenario" };
-	private static final String[] STEP_NAMES = new String[] { "Given I have empty step",
-			"When I have one more empty step" };
+	private static final String[] STEP_NAMES = new String[] { "Given I have empty step", "When I have one more empty step" };
 	private static final String LIFECYCLE_STEP_NAME = "Then I have another empty step";
 
 	@Test
@@ -102,10 +102,8 @@ public class AfterScenarioTest extends BaseTest {
 		List<StartTestItemRQ> steps = Arrays.asList(startItems.get(2), startItems.get(4));
 		IntStream.range(0, steps.size()).forEach(i -> {
 			StartTestItemRQ step = steps.get(i);
-			String stepCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, SCENARIO_NAMES[i]) + String.format(
-					STEP_PATTERN,
-					STEP_NAMES[i]
-			);
+			String stepCodeRef =
+					STORY_PATH + String.format(SCENARIO_PATTERN, SCENARIO_NAMES[i]) + String.format(STEP_PATTERN, STEP_NAMES[i]);
 			assertThat(step.getName(), equalTo(STEP_NAMES[i]));
 			assertThat(step.getCodeRef(), equalTo(stepCodeRef));
 			assertThat(step.getType(), equalTo(ItemType.STEP.name()));
@@ -114,10 +112,8 @@ public class AfterScenarioTest extends BaseTest {
 		List<StartTestItemRQ> afterStarts = Arrays.asList(startItems.get(3), startItems.get(5));
 		IntStream.range(0, afterStarts.size()).forEach(i -> {
 			StartTestItemRQ beforeStart = afterStarts.get(i);
-			String lifecycleCodeRef = STORY_PATH + String.format(SCENARIO_PATTERN, SCENARIO_NAMES[i]) + String.format(
-					STEP_PATTERN,
-					LIFECYCLE_STEP_NAME
-			);
+			String lifecycleCodeRef =
+					STORY_PATH + String.format(SCENARIO_PATTERN, SCENARIO_NAMES[i]) + String.format(STEP_PATTERN, LIFECYCLE_STEP_NAME);
 			assertThat(beforeStart.getName(), equalTo(LIFECYCLE_STEP_NAME));
 			assertThat(beforeStart.getCodeRef(), equalTo(lifecycleCodeRef));
 			assertThat(beforeStart.getType(), equalTo(ItemType.STEP.name()));

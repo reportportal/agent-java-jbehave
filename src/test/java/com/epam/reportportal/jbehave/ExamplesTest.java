@@ -42,9 +42,8 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
 
 public class ExamplesTest extends BaseTest {
 
@@ -56,7 +55,8 @@ public class ExamplesTest extends BaseTest {
 			.collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
@@ -84,19 +84,22 @@ public class ExamplesTest extends BaseTest {
 					+ "|\u00A0STK1$\u00A0\u00A0|\u00A0\u00A0\u00A010.0\u00A0\u00A0\u00A0\u00A0|\u00A011.0\u00A0\u00A0|\u00A0\u00A0\u00A0ON\u00A0\u00A0\u00A0|"
 	);
 
-	private static final List<Map<String, String>> EXAMPLE_PARAMETERS = asList(new HashMap<String, String>() {{
-		put("symbol", "STK1$");
-		put("threshold", "10.0");
-		put("price", "5.0");
-		put("status", "OFF");
-	}}, new HashMap<String, String>() {{
-		put("symbol", "STK1$");
-		put("threshold", "10.0");
-		put("price", "11.0");
-		put("status", "ON");
-	}});
+	private static final List<Map<String, String>> EXAMPLE_PARAMETERS = asList(
+			new HashMap<>() {{
+				put("symbol", "STK1$");
+				put("threshold", "10.0");
+				put("price", "5.0");
+				put("status", "OFF");
+			}}, new HashMap<>() {{
+				put("symbol", "STK1$");
+				put("threshold", "10.0");
+				put("price", "11.0");
+				put("status", "ON");
+			}}
+	);
 
-	private static final List<String> STEP_NAMES = asList("Given a stock of symbol STK1$ and a threshold 10.0",
+	private static final List<String> STEP_NAMES = asList(
+			"Given a stock of symbol STK1$ and a threshold 10.0",
 			"When the stock is traded at price 5.0",
 			"Then the alert status should be status OFF",
 			"When I have first parameter STK1$ and second parameter STK1$",
@@ -106,17 +109,15 @@ public class ExamplesTest extends BaseTest {
 			"When I have first parameter STK1$ and second parameter STK1$"
 	);
 
-	private static final List<List<ParameterResource>> STEP_PARAMETERS = asList(asList(
-					parameterOf("symbol", "STK1$"),
-					parameterOf("threshold", "10.0")
-			),
-			asList(parameterOf("price", "5.0")),
-			asList(parameterOf("status", "OFF")),
-			asList(parameterOf("symbol", "STK1$"), parameterOf("symbol", "STK1$")),
-			asList(parameterOf("symbol", "STK1$"), parameterOf("threshold", "10.0")),
-			asList(parameterOf("price", "11.0")),
-			asList(parameterOf("status", "ON")),
-			asList(parameterOf("symbol", "STK1$"), parameterOf("symbol", "STK1$"))
+	private static final List<List<ParameterResource>> STEP_PARAMETERS = asList(
+			List.of(parameterOf("symbol", "STK1$"), parameterOf("threshold", "10.0")),
+			List.of(parameterOf("price", "5.0")),
+			List.of(parameterOf("status", "OFF")),
+			List.of(parameterOf("symbol", "STK1$"), parameterOf("symbol", "STK1$")),
+			List.of(parameterOf("symbol", "STK1$"), parameterOf("threshold", "10.0")),
+			List.of(parameterOf("price", "11.0")),
+			List.of(parameterOf("status", "ON")),
+			List.of(parameterOf("symbol", "STK1$"), parameterOf("symbol", "STK1$"))
 	);
 
 	@Test
@@ -146,7 +147,13 @@ public class ExamplesTest extends BaseTest {
 			StartTestItemRQ rq = steps.get(i);
 			assertThat(rq.getName(), equalTo(STEP_NAMES.get(i)));
 			assertThat(rq.getType(), equalTo(ItemType.STEP.name()));
-			assertEquals(STEP_PARAMETERS.get(i), rq.getParameters());
+			List<ParameterResource> expectedParams = STEP_PARAMETERS.get(i);
+			List<ParameterResource> actualParams = rq.getParameters();
+			assertThat(actualParams, hasSize(expectedParams.size()));
+			IntStream.range(0, expectedParams.size()).forEach(j -> {
+				assertThat(actualParams.get(j).getKey(), equalTo(expectedParams.get(j).getKey()));
+				assertThat(actualParams.get(j).getValue(), equalTo(expectedParams.get(j).getValue()));
+			});
 		});
 
 		// Finish items verification

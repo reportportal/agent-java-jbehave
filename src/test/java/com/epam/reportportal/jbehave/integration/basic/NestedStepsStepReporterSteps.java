@@ -43,8 +43,7 @@ public class NestedStepsStepReporterSteps {
 	@SuppressWarnings("unused")
 	@Given("a step with a manual step")
 	public void i_have_a_step_with_a_manual_step() {
-		StepReporter stepReporter = ofNullable(Launch.currentLaunch()).map(Launch::getStepReporter)
-				.orElseThrow(() -> NO_LAUNCH_EXCEPTION);
+		StepReporter stepReporter = ofNullable(Launch.currentLaunch()).map(Launch::getStepReporter).orElseThrow(() -> NO_LAUNCH_EXCEPTION);
 
 		stepReporter.sendStep(FIRST_NAME);
 		LOGGER.info(FIRST_NESTED_STEP_LOG);
@@ -53,8 +52,7 @@ public class NestedStepsStepReporterSteps {
 	@SuppressWarnings("unused")
 	@Then("a step with two manual steps")
 	public void i_have_a_step_with_two_manual_steps() {
-		StepReporter stepReporter = ofNullable(Launch.currentLaunch()).map(Launch::getStepReporter)
-				.orElseThrow(() -> NO_LAUNCH_EXCEPTION);
+		StepReporter stepReporter = ofNullable(Launch.currentLaunch()).map(Launch::getStepReporter).orElseThrow(() -> NO_LAUNCH_EXCEPTION);
 
 		stepReporter.sendStep(SECOND_NAME, DURING_SECOND_NESTED_STEP_LOG);
 		LOGGER.info(SECOND_NESTED_STEP_LOG);

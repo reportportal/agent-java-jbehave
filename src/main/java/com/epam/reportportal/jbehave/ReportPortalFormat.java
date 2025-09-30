@@ -24,13 +24,15 @@ import com.epam.reportportal.utils.properties.SystemAttributesExtractor;
 import com.epam.ta.reportportal.ws.model.FinishExecutionRQ;
 import com.epam.ta.reportportal.ws.model.attribute.ItemAttributesRQ;
 import com.epam.ta.reportportal.ws.model.launch.StartLaunchRQ;
+import jakarta.annotation.Nonnull;
 import org.jbehave.core.reporters.FilePrintStreamFactory;
 import org.jbehave.core.reporters.Format;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 
-import javax.annotation.Nonnull;
-import java.util.*;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -69,7 +71,7 @@ public abstract class ReportPortalFormat extends Format {
 	 */
 	public void finishLaunch() {
 		FinishExecutionRQ rq = new FinishExecutionRQ();
-		rq.setEndTime(Calendar.getInstance().getTime());
+		rq.setEndTime(Instant.now());
 		launch.get().finish(rq);
 	}
 
@@ -90,7 +92,7 @@ public abstract class ReportPortalFormat extends Format {
 	 * @param parameters Report Portal client parameters
 	 * @return a Start Launch request instance
 	 */
-	protected StartLaunchRQ buildStartLaunchRQ(Date startTime, ListenerParameters parameters) {
+	protected StartLaunchRQ buildStartLaunchRQ(Instant startTime, ListenerParameters parameters) {
 		StartLaunchRQ rq = new StartLaunchRQ();
 		rq.setName(parameters.getLaunchName());
 		rq.setStartTime(startTime);
@@ -119,9 +121,9 @@ public abstract class ReportPortalFormat extends Format {
 	 * @return a supplier with a lazy-initialized {@link Launch} instance
 	 */
 	protected MemoizingSupplier<Launch> createLaunch(final ReportPortal rp) {
-		return new MemoizingSupplier<>(new Supplier<Launch>() {
+		return new MemoizingSupplier<>(new Supplier<>() {
 			/* should no be lazy */
-			private final Date startTime = Calendar.getInstance().getTime();
+			private final Instant startTime = Instant.now();
 
 			@Override
 			public Launch get() {

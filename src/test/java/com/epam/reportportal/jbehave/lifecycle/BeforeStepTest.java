@@ -55,7 +55,8 @@ public class BeforeStepTest extends BaseTest {
 			.limit(STEP_NUMBER)
 			.collect(Collectors.toList());
 
-	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(scenarioId,
+	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(
+			scenarioId,
 			IntStream.range(0, stepIds.size())
 					.mapToObj(i -> Stream.of(beforeStepIds.get(i), stepIds.get(i)))
 					.flatMap(i -> i)
@@ -63,7 +64,8 @@ public class BeforeStepTest extends BaseTest {
 	));
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
@@ -76,8 +78,7 @@ public class BeforeStepTest extends BaseTest {
 
 	private static final String STORY_PATH = "stories/lifecycle/BeforeStep.story";
 	private static final String SCENARIO_NAME = "The scenario";
-	private static final String[] STEP_NAMES = new String[] { "Given I have empty step",
-			"When I have one more empty step" };
+	private static final String[] STEP_NAMES = new String[] { "Given I have empty step", "When I have one more empty step" };
 	private static final String LIFECYCLE_STEP_NAME = "Then I have another empty step";
 
 	@Test

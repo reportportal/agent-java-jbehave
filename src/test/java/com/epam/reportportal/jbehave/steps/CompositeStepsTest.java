@@ -53,7 +53,8 @@ public class CompositeStepsTest extends BaseTest {
 			.collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
@@ -66,7 +67,8 @@ public class CompositeStepsTest extends BaseTest {
 
 	private static final String STORY = "stories/composite/CompositeSteps.story";
 
-	private static final List<String> STEP_NAMES = Arrays.asList("Given composite step",
+	private static final List<String> STEP_NAMES = Arrays.asList(
+			"Given composite step",
 			"Given I have empty step",
 			"Then I have another empty step",
 			"When parametrized with a string step",

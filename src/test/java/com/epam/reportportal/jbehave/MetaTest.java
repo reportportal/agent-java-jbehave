@@ -45,7 +45,8 @@ public class MetaTest extends BaseTest {
 	private final String stepId = CommonUtils.namedId("step_");
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
@@ -58,13 +59,13 @@ public class MetaTest extends BaseTest {
 
 	private static final String STORY_NAME = "MetaInfo.story";
 	private static final String STORY_PATH = "stories/" + STORY_NAME;
-	private static final Set<Pair<String, String>> SUITE_ATTRIBUTES = new HashSet<Pair<String, String>>() {{
+	private static final Set<Pair<String, String>> SUITE_ATTRIBUTES = new HashSet<>() {{
 		add(Pair.of("author", "Mauro"));
 		add(Pair.of("themes", "UI Usability"));
 		add(Pair.of(null, "smoke"));
 	}};
 
-	private static final Set<Pair<String, String>> SCENARIO_ATTRIBUTES = new HashSet<Pair<String, String>>() {{
+	private static final Set<Pair<String, String>> SCENARIO_ATTRIBUTES = new HashSet<>() {{
 		add(Pair.of("ignored", "false"));
 	}};
 

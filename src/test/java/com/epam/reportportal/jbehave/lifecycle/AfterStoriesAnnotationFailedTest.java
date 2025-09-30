@@ -49,16 +49,19 @@ public class AfterStoriesAnnotationFailedTest extends BaseTest {
 	private final String afterStoriesId = CommonUtils.namedId("after_stories_");
 	private final String afterStepId = CommonUtils.namedId("after_story_step_");
 
-	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(scenarioId,
+	private final List<Pair<String, List<String>>> steps = Collections.singletonList(Pair.of(
+			scenarioId,
 			Collections.singletonList(stepId)
 	));
 
-	private final List<Pair<String, List<String>>> afterSteps = Collections.singletonList(Pair.of(afterStoriesId,
+	private final List<Pair<String, List<String>>> afterSteps = Collections.singletonList(Pair.of(
+			afterStoriesId,
 			Collections.singletonList(afterStepId)
 	));
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
@@ -113,10 +116,7 @@ public class AfterStoriesAnnotationFailedTest extends BaseTest {
 
 		StartTestItemRQ afterStep = startItems.get(4);
 		assertThat(afterStep.getName(), equalTo(AFTER_STORY_NAME));
-		assertThat(
-				afterStep.getCodeRef(),
-				equalTo(afterStoriesCodeRef + String.format("/[AFTER_GROUPS:%s]", AFTER_STORY_NAME))
-		);
+		assertThat(afterStep.getCodeRef(), equalTo(afterStoriesCodeRef + String.format("/[AFTER_GROUPS:%s]", AFTER_STORY_NAME)));
 		assertThat(afterStep.getType(), equalTo(ItemType.AFTER_GROUPS.name()));
 
 		// Finish items verification

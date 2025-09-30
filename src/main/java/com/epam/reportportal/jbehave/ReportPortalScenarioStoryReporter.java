@@ -20,11 +20,11 @@ import com.epam.reportportal.service.Launch;
 import com.epam.reportportal.service.item.TestCaseIdEntry;
 import com.epam.reportportal.service.tree.TestItemTree;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.jbehave.core.model.Scenario;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -47,7 +47,7 @@ public class ReportPortalScenarioStoryReporter extends ReportPortalStoryReporter
 	 */
 	@Nonnull
 	protected StartTestItemRQ buildStartExampleRq(@Nonnull Scenario scenario, @Nonnull Map<String, String> example, @Nonnull String codeRef,
-			@Nullable final Date startTime) {
+			@Nullable final Instant startTime) {
 		StartTestItemRQ rq = super.buildStartExampleRq(scenario, example, codeRef, startTime);
 		rq.setType(ItemType.STEP.name());
 		rq.setTestCaseId(ofNullable(getTestCaseId(codeRef, null)).map(TestCaseIdEntry::getId).orElse(null));
@@ -59,7 +59,7 @@ public class ReportPortalScenarioStoryReporter extends ReportPortalStoryReporter
 	 */
 	@Override
 	@Nonnull
-	protected StartTestItemRQ buildStartScenarioRq(@Nonnull Scenario scenario, @Nonnull String codeRef, @Nullable final Date startTime) {
+	protected StartTestItemRQ buildStartScenarioRq(@Nonnull Scenario scenario, @Nonnull String codeRef, @Nullable final Instant startTime) {
 		StartTestItemRQ rq = super.buildStartScenarioRq(scenario, codeRef, startTime);
 		rq.setTestCaseId(ofNullable(getTestCaseId(codeRef, null)).map(TestCaseIdEntry::getId).orElse(null));
 		rq.setType(ItemType.STEP.name());
@@ -71,7 +71,7 @@ public class ReportPortalScenarioStoryReporter extends ReportPortalStoryReporter
 	 */
 	@Nonnull
 	protected StartTestItemRQ buildStartStepRq(@Nonnull final String step, @Nonnull final String codeRef,
-			@Nullable final Map<String, String> params, @Nullable final Date startTime) {
+			@Nullable final Map<String, String> params, @Nullable final Instant startTime) {
 		StartTestItemRQ rq = super.buildStartStepRq(step, codeRef, params, startTime);
 		rq.setTestCaseId(null);
 		rq.setHasStats(false);

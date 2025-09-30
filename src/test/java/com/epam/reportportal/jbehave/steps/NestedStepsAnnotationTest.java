@@ -51,9 +51,12 @@ public class NestedStepsAnnotationTest extends BaseTest {
 			.limit(3)
 			.collect(Collectors.toList());
 	private final String nestedNestedStepId = CommonUtils.namedId("double_nested_step_");
-	private final List<Pair<String, String>> firstLevelNestedStepIds = Stream.concat(Stream.of(Pair.of(stepIds.get(0),
-					nestedStepIds.get(0)
-			)), nestedStepIds.stream().skip(1).map(i -> Pair.of(stepIds.get(1), i)))
+	private final List<Pair<String, String>> firstLevelNestedStepIds = Stream.concat(
+					Stream.of(Pair.of(
+							stepIds.get(0),
+							nestedStepIds.get(0)
+					)), nestedStepIds.stream().skip(1).map(i -> Pair.of(stepIds.get(1), i))
+			)
 			.collect(Collectors.toList());
 
 	private final ListenerParameters params = standardParameters();
@@ -70,7 +73,8 @@ public class NestedStepsAnnotationTest extends BaseTest {
 		mockBatchLogging(client);
 	}
 
-	public static final List<String> FIRST_LEVEL_NAMES = Arrays.asList("A step inside step",
+	public static final List<String> FIRST_LEVEL_NAMES = Arrays.asList(
+			"A step inside step",
 			"A step with parameters",
 			"A step with attributes"
 	);

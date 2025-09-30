@@ -28,11 +28,11 @@ import com.epam.reportportal.service.tree.TestItemTree;
 import com.epam.reportportal.util.test.CommonUtils;
 import com.epam.ta.reportportal.ws.model.FinishTestItemRQ;
 import com.epam.ta.reportportal.ws.model.StartTestItemRQ;
+import jakarta.annotation.Nonnull;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.Given;
 
-import javax.annotation.Nonnull;
-import java.util.Calendar;
+import java.time.Instant;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -62,8 +62,7 @@ public class CallbackReportingSteps {
 					.orElse(null);
 			if (ofNullable(scenario).isPresent()) {
 				String scenarioName = ofNullable((StartTestItemRQ) scenario.getAttribute(ReportPortalStepStoryReporter.START_REQUEST)).map(
-								StartTestItemRQ::getName)
-						.orElseThrow(() -> new IllegalStateException("Unable to get start item request"));
+						StartTestItemRQ::getName).orElseThrow(() -> new IllegalStateException("Unable to get start item request"));
 
 				if (scenarioName.contains("failure")) {
 					ofNullable(stepLeaf).ifPresent(l -> {
@@ -83,24 +82,14 @@ public class CallbackReportingSteps {
 			@Nonnull TestItemTree.TestItemLeaf testItemLeaf) {
 		FinishTestItemRQ finishTestItemRQ = new FinishTestItemRQ();
 		finishTestItemRQ.setStatus(status);
-		finishTestItemRQ.setEndTime(Calendar.getInstance().getTime());
+		finishTestItemRQ.setEndTime(Instant.now());
 		//noinspection ResultOfMethodCallIgnored
-		ItemTreeReporter.finishItem(rp.getClient(), finishTestItemRQ, tree.getLaunchId(), testItemLeaf)
-				.cache()
-				.blockingGet();
+		ItemTreeReporter.finishItem(rp.getClient(), finishTestItemRQ, tree.getLaunchId(), testItemLeaf).cache().blockingGet();
 		testItemLeaf.setStatus(ItemStatus.valueOf(status));
 	}
 
-	private void attachLog(@Nonnull ReportPortal rp, @Nonnull TestItemTree tree,
-			@Nonnull TestItemTree.TestItemLeaf testItemLeaf) {
-		ItemTreeReporter.sendLog(
-				rp.getClient(),
-				"ERROR",
-				"Error message",
-				Calendar.getInstance().getTime(),
-				tree.getLaunchId(),
-				testItemLeaf
-		);
+	private void attachLog(@Nonnull ReportPortal rp, @Nonnull TestItemTree tree, @Nonnull TestItemTree.TestItemLeaf testItemLeaf) {
+		ItemTreeReporter.sendLog(rp.getClient(), "ERROR", "Error message", Instant.now(), tree.getLaunchId(), testItemLeaf);
 	}
 
 }

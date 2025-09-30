@@ -59,19 +59,22 @@ public class GivenStoryCodeRefTest extends BaseTest {
 			.limit(2)
 			.collect(Collectors.toList());
 
-	private final List<Pair<String, List<String>>> stepIds = Arrays.asList(Pair.of(outerGivenStoryId,
-			Collections.singletonList(outerScenarioId)
-	), Pair.of(scenarioId, Arrays.asList(innerGivenStoryId, stepId)));
+	private final List<Pair<String, List<String>>> stepIds = Arrays.asList(
+			Pair.of(outerGivenStoryId, Collections.singletonList(outerScenarioId)),
+			Pair.of(scenarioId, Arrays.asList(innerGivenStoryId, stepId))
+	);
 
 	private final List<Pair<String, String>> nestedStepIds = Stream.concat(
-			Stream.concat(outerStepIds.stream().map(s -> Pair.of(outerScenarioId, s)),
+			Stream.concat(
+					outerStepIds.stream().map(s -> Pair.of(outerScenarioId, s)),
 					Stream.of(Pair.of(innerGivenStoryId, innerScenarioId))
 			),
 			innerStepIds.stream().map(s -> Pair.of(innerScenarioId, s))
 	).collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(client,
+	private final ReportPortalStepFormat format = new ReportPortalStepFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
@@ -85,7 +88,8 @@ public class GivenStoryCodeRefTest extends BaseTest {
 
 	private static final String GIVEN_STORIES_STORY = "stories/GivenStories.story";
 	private static final List<String> DUMMY_SCENARIO_STEPS = Arrays.asList("Given I have empty step", "Then I have another empty step");
-	private static final List<String> INLINE_PARAMETERS_STEPS = Arrays.asList("Given It is a step with an integer parameter 42",
+	private static final List<String> INLINE_PARAMETERS_STEPS = Arrays.asList(
+			"Given It is a step with an integer parameter 42",
 			"When I have a step with a string parameter \"string\""
 	);
 	private static final String GIVEN_STORY_STEP = "When I have one more empty step";

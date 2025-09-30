@@ -46,7 +46,8 @@ public class SimpleScenarioFormatTest extends BaseTest {
 	private final List<String> stepIds = Stream.generate(() -> CommonUtils.namedId("step_")).limit(2).collect(Collectors.toList());
 
 	private final ReportPortalClient client = mock(ReportPortalClient.class);
-	private final ReportPortalScenarioFormat format = new ReportPortalScenarioFormat(ReportPortal.create(client,
+	private final ReportPortalScenarioFormat format = new ReportPortalScenarioFormat(ReportPortal.create(
+			client,
 			standardParameters(),
 			testExecutor()
 	));
