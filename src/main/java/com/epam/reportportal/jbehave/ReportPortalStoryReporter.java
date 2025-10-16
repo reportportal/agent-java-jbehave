@@ -47,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -196,7 +197,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(getStoryName(story));
 		rq.setCodeRef(codeRef);
-		rq.setStartTime(ofNullable(startTime).orElseGet(Instant::now));
+		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Instant.now().truncatedTo(ChronoUnit.MICROS)));
 		rq.setType(ItemType.STORY.name());
 		rq.setAttributes(getAttributes(story));
 		rq.setDescription(story.getDescription().asString());
@@ -238,7 +239,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(getScenarioName(scenario));
 		rq.setCodeRef(codeRef);
-		rq.setStartTime(ofNullable(startTime).orElseGet(Instant::now));
+		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Instant.now().truncatedTo(ChronoUnit.MICROS)));
 		rq.setType(ItemType.SCENARIO.name());
 		rq.setAttributes(getAttributes(scenario));
 		return rq;
@@ -280,7 +281,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(getScenarioName(scenario));
 		rq.setCodeRef(codeRef);
-		rq.setStartTime(ofNullable(startTime).orElseGet(Instant::now));
+		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Instant.now().truncatedTo(ChronoUnit.MICROS)));
 		rq.setType(ItemType.TEST.name());
 		rq.setParameters(getStepParameters(example));
 		rq.setDescription(String.format(PARAMETERS_PATTERN, MarkdownUtils.formatDataTable(example)));
@@ -349,7 +350,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(formatExampleStep(step, params));
 		rq.setCodeRef(codeRef);
-		rq.setStartTime(ofNullable(startTime).orElseGet(Instant::now));
+		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Instant.now().truncatedTo(ChronoUnit.MICROS)));
 		rq.setType(ItemType.STEP.name());
 		Optional<List<ParameterResource>> usedParams = ofNullable(params).map(p -> getUsedParameters(step).stream()
 				.filter(params::containsKey)
@@ -377,7 +378,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(name);
 		rq.setCodeRef(codeRef);
-		rq.setStartTime(ofNullable(startTime).orElseGet(Instant::now));
+		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Instant.now().truncatedTo(ChronoUnit.MICROS)));
 		rq.setType(ItemType.TEST.name());
 		return rq;
 	}
@@ -397,7 +398,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 		StartTestItemRQ rq = new StartTestItemRQ();
 		rq.setName(name);
 		rq.setCodeRef(codeRef);
-		rq.setStartTime(ofNullable(startTime).orElseGet(Instant::now));
+		rq.setStartTime(ofNullable(startTime).orElseGet(() -> Instant.now().truncatedTo(ChronoUnit.MICROS)));
 		rq.setType(type.name());
 		return rq;
 	}
@@ -449,7 +450,7 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 	@Nonnull
 	protected Instant getItemDate(@Nullable final TestItemTree.TestItemLeaf parent) {
 		final Instant previousDate = ofNullable(parent).map(p -> p.<Instant>getAttribute(START_TIME)).orElseGet(Instant::now);
-		Instant currentDate = Instant.now();
+		Instant currentDate = Instant.now().truncatedTo(ChronoUnit.MICROS);
 		Instant itemDate;
 		if (previousDate.compareTo(currentDate) <= 0) {
 			itemDate = currentDate;
@@ -525,14 +526,12 @@ public abstract class ReportPortalStoryReporter extends NullStoryReporter {
 									exampleKey, k -> {
 										String parentScenarioCodeRef = getCodeRef(parentCodeRef, parentScenarioKey, ItemType.SCENARIO);
 										TestItemTree.TestItemLeaf leaf = createLeaf(
-												ItemType.SUITE,
-												buildStartExampleRq(
+												ItemType.SUITE, buildStartExampleRq(
 														parentScenario,
 														example,
 														getCodeRef(parentScenarioCodeRef, k, ItemType.SUITE),
 														itemDate
-												),
-												parentLeaf
+												), parentLeaf
 										);
 										leaf.setAttribute(PARAMETERS, example);
 										return leaf;
