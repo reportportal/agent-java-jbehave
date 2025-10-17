@@ -39,7 +39,7 @@ repositories {
 }
 
 dependencies {
-    api 'com.epam.reportportal:client-java:5.4.3'
+    api 'com.epam.reportportal:client-java:5.4.4'
     compileOnly ("org.jbehave:jbehave-core:${project.jbehave_version}") {
         exclude group: 'junit'
         exclude group: 'org.junit.vintage'
@@ -55,7 +55,7 @@ dependencies {
     testImplementation 'org.hamcrest:hamcrest-core:2.2'
     testImplementation "org.mockito:mockito-core:${project.mockito_version}"
     testImplementation "org.mockito:mockito-junit-jupiter:${project.mockito_version}"
-    testImplementation 'ch.qos.logback:logback-classic:1.5.18'
+    testImplementation 'ch.qos.logback:logback-classic:1.5.19'
     testImplementation 'com.epam.reportportal:logger-java-logback:5.4.0'
     testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junit5_version}"
     testImplementation "org.junit.jupiter:junit-jupiter-params:${project.junit5_version}"
