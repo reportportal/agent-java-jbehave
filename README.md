@@ -11,7 +11,7 @@
 [![stackoverflow](https://img.shields.io/badge/reportportal-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/reportportal)
 [![Build with Love](https://img.shields.io/badge/build%20with-❤%EF%B8%8F%E2%80%8D-lightgrey.svg)](http://reportportal.io?style=flat)
 
-The latest version: 5.5.2. Please use `Maven Central` link above to get the agent. **For JBehave version 5.0 and
+The latest version: 5.5.3. Please use `Maven Central` link above to get the agent. **For JBehave version 5.0 and
 higher**
 
 ## Overview: How to Add ReportPortal Logging to Your JBehave Java Project
@@ -86,7 +86,7 @@ Java agents): https://github.com/reportportal/client-java
         <dependency>
             <groupId>com.epam.reportportal</groupId>
             <artifactId>agent-java-jbehave</artifactId>
-            <version>5.5.2</version>
+            <version>5.5.3</version>
         </dependency>
 
         <dependency>
@@ -159,7 +159,7 @@ def jbehaveVersion = '5.1.1'
 dependencies {
     testCompile "org.jbehave:jbehave-core:${jbehaveVersion}"
     testCompile "org.jbehave:jbehave-navigator:${jbehaveVersion}"
-    testCompile 'com.epam.reportportal:agent-java-jbehave:5.5.2'
+    testCompile 'com.epam.reportportal:agent-java-jbehave:5.5.3'
     testCompile 'com.epam.reportportal:logger-java-logback:5.2.2'
 }
 
